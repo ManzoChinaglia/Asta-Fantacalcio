@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Asta Assistant">
+<meta name="theme-color" content="#0b1210">
+<title>Asta Assistant — Fantacalcio</title>
+<style>
+  :root{
+    --bg:#0b1210; --surface:#151f1a; --surface2:#1c2921; --border:#2a3a33;
+    --text:#eef2ef; --text-dim:#96a89f; --accent:#e8b93f; --accent-dim:#7a611f;
+    --danger:#e2574c; --ok:#4caf7d; --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  input, select, textarea{font-size:16px;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:88px;
+  }
+  header{padding:16px 16px 8px; display:flex; justify-content:space-between; align-items:center;}
+  header h1{font-size:17px; font-weight:600; margin:0; letter-spacing:.2px;}
+  header button{background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:6px 10px; font-size:13px;}
+  main{padding:0 16px;}
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:14px;}
+  .panel h2{font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin:0 0 10px; font-weight:600;}
+  .row{display:flex; gap:10px; margin-bottom:8px;}
+  .field{flex:1;}
+  .field label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
+  .field input{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;}
+  .pctsum{font-size:12px; color:var(--text-dim); margin-top:4px;}
+  .pctsum.warn{color:var(--danger);}
+  #search{width:100%; font-size:17px; padding:14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); margin:6px 0 10px;}
+  #results{display:flex; flex-direction:column; gap:6px; margin-bottom:12px;}
+  .result{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer;}
+  .result:active{background:var(--surface2);}
+  .badge{font-size:11px; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .badge.P{background:#3a3220; color:#e8c04f;}
+  .badge.D{background:#20323a; color:#5fb0d6;}
+  .badge.C{background:#233a24; color:#7ecb7f;}
+  .badge.A{background:#3a2323; color:#e07a6e;}
+  .rname{flex:1; font-size:15px;}
+  .rteam{font-size:12px; color:var(--text-dim);}
+  .rq{font-size:14px; color:var(--text-dim); font-variant-numeric:tabular-nums;}
+  .hint{font-size:13px; color:var(--text-dim); text-align:center; padding:20px 0;}
+  #detail{display:none;}
+  .dhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .dhead .rname{font-size:19px; font-weight:600;}
+  .stat{display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border);}
+  .stat:last-child{border-bottom:none;}
+  .stat .label{font-size:13px; color:var(--text-dim);}
+  .stat .value{font-size:15px; font-variant-numeric:tabular-nums;}
+  .suggested{text-align:center; padding:16px 0 8px;}
+  .suggested .num{font-size:60px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
+  .suggested .lab{font-size:12px; color:var(--text-dim); margin-top:6px;}
+  .roletabs{display:flex; gap:8px; margin:4px 0 10px;}
+  .roletab{flex:1; text-align:center; padding:10px 0; border-radius:10px; background:var(--surface); border:1px solid var(--border); font-weight:700; font-size:14px; color:var(--text);}
+  .roletab:active{background:var(--surface2);}
+  .roletab .n{display:block; font-size:11px; font-weight:400; color:var(--text-dim); margin-top:2px;}
+  .quickbuy{background:var(--accent) !important; color:#241c07 !important; border:none !important; font-size:16px !important;}
+  .secondbtns{display:flex; gap:10px; margin-top:8px;}
+  .linkbtn{background:none; border:none; color:var(--text-dim); font-size:13px; text-decoration:underline; padding:6px;}
+  #undoBar{display:none; align-items:center; justify-content:space-between; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;}
+  #undoBar button{background:none; border:none; color:var(--accent); font-weight:700; font-size:13px;}
+  .altrow{display:flex; justify-content:space-between; font-size:13px; padding:6px 0; color:var(--text-dim);}
+  .actions{display:flex; gap:10px; margin-top:12px;}
+  .actions button{flex:1; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:14px; font-weight:600;}
+  .btn-buy{background:var(--ok); color:#08160e; border:none;}
+  .btn-buy.altprice{background:none; border:1px solid var(--ok); color:var(--ok);}
+  .btn-skip{background:none; color:var(--text-dim); border:1px solid var(--border);}
+  .buyform{display:none; margin-top:10px; gap:8px;}
+  .buyform input{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px;}
+  .buyform button{background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;}
+  .closebtn{margin-left:auto; background:none; border:none; color:var(--text-dim); font-size:20px; line-height:1; padding:4px;}
+  #bar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; align-items:center;}
+  .chip{flex:1; text-align:center; border-radius:8px; padding:6px 4px; font-size:12px; background:var(--surface2);}
+  .chip.done{background:#1c3324; color:var(--ok);}
+  .chip b{display:block; font-size:14px;}
+  .chip .chipcr{display:block; font-size:11px; color:var(--text-dim); margin-top:2px;}
+  .chip .chipcr.over{color:var(--danger); font-weight:700;}
+  #budgetLeft{font-size:16px; font-weight:700; color:var(--accent); white-space:nowrap; padding-left:6px;}
+  #budgetLeft.over{color:var(--danger);}
+  #marketBar{font-size:12px; color:var(--text-dim); text-align:center; margin:0 0 10px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px;}
+  #marketBar b{color:var(--text);}
+  #marketSummary{cursor:pointer;}
+  .teamrow{display:flex; justify-content:space-between; font-size:12px; padding:4px 2px;}
+  .teamrow.up{color:var(--danger);}
+  .teamrow.down{color:var(--ok);}
+  .suggested .num.danger{color:var(--danger);}
+  .buyformlabel{font-size:12px; color:var(--text-dim); margin-top:10px;}
+  .curpct{color:var(--accent); font-weight:400;}
+  .pillbtn{background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:20px; padding:8px 14px; font-size:13px;}
+  .pillbtn.ghost{color:var(--text-dim);}
+  #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px; margin-top:6px;}
+  .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 8px 5px 12px; font-size:13px;}
+  .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:14px; padding:0 2px;}
+  .rivalcard{background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+  .rivalname{font-weight:700; font-size:14px;}
+  .rivalstats{font-size:12px; color:var(--text-dim); margin:4px 0;}
+  .rivalroles{font-size:12px; color:var(--text-dim);}
+  .rivalwarn{color:var(--danger) !important; font-weight:700;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Asta Assistant</h1>
+  <div style="display:flex; gap:8px;">
+    <button id="toggleRivals">Rivali</button>
+    <button id="toggleSettings">Impostazioni</button>
+  </div>
+</header>
+<main>
+  <div class="panel" id="settings" style="display:none">
+    <h2>Budget e rosa</h2>
+    <div class="row">
+      <div class="field"><label>Crediti totali</label><input type="number" id="budget"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Portieri</label><input type="number" id="slotP"></div>
+      <div class="field"><label>% budget <span class="curpct" id="curP"></span></label><input type="number" id="pctP"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Difensori</label><input type="number" id="slotD"></div>
+      <div class="field"><label>% budget <span class="curpct" id="curD"></span></label><input type="number" id="pctD"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC"></div>
+      <div class="field"><label>% budget <span class="curpct" id="curC"></span></label><input type="number" id="pctC"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA"></div>
+      <div class="field"><label>% budget <span class="curpct" id="curA"></span></label><input type="number" id="pctA"></div>
+    </div>
+    <div class="pctsum" id="pctsum"></div>
+    <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:10px; font-size:14px;">Ripristina percentuali di partenza</button>
+    <p style="font-size:11px; color:var(--text-dim); margin:4px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta: si sposta ulteriormente sugli altri ruoli se sfori o risparmi, e cresce sui ruoli non ancora completi.</p>
+
+    <h2 style="margin-top:18px">Partecipanti avversari</h2>
+    <div class="row">
+      <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
+      <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
+    </div>
+    <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
+
+    <div class="row" style="margin-top:16px">
+      <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
+    </div>
+  </div>
+
+  <div class="panel" id="rivals" style="display:none">
+    <h2>Situazione avversari</h2>
+    <div id="rivalsList"></div>
+  </div>
+
+  <div id="undoBar"><span id="undoText"></span><button id="undoBtn">Annulla</button></div>
+
+  <div id="marketBar">
+    <div id="marketSummary"></div>
+    <div id="marketTeams" style="display:none; margin-top:8px; text-align:left;"></div>
+  </div>
+
+  <div class="roletabs">
+    <button class="roletab" data-r="P">P<span class="n" id="ntP"></span></button>
+    <button class="roletab" data-r="D">D<span class="n" id="ntD"></span></button>
+    <button class="roletab" data-r="C">C<span class="n" id="ntC"></span></button>
+    <button class="roletab" data-r="A">A<span class="n" id="ntA"></span></button>
+  </div>
+
+  <input type="text" id="search" placeholder="Cerca un giocatore..." autocomplete="off">
+  <div id="results"></div>
+  <div class="hint" id="hint">Scrivi un nome, o tocca un ruolo qui sopra per vedere i migliori ancora liberi.</div>
+
+  <div class="panel" id="detail">
+    <div class="dhead">
+      <div class="badge" id="dBadge"></div>
+      <div>
+        <div class="rname" id="dName"></div>
+        <div class="rteam" id="dTeam"></div>
+      </div>
+      <button class="closebtn" id="dClose">&times;</button>
+    </div>
+    <div class="suggested">
+      <div class="num" id="dSuggested">-</div>
+      <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
+    </div>
+    <div class="stat"><span class="label">Quotazione ufficiale</span><span class="value" id="dQt"></span></div>
+    <div class="stat"><span class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</span><span class="value" id="dRoleBudget"></span></div>
+    <div class="stat"><span class="label">Slot ancora da coprire</span><span class="value" id="dSlots"></span></div>
+    <div id="dAlts" style="margin-top:10px"></div>
+    <div class="actions">
+      <button class="btn-buy quickbuy" id="dQuickBuyBtn">Preso a —</button>
+      <button class="btn-buy altprice" id="dOtherPriceBtn">Prezzo diverso</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn-skip" id="dSkipBtn">Preso da altri</button>
+    </div>
+    <div class="buyformlabel" id="buyFormLabel"></div>
+    <div class="buyform" id="buyform" style="display:none">
+      <input type="number" id="buyPrice" placeholder="Crediti pagati">
+      <button id="buyConfirm">OK</button>
+    </div>
+    <div id="buyerPicker" style="display:none; margin-top:10px;">
+      <div class="buyformlabel" style="margin-top:0">Chi se l'è aggiudicato?</div>
+      <select id="buyerSelect"></select>
+    </div>
+  </div>
+</main>
+
+<div id="bar">
+  <div class="chip" id="chipP"></div>
+  <div class="chip" id="chipD"></div>
+  <div class="chip" id="chipC"></div>
+  <div class="chip" id="chipA"></div>
+  <div id="budgetLeft"></div>
+</div>
+
+<script>
+const RAW = [["Svilar","P","Roma",18],["Carnesecchi","P","Atalanta",17],["Martinez Jo.","P","Inter",17],["Vicario","P","Juventus",16],["Butez","P","Como",15],["Maignan","P","Milan",15],["Caprile","P","Cagliari",11],["Mandas","P","Lazio",11],["Meret","P","Napoli",11],["Skorupski","P","Bologna",10],["De Gea","P","Fiorentina",10],["Okoye","P","Udinese",9],["Perri","P","Torino",9],["Falcone","P","Lecce",8],["Sanchez Ro.","P","Como",8],["Bijlow","P","Genoa",7],["Muric","P","Sassuolo",7],["Daffara","P","Parma",6],["Stankovic F.","P","Venezia",6],["Palmisani","P","Frosinone",5],["Thiam","P","Monza",4],["Milinkovic-Savic V.","P","Napoli",4],["Corvi","P","Parma",3],["Sportiello","P","Atalanta",1],["Happonen","P","Bologna",1],["Pessina Mas.","P","Bologna",1],["Sherri","P","Cagliari",1],["Tornqvist","P","Monza",1],["Vigorito","P","Como",1],["Christensen O.","P","Fiorentina",1],["Lezzerini","P","Fiorentina",1],["Desplanches","P","Frosinone",1],["Lolic","P","Frosinone",1],["Sommariva","P","Genoa",1],["Stolz","P","Genoa",1],["Di Gennaro","P","Inter",1],["Provedel","P","Inter",1],["Pinsoglio","P","Juventus",1],["Motta","P","Lazio",1],["Renzetti","P","Lazio",1],["Terracciano","P","Milan",1],["Torriani","P","Milan",1],["Strajnar","P","Monza",1],["Contini","P","Napoli",1],["De Marzi","P","Roma",1],["Gollini","P","Roma",1],["Russo A.","P","Sassuolo",1],["Turati","P","Sassuolo",1],["Mascardi","P","Torino",1],["Siviero","P","Torino",1],["Padelli","P","Udinese",1],["Grandi","P","Venezia",1],["Pozzi","P","Venezia",1],["Satalino","P","Sassuolo",1],["Penev","P","Lecce",1],["Pisseri","P","Frosinone",1],["Radunovic","P","Cagliari",1],["Montipò","P","Venezia",1],["Bleve","P","Lecce",1],["Grabara","P","Juventus",1],["Mrozek","P","Udinese",1],["Ghidotti","P","Parma",1],["Pompei","P","Atalanta",1],["Dimarco","D","Inter",31],["Wesley","D","Roma",18],["Molina N.","D","Roma",18],["Bremer","D","Juventus",16],["Akanji","D","Inter",15],["Mancini","D","Roma",15],["Bastoni","D","Inter",14],["Kalulu","D","Juventus",14],["Pavlovic","D","Milan",14],["Rrahmani","D","Napoli",14],["Bisseck","D","Inter",13],["Gila","D","Milan",13],["Solet","D","Udinese",13],["Stones","D","Inter",12],["Di Lorenzo","D","Napoli",12],["Hermoso","D","Roma",12],["N'Dicka","D","Roma",12],["Scalvini","D","Atalanta",11],["Spence","D","Inter",11],["Ramon","D","Como",10],["Ostigard","D","Genoa",10],["Kamara H.","D","Udinese",10],["Chalobah T.","D","Como",10],["Miranda J.","D","Bologna",9],["Dodò","D","Fiorentina",9],["Vasquez","D","Genoa",9],["Valeri","D","Parma",9],["Vojvoda","D","Udinese",9],["Couto","D","Como",9],["Zappacosta","D","Atalanta",8],["Lucumì","D","Juventus",8],["Obert","D","Cagliari",8],["Bracaglia","D","Frosinone",8],["Celik","D","Juventus",8],["Cambiaso","D","Juventus",8],["Doekhi","D","Lazio",8],["Tiago Gabriel","D","Lecce",8],["Bartesaghi","D","Milan",8],["Spinazzola","D","Napoli",8],["Delprato","D","Parma",8],["Koulierakis","D","Roma",8],["Comuzzo","D","Torino",8],["Ismajli","D","Torino",8],["Theate","D","Bologna",8],["Belghali","D","Torino",8],["Diego Carlos","D","Parma",8],["Hien","D","Atalanta",7],["Mina","D","Cagliari",7],["Valle","D","Como",7],["Dragusin","D","Fiorentina",7],["Jimenez A.","D","Fiorentina",7],["Oyono A.","D","Frosinone",7],["Carlos Augusto","D","Inter",7],["Tavares N.","D","Lazio",7],["Gabbia","D","Milan",7],["Mangas","D","Monza",7],["Idzes","D","Sassuolo",7],["Doig","D","Sassuolo",7],["Coco","D","Torino",7],["Kolasinac","D","Atalanta",6],["Holm","D","Bologna",6],["Zortea","D","Bologna",6],["Kofler","D","Cagliari",6],["Zè Pedro","D","Cagliari",6],["Kaiki","D","Como",6],["Calvani","D","Frosinone",6],["Monterisi","D","Frosinone",6],["Marcandalli","D","Genoa",6],["Pavard","D","Inter",6],["Pedraza","D","Lazio",6],["Marusic","D","Lazio",6],["Tomori","D","Milan",6],["Buongiorno","D","Napoli",6],["Kristensen T.","D","Atalanta",6],["Obrador","D","Sassuolo",6],["Fortini","D","Torino",6],["Leysen F.","D","Sassuolo",6],["Badiashile","D","Napoli",6],["Sutalo J.","D","Lazio",6],["Balerdi","D","Roma",6],["Caleta-Car","D","Sassuolo",6],["Sugawara","D","Cagliari",6],["Leite","D","Lazio",6],["Bellanova","D","Atalanta",5],["Bernasconi","D","Atalanta",5],["Heggem","D","Bologna",5],["Rodriguez Ju.","D","Cagliari",5],["Kempf","D","Como",5],["Valdepenas","D","Fiorentina",5],["Viery","D","Fiorentina",5],["Gatti","D","Juventus",5],["Kelly L.","D","Juventus",5],["Gaspar K.","D","Lecce",5],["Veiga D.","D","Lecce",5],["Gallo","D","Lecce",5],["De Winter","D","Milan",5],["Birindelli","D","Monza",5],["Beukema","D","Napoli",5],["Ghilardi","D","Roma",5],["Comert","D","Torino",5],["Bella-Kotchap","D","Venezia",5],["Correia T.","D","Venezia",5],["Hainaut","D","Venezia",5],["Haps","D","Venezia",5],["Patterson","D","Torino",5],["Rodriguez R.","D","Torino",5],["Kossounou","D","Atalanta",4],["Vitik","D","Bologna",4],["Smolcic I.","D","Como",4],["Parisi","D","Fiorentina",4],["Cittadini","D","Frosinone",4],["Provstgaard","D","Lazio",4],["Floriani Mussolini","D","Lazio",4],["Siebert","D","Lecce",4],["Lucchesi","D","Monza",4],["Kouadio","D","Monza",4],["Carboni A.","D","Monza",4],["Olivera","D","Napoli",4],["Troilo","D","Parma",4],["Valenti","D","Parma",4],["Britschgi","D","Parma",4],["Rensch","D","Roma",4],["Kabasele","D","Udinese",4],["Bertola","D","Udinese",4],["Moreno M.","D","Venezia",4],["Sagrado","D","Venezia",4],["Terzic","D","Frosinone",4],["Cinquegrano","D","Sassuolo",4],["Juan Jesus","D","Venezia",4],["Ehizibue","D","Genoa",4],["Helland","D","Bologna",3],["Pongracic","D","Fiorentina",3],["Joao Mario","D","Fiorentina",3],["Mitaj","D","Genoa",3],["Estupinan","D","Milan",3],["Walukiewicz","D","Sassuolo",3],["Abankwah","D","Udinese",3],["Ebosse","D","Udinese",3],["Zanoli","D","Udinese",3],["Arizala","D","Udinese",3],["Halhal","D","Venezia",3],["Schingtienne","D","Venezia",3],["Odenthal","D","Sassuolo",3],["Favasuli","D","Napoli",3],["Lulli","D","Roma",3],["Tchato","D","Frosinone",3],["Kambwala","D","Como",3],["Drameh","D","Genoa",3],["Casale","D","Bologna",2],["Alhassane","D","Bologna",2],["Idrissi R.","D","Cagliari",2],["Ranieri L.","D","Fiorentina",2],["Akpoguma","D","Frosinone",2],["Otoa","D","Genoa",2],["Sabelli","D","Genoa",2],["Marin R.","D","Napoli",2],["Candè","D","Sassuolo",2],["Palma","D","Udinese",2],["Sverko","D","Venezia",2],["Franjic","D","Venezia",2],["Goglichidze","D","Monza",2],["Drobnic","D","Parma",2],["De Silvestri","D","Bologna",1],["Goldaniga","D","Como",1],["Van Der Brempt","D","Sassuolo",1],["Amey","D","Frosinone",1],["Puczka","D","Genoa",1],["Rugani","D","Juventus",1],["Cabal","D","Juventus",1],["Patric","D","Lazio",1],["Lazzari","D","Lazio",1],["Pellegrini Lu.","D","Lazio",1],["Jean","D","Lecce",1],["Ndaba","D","Lecce",1],["Diawara S.","D","Milan",1],["Antov","D","Monza",1],["Bakoune","D","Monza",1],["Marianucci","D","Napoli",1],["Mazzocchi","D","Venezia",1],["Ndiaye","D","Parma",1],["Carboni F.","D","Parma",1],["Ziolkowski","D","Monza",1],["Pieragnolo","D","Sassuolo",1],["Biraghi","D","Torino",1],["Gomes","D","Venezia",1],["Aurelio","D","Cagliari",1],["Omar Fayed","D","Frosinone",1],["Terracciano F.","D","Milan",1],["Maye","D","Monza",1],["Dembelè A.","D","Lecce",1],["Paz N.","C","Como",30],["Calhanoglu","C","Inter",28],["McTominay","C","Napoli",26],["Orsolini","C","Bologna",25],["Pulisic","C","Milan",23],["Rabiot","C","Milan",22],["Baturina","C","Como",21],["Mora","C","Roma",20],["Da Cunha","C","Como",18],["Barella","C","Inter",17],["De Bruyne","C","Napoli",17],["Zaniolo","C","Udinese",17],["McKennie","C","Juventus",16],["Zaccagni","C","Lazio",16],["Atta","C","Fiorentina",15],["Ederson D.S.","C","Atalanta",13],["Samardzic","C","Atalanta",13],["Gudmundsson A.","C","Lazio",13],["Conceicao","C","Juventus",13],["Taylor K.","C","Lazio",13],["Vlasic","C","Torino",13],["Gonzalez N.","C","Juventus",13],["Zielinski","C","Inter",12],["Modric","C","Milan",12],["Ekkelenkamp","C","Udinese",12],["Jones C.","C","Inter",12],["Kessiè","C","Atalanta",12],["Goncalves P.","C","Fiorentina",12],["Perrone","C","Como",11],["Rodriguez Je.","C","Como",11],["Baldanzi","C","Genoa",11],["Frattesi","C","Lazio",11],["Alajbegovic","C","Juventus",11],["Saelemaekers","C","Milan",11],["Mastantuono","C","Fiorentina",11],["Moreira","C","Milan",11],["Bernardeschi","C","Bologna",10],["Rowe","C","Atalanta",10],["Mandragora","C","Torino",10],["Zambo Anguissa","C","Napoli",10],["Politano","C","Napoli",10],["Konè M.","C","Roma",10],["Thorstvedt","C","Sassuolo",10],["Diouf","C","Inter",9],["Sucic P.","C","Inter",9],["Locatelli","C","Juventus",9],["Thuram K.","C","Juventus",9],["Cancellieri","C","Lazio",9],["Isaksen","C","Lazio",9],["Colpani","C","Monza",9],["Vergara","C","Napoli",9],["Cristante","C","Roma",9],["Volpato","C","Sassuolo",9],["Casadei","C","Torino",9],["Pellegrini Lo.","C","Roma",9],["Pasalic","C","Atalanta",8],["Ferguson","C","Bologna",8],["Odgaard","C","Bologna",8],["Cambiaghi","C","Bologna",8],["Romano","C","Cagliari",8],["Fazzini","C","Cagliari",8],["Calò","C","Frosinone",8],["Chukwueze","C","Milan",8],["Lobotka","C","Napoli",8],["Konè I.","C","Sassuolo",8],["Karlstrom","C","Udinese",8],["Schmid","C","Frosinone",8],["Hutchinson","C","Milan",8],["Mbangula","C","Bologna",8],["Gaetano","C","Atalanta",7],["Zalewski","C","Atalanta",7],["Adopo","C","Cagliari",7],["Winks","C","Cagliari",7],["Caqueret","C","Como",7],["Fagioli","C","Fiorentina",7],["Ndour","C","Fiorentina",7],["Frendrup","C","Genoa",7],["Koopmeiners","C","Juventus",7],["Rovella","C","Lazio",7],["Coulibaly L.","C","Lecce",7],["Akinsanmiro","C","Monza",7],["Bernabè","C","Parma",7],["Pisilli","C","Roma",7],["Adzic","C","Sassuolo",7],["Sow","C","Genoa",7],["Cissè A.","C","Milan",7],["Elmas","C","Atalanta",7],["Monteiro J.","C","Lecce",7],["Sarr P.","C","Juventus",7],["El Shaarawy","C","Genoa",7],["Pobega","C","Bologna",6],["Milla","C","Como",6],["Liberali","C","Como",6],["Oulai","C","Fiorentina",6],["Zerbin","C","Frosinone",6],["Ellertsson","C","Genoa",6],["Zhegrova","C","Juventus",6],["Pierotti","C","Lecce",6],["Pessina","C","Monza",6],["Matic","C","Sassuolo",6],["Bakola","C","Sassuolo",6],["Cacciamani","C","Torino",6],["Fitz-Jim","C","Torino",6],["Oristanio","C","Torino",6],["Piotrowski","C","Udinese",6],["Unai Gomez","C","Udinese",6],["Basic","C","Venezia",6],["Busio","C","Venezia",6],["Braganca","C","Torino",6],["Felici","C","Cagliari",5],["Fini ","C","Frosinone",5],["Masini","C","Frosinone",5],["Meichtry","C","Genoa",5],["Messias","C","Genoa",5],["Luis Henrique","C","Inter",5],["Jashari","C","Milan",5],["Keita M.","C","Parma",5],["Nicolussi Caviglia","C","Parma",5],["Gineitis","C","Torino",5],["Njie","C","Fiorentina",5],["Sohm","C","Venezia",5],["Perez K.","C","Venezia",5],["Tourè I.","C","Monza",5],["Amondarain","C","Bologna",4],["Moro N.","C","Bologna",4],["Deiola","C","Cagliari",4],["Addai","C","Como",4],["Brescianini","C","Fiorentina",4],["Fabbian","C","Parma",4],["Cichella","C","Frosinone",4],["Amorim","C","Genoa",4],["Traorè Hj.","C","Genoa",4],["Mkhitaryan","C","Inter",4],["Douglas Luiz","C","Juventus",4],["Dele-Bashiru","C","Lazio",4],["Ngom","C","Lecce",4],["Berisha M.","C","Lecce",4],["Gandelman","C","Lecce",4],["Musah","C","Milan",4],["Loftus-Cheek","C","Milan",4],["Folorunsho","C","Monza",4],["Almqvist","C","Parma",4],["Ilkhan","C","Torino",4],["Miller L.","C","Udinese",4],["Grillitsch","C","Frosinone",4],["Massolin","C","Cagliari",4],["Fernandez T.","C","Venezia",4],["De Roon","C","Roma",3],["Sulemana I.","C","Sassuolo",3],["Dominguez B.","C","Sassuolo",3],["Fadera","C","Cagliari",3],["Belahyane","C","Lazio",3],["Cataldi","C","Lazio",3],["Gorter","C","Lecce",3],["Maleh","C","Lecce",3],["Ricci S.","C","Como",3],["Ordonez C.","C","Parma",3],["Diallo O.","C","Parma",3],["Aboukhlal","C","Torino",3],["Gagliardini","C","Cagliari",3],["El Azzouzi O.","C","Bologna",2],["Gelli F.","C","Frosinone",2],["Hasa","C","Frosinone",2],["Stankovic A.","C","Inter",2],["Colombo L.","C","Monza",2],["Gilmour","C","Napoli",2],["Cremaschi","C","Parma",2],["Lipani","C","Sassuolo",2],["Zarraga","C","Udinese",2],["Helgason","C","Venezia",2],["Forson O.","C","Monza",2],["Foe Ondoa","C","Monza",2],["Jovanovic","C","Udinese",2],["Liteta","C","Cagliari",1],["Lahdo","C","Como",1],["El Azzouzi A.","C","Frosinone",1],["Kone B.","C","Frosinone",1],["Venturino","C","Genoa",1],["Przyborek","C","Lazio",1],["Kaba","C","Lecce",1],["Fofana Sa.","C","Lecce",1],["Ciurria","C","Monza",1],["Boloca","C","Sassuolo",1],["Ilic","C","Lecce",1],["Chakvetadze","C","Udinese",1],["Dagasso","C","Venezia",1],["Duncan","C","Venezia",1],["Laerke","C","Lecce",1],["Comotto","C","Milan",1],["Mout","C","Monza",1],["Ciervo","C","Cagliari",1],["Sierro","C","Parma",1],["Libra","C","Bologna",1],["Malen","A","Roma",37],["Martinez L.","A","Inter",35],["Hojlund","A","Napoli",29],["Thuram","A","Inter",28],["Ramos G.","A","Milan",27],["Kean","A","Como",25],["Kolo Muani","A","Juventus",24],["Woltemade","A","Juventus",23],["Douvikas","A","Como",21],["Yildiz","A","Juventus",21],["Scamacca","A","Atalanta",19],["Berardi","A","Sassuolo",19],["Davis K.","A","Udinese",19],["Krstovic","A","Atalanta",18],["De Ketelaere","A","Atalanta",17],["Esposito F.P.","A","Inter",17],["Dovbyk","A","Bologna",16],["Dybala","A","Roma",16],["Soulè","A","Roma",15],["Laurientè","A","Sassuolo",15],["Diao","A","Como",14],["Santos A.","A","Napoli",14],["Pellegrino M.","A","Fiorentina",14],["Castro S.","A","Roma",14],["Simeone","A","Torino",14],["Beto","A","Fiorentina",14],["Raspadori","A","Atalanta",13],["Esposito Se.","A","Sassuolo",12],["Pinamonti","A","Lazio",12],["Adams C.","A","Torino",12],["Kevin Carlos","A","Cagliari",12],["Raimondo","A","Frosinone",11],["Colombo","A","Genoa",11],["Adams A.","A","Venezia",11],["Tourè E.","A","Parma",11],["Bowie","A","Sassuolo",10],["Yeboah J.","A","Venezia",10],["Romero D.","A","Parma",10],["Piccoli","A","Bologna",9],["Ghedjemis","A","Frosinone",9],["Cutrone","A","Monza",9],["Osmajic","A","Genoa",9],["Kvernadze","A","Frosinone",8],["Geubbels","A","Lecce",8],["Bobcek","A","Frosinone",8],["Maldini","A","Cagliari",7],["Vitinha O.","A","Genoa",7],["Bonny","A","Inter",7],["Varela G.","A","Monza",7],["Rrahmani Al.","A","Venezia",7],["Gnonto","A","Fiorentina",7],["Boga","A","Juventus",6],["Noslin","A","Lazio",6],["Stulic","A","Lecce",6],["Zapata D.","A","Torino",6],["Robinson J.","A","Monza",6],["Zeballos","A","Monza",6],["Sulemana K.","A","Atalanta",5],["Mendy P.","A","Cagliari",5],["Mota","A","Monza",5],["Neres","A","Napoli",5],["Lontani","A","Parma",5],["N'Dri","A","Lecce",4],["Camarda","A","Milan",4],["Frigan","A","Parma",4],["Kulenovic","A","Torino",4],["Gueye","A","Udinese",4],["Adorante","A","Venezia",4],["Milik","A","Juventus",4],["Fatah","A","Lecce",4],["Birligea","A","Frosinone",4],["Ngonge","A","Monza",4],["Nzola","A","Cagliari",4],["Havel","A","Genoa",3],["Giovane","A","Napoli",3],["Lang","A","Napoli",3],["Lucca","A","Napoli",3],["Elphege","A","Parma",3],["Ekhator","A","Juventus",2],["Lauberbach","A","Venezia",2],["Enem","A","Bologna",2],["Trepy","A","Cagliari",1],["Bayo V.","A","Udinese",1],["Lisman","A","Venezia",1],["De Martis","A","Parma",1],["Robinho Junior","A","Genoa",1]];
+const ROLES = ['P','D','C','A'];
+const ROLENAMES = {P:'Portiere', D:'Difensore', C:'Centrocampista', A:'Attaccante'};
+const players = RAW.map((p,i)=>({id:i, nome:p[0], r:p[1], squadra:p[2], q:p[3]}));
+
+const DEFAULT_STATE = {
+  budget:500,
+  slots:{P:3,D:8,C:8,A:6},
+  pct:{P:8,D:20,C:27,A:45},
+  bought:{},
+  discarded:{},
+  market:[],
+  participants:[],
+  teams:{}
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let selected = null;
+
+function norm(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+function levenshtein(a,b){
+  const m=a.length, n=b.length;
+  if(m===0) return n; if(n===0) return m;
+  let prev = Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){
+      cur[j] = a[i-1]===b[j-1] ? prev[j-1] : 1+Math.min(prev[j-1], prev[j], cur[j-1]);
+    }
+    prev=cur;
+  }
+  return prev[n];
+}
+
+function matchScore(query, name){
+  const q = norm(query), n = norm(name);
+  if(!q) return -1;
+  if(n.includes(q)) return n.indexOf(q)===0 ? 0 : 1;
+  const tokens = n.split(/[\s.'-]+/).filter(Boolean);
+  let best = 99;
+  tokens.forEach(t=>{
+    if(t.startsWith(q)) best = Math.min(best, 2);
+    else {
+      const maxDist = q.length<=3 ? 1 : q.length<=6 ? 2 : 3;
+      const d = levenshtein(q, t.slice(0,q.length+maxDist));
+      if(d<=maxDist) best = Math.min(best, 3+d);
+    }
+  });
+  return best<99 ? best : -1;
+}
+
+const STORAGE_KEY = 'asta-state';
+
+async function readStoredState(){
+  if(typeof window !== 'undefined' && window.storage && window.storage.get){
+    try{
+      const r = await window.storage.get(STORAGE_KEY, false);
+      if(r && r.value) return r.value;
+    }catch(e){}
+  }
+  try{ return window.localStorage.getItem(STORAGE_KEY); }catch(e){}
+  return null;
+}
+async function writeStoredState(payload){
+  let ok = false;
+  if(typeof window !== 'undefined' && window.storage && window.storage.set){
+    try{ await window.storage.set(STORAGE_KEY, payload, false); ok = true; }catch(e){}
+  }
+  try{ window.localStorage.setItem(STORAGE_KEY, payload); ok = true; }catch(e){}
+  return ok;
+}
+
+async function loadState(){
+  try{
+    const rawValue = await readStoredState();
+    if(rawValue){
+      const loaded = JSON.parse(rawValue);
+      state = Object.assign({}, DEFAULT_STATE, loaded);
+      state.slots = Object.assign({}, DEFAULT_STATE.slots, loaded.slots);
+      state.pct = Object.assign({}, DEFAULT_STATE.pct, loaded.pct);
+    }
+  }catch(e){}
+  normalizeBasePct();
+  renderSettings();
+  renderBar();
+  renderUndo();
+  renderMarket();
+  renderRivals();
+}
+async function saveState(){
+  await writeStoredState(JSON.stringify(state));
+}
+
+function boughtCount(role){
+  return Object.values(state.bought).filter(b=>b.r===role).length;
+}
+function boughtSpent(role){
+  return Object.values(state.bought).filter(b=>b.r===role).reduce((a,b)=>a+b.price,0);
+}
+function poolFor(role){
+  return players.filter(p=>p.r===role && !state.bought[p.id] && !state.discarded[p.id]).sort((a,b)=>b.q-a.q);
+}
+
+function roleRemainingRaw(role){
+  return remainingTotalBudget() * normalizedPct(role) / 100;
+}
+function roleBudgetDisplay(role){
+  const needed = state.slots[role] - boughtCount(role);
+  if(needed <= 0){
+    const planned = state.budget * state.pct[role] / 100;
+    return Math.round(planned - boughtSpent(role));
+  }
+  return Math.round(roleRemainingRaw(role));
+}
+function totalSpentAll(){
+  return Object.values(state.bought).reduce((a,b)=>a+b.price,0);
+}
+function remainingTotalBudget(){
+  return state.budget - totalSpentAll();
+}
+function activeRolesList(){
+  return ROLES.filter(r => (state.slots[r] - boughtCount(r)) > 0);
+}
+function normalizedPct(role){
+  const active = activeRolesList();
+  if(active.indexOf(role)===-1) return 0;
+  const sum = active.reduce((a,r)=>a+Number(state.pct[r]),0) || 1;
+  return Number(state.pct[role]) / sum * 100;
+}
+
+function computeSuggestion(player){
+  const role = player.r;
+  const raw = roleRemainingRaw(role);
+  const remainingBudget = Math.max(raw, 0);
+  const neededSlots = state.slots[role] - boughtCount(role);
+  if(neededSlots <= 0){
+    return {complete:true, remainingBudget, raw, neededSlots};
+  }
+  const pool = poolFor(role);
+  const target = pool.slice(0, neededSlots);
+  const sumQ = target.reduce((a,p)=>a+p.q,0) || 1;
+  const value = Math.max(1, Math.round(remainingBudget * (player.q / sumQ)));
+  return {complete:false, value, remainingBudget, raw, neededSlots, pool, over: raw<0};
+}
+
+function marketTemp(){
+  const log = state.market || [];
+  if(log.length < 3) return {n: log.length};
+  const ratios = log.map(m=>m.price/m.q);
+  const avg = ratios.reduce((a,b)=>a+b,0)/ratios.length;
+  return {pct: Math.round((avg-1)*100), n: log.length};
+}
+function marketTeamTemp(){
+  const log = state.market || [];
+  const groups = {};
+  log.forEach(m=>{
+    const team = m.squadra || 'N/D';
+    groups[team] = groups[team] || [];
+    groups[team].push(m.price / m.q);
+  });
+  return Object.entries(groups)
+    .filter(([team, arr]) => arr.length >= 2)
+    .map(([team, arr]) => ({
+      team, n: arr.length,
+      pct: Math.round((arr.reduce((a,b)=>a+b,0)/arr.length - 1) * 100)
+    }))
+    .sort((a,b) => b.pct - a.pct);
+}
+function renderMarket(){
+  const t = marketTemp();
+  const summary = document.getElementById('marketSummary');
+  if(t.n < 3){
+    summary.textContent = 'Temperatura asta: dati insufficienti (' + t.n + ' osservate)';
+  } else {
+    const sign = t.pct>0 ? '+' : '';
+    summary.innerHTML = 'Temperatura asta: <b>'+sign+t.pct+'% sul listino</b> ('+t.n+' osservate) — tocca per il dettaglio squadre';
+  }
+  const teams = marketTeamTemp();
+  const box = document.getElementById('marketTeams');
+  if(teams.length===0){
+    box.innerHTML = '<div style="text-align:center; color:var(--text-dim)">Ancora troppo poche osservazioni per squadra.</div>';
+  } else {
+    box.innerHTML = teams.map(t=>{
+      const sign = t.pct>0 ? '+' : '';
+      const cls = t.pct>0 ? 'up' : (t.pct<0 ? 'down' : '');
+      return '<div class="teamrow '+cls+'"><span>'+t.team+' ('+t.n+')</span><span>'+sign+t.pct+'%</span></div>';
+    }).join('');
+  }
+}
+document.getElementById('marketSummary').onclick = ()=>{
+  const box = document.getElementById('marketTeams');
+  box.style.display = box.style.display==='none' ? 'block' : 'none';
+};
+
+function renderSettings(){
+  document.getElementById('budget').value = state.budget;
+  ROLES.forEach(r=>{
+    document.getElementById('slot'+r).value = state.slots[r];
+    document.getElementById('pct'+r).value = state.pct[r];
+  });
+  updatePctSum();
+  renderParticipantList();
+}
+function updatePctSum(){
+  const sum = ROLES.reduce((a,r)=>a+Number(state.pct[r]),0);
+  const el = document.getElementById('pctsum');
+  el.textContent = 'Totale percentuali: ' + sum + '%';
+  el.className = 'pctsum' + (sum!==100 ? ' warn' : '');
+}
+
+function rebalancePct(changedRole, rawNewValue){
+  const oldPct = {...state.pct};
+  const newValue = Math.max(0, Math.min(100, Number(rawNewValue)||0));
+  const others = ROLES.filter(r=>r!==changedRole);
+  const oldOthersSum = others.reduce((a,r)=>a+oldPct[r],0);
+  const delta = newValue - oldPct[changedRole];
+  const newPct = {...oldPct, [changedRole]: newValue};
+  if(oldOthersSum <= 0){
+    const share = -delta / others.length;
+    others.forEach(r=> newPct[r] = Math.max(0, oldPct[r] + share));
+  } else {
+    others.forEach(r=>{
+      const proportion = oldPct[r] / oldOthersSum;
+      newPct[r] = Math.max(0, oldPct[r] - delta * proportion);
+    });
+  }
+  ROLES.forEach(r=> newPct[r] = Math.round(newPct[r]));
+  const total = ROLES.reduce((a,r)=>a+newPct[r],0);
+  const residual = 100 - total;
+  if(residual !== 0){
+    const adjustRole = others.reduce((best,r)=> newPct[r]>newPct[best] ? r : best, others[0]);
+    newPct[adjustRole] = Math.max(0, newPct[adjustRole] + residual);
+  }
+  return newPct;
+}
+
+function applyPctChange(role, rawValue){
+  state.pct = rebalancePct(role, rawValue);
+  ROLES.forEach(rr=> document.getElementById('pct'+rr).value = state.pct[rr]);
+  updatePctSum();
+  saveState();
+  renderBar();
+  if(selected) selectPlayer(selected);
+}
+
+function healPctTotal(){
+  const sum = ROLES.reduce((a,r)=>a+Number(state.pct[r]||0),0);
+  if(sum === 100 || sum <= 0) return false;
+  const scaled = {};
+  ROLES.forEach(r=> scaled[r] = Math.round(Number(state.pct[r]||0)/sum*100));
+  const diff = 100 - ROLES.reduce((a,r)=>a+scaled[r],0);
+  if(diff !== 0){
+    const biggest = ROLES.reduce((b,r)=> scaled[r]>scaled[b] ? r : b, ROLES[0]);
+    scaled[biggest] = Math.max(0, scaled[biggest] + diff);
+  }
+  state.pct = scaled;
+  ROLES.forEach(r=>{
+    const el = document.getElementById('pct'+r);
+    if(el) el.value = state.pct[r];
+  });
+  updatePctSum();
+  return true;
+}
+
+function normalizeBasePct(){
+  const sum = ROLES.reduce((a,r)=>a+Number(state.pct[r]||0),0);
+  if(sum===100) return;
+  if(sum<=0){ ROLES.forEach(r=>state.pct[r]=25); saveState(); return; }
+  const scaled = {};
+  ROLES.forEach(r=> scaled[r] = Math.round(Number(state.pct[r]||0) * 100/sum));
+  const total = ROLES.reduce((a,r)=>a+scaled[r],0);
+  const residual = 100 - total;
+  if(residual !== 0){
+    const maxRole = ROLES.reduce((best,r)=> scaled[r]>scaled[best] ? r : best, ROLES[0]);
+    scaled[maxRole] += residual;
+  }
+  state.pct = scaled;
+  saveState();
+}
+
+function renderParticipantList(){
+  const box = document.getElementById('participantList');
+  box.innerHTML = '';
+  (state.participants||[]).forEach(name=>{
+    const chip = document.createElement('div');
+    chip.className = 'participant-chip';
+    chip.innerHTML = '<span>'+name+'</span><button>&times;</button>';
+    chip.querySelector('button').onclick = ()=>{
+      state.participants = state.participants.filter(n=>n!==name);
+      delete state.teams[name];
+      saveState();
+      renderParticipantList();
+      renderRivals();
+    };
+    box.appendChild(chip);
+  });
+}
+document.getElementById('addParticipant').onclick = ()=>{
+  const input = document.getElementById('participantInput');
+  const name = input.value.trim();
+  if(!name) return;
+  state.participants = state.participants || [];
+  if(state.participants.includes(name)){ input.value=''; return; }
+  state.participants.push(name);
+  input.value='';
+  saveState();
+  renderParticipantList();
+  renderRivals();
+};
+
+function rivalStats(name){
+  const team = (state.teams && state.teams[name]) || {bought:{}};
+  const bought = Object.values(team.bought||{});
+  const spent = bought.reduce((a,b)=>a+b.price,0);
+  const remaining = state.budget - spent;
+  const perRole = {};
+  let neededTotal = 0;
+  ROLES.forEach(r=>{
+    const c = bought.filter(b=>b.r===r).length;
+    const needed = state.slots[r]-c;
+    perRole[r] = {count:c, needed};
+    neededTotal += Math.max(needed,0);
+  });
+  return {spent, remaining, perRole, neededTotal};
+}
+
+function renderRivals(){
+  const box = document.getElementById('rivalsList');
+  if(!state.participants || state.participants.length===0){
+    box.innerHTML = '<div class="hint" style="display:block">Aggiungi i nomi degli avversari dalle Impostazioni per iniziare a tracciarli.</div>';
+    return;
+  }
+  box.innerHTML = '';
+  state.participants.forEach(name=>{
+    const s = rivalStats(name);
+    const tight = s.remaining < s.neededTotal;
+    const card = document.createElement('div');
+    card.className = 'rivalcard';
+    card.innerHTML =
+      '<div class="rivalname">'+name+'</div>'+
+      '<div class="rivalstats'+(tight?' rivalwarn':'')+'">Speso '+s.spent+' cr · Rimane '+s.remaining+' cr'+(tight?' — in difficolta':'')+'</div>'+
+      '<div class="rivalroles">'+ROLES.map(r=>r+' '+s.perRole[r].count+'/'+state.slots[r]).join(' · ')+'</div>';
+    box.appendChild(card);
+  });
+}
+document.getElementById('toggleRivals').onclick = ()=>{
+  const p = document.getElementById('rivals');
+  const willShow = p.style.display==='none';
+  p.style.display = willShow ? 'block' : 'none';
+  if(willShow) renderRivals();
+};
+
+function renderBar(){
+  healPctTotal();
+  ROLES.forEach(r=>{
+    const el = document.getElementById('chip'+r);
+    const c = boughtCount(r), t = state.slots[r];
+    const display = roleBudgetDisplay(r);
+    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr'+(display<0?' over':'')+'">'+display+' cr</span>';
+    el.className = 'chip' + (c>=t ? ' done' : '');
+    document.getElementById('nt'+r).textContent = c+'/'+t;
+    const curEl = document.getElementById('cur'+r);
+    if(curEl) curEl.textContent = '(attuale: '+Math.round(normalizedPct(r))+'%)';
+  });
+  const totalSpent = totalSpentAll();
+  const left = state.budget - totalSpent;
+  const bl = document.getElementById('budgetLeft');
+  bl.textContent = left + ' cr';
+  bl.className = left<0 ? 'over' : '';
+}
+
+function renderUndo(){
+  const bar = document.getElementById('undoBar');
+  if(!state.lastAction){ bar.style.display='none'; return; }
+  bar.style.display='flex';
+  const a = state.lastAction;
+  document.getElementById('undoText').textContent = a.type==='buy'
+    ? a.nome+' acquistato a '+a.price+' cr'
+    : a.nome+' segnato preso da altri a '+a.price+' cr';
+}
+document.getElementById('undoBtn').onclick = ()=>{
+  if(!state.lastAction) return;
+  const a = state.lastAction;
+  if(a.type==='buy') delete state.bought[a.id];
+  else {
+    delete state.discarded[a.id];
+    if(a.buyer && state.teams[a.buyer]) delete state.teams[a.buyer].bought[a.id];
+  }
+  if(state.market && state.market.length) state.market.pop();
+  state.lastAction = null;
+  saveState();
+  renderBar();
+  renderUndo();
+  renderMarket();
+  renderRivals();
+  renderResults(document.getElementById('search').value);
+};
+
+function renderList(list, emptyMsg){
+  const box = document.getElementById('results');
+  box.innerHTML = '';
+  if(list.length===0){
+    box.innerHTML = '<div class="hint" style="display:block">'+emptyMsg+'</div>';
+    return;
+  }
+  list.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'result';
+    div.innerHTML = '<div class="badge '+p.r+'">'+p.r+'</div><div class="rname">'+p.nome+'<div class="rteam">'+p.squadra+'</div></div><div class="rq">'+p.q+' cr</div>';
+    div.onclick = ()=>selectPlayer(p);
+    box.appendChild(div);
+  });
+}
+
+function renderResults(query){
+  const hint = document.getElementById('hint');
+  if(!query){ document.getElementById('results').innerHTML=''; hint.style.display = activeRoleTab ? 'none' : 'block'; if(activeRoleTab) showRoleTop(activeRoleTab); return; }
+  hint.style.display='none';
+  clearRoleTab();
+  const scored = players
+    .filter(p=>!state.bought[p.id] && !state.discarded[p.id])
+    .map(p=>({p, s:matchScore(query, p.nome)}))
+    .filter(x=>x.s>=0)
+    .sort((a,b)=>a.s-b.s || b.p.q-a.p.q)
+    .slice(0,8)
+    .map(x=>x.p);
+  renderList(scored, 'Nessun giocatore trovato, o gia assegnato.');
+}
+
+let activeRoleTab = null;
+function showRoleTop(role){
+  const pool = poolFor(role).slice(0,8);
+  renderList(pool, 'Ruolo completo o nessun giocatore libero.');
+}
+function clearRoleTab(){
+  activeRoleTab = null;
+  document.querySelectorAll('.roletab').forEach(b=>b.classList.remove('active'));
+}
+document.querySelectorAll('.roletab').forEach(btn=>{
+  btn.onclick = ()=>{
+    const r = btn.dataset.r;
+    document.getElementById('search').value='';
+    if(activeRoleTab===r){ clearRoleTab(); document.getElementById('results').innerHTML=''; document.getElementById('hint').style.display='block'; return; }
+    activeRoleTab = r;
+    document.querySelectorAll('.roletab').forEach(b=>b.classList.toggle('active', b===btn));
+    document.getElementById('hint').style.display='none';
+    showRoleTop(r);
+  };
+});
+
+function selectPlayer(p){
+  selected = p;
+  document.getElementById('detail').style.display = 'block';
+  document.getElementById('buyform').style.display = 'none';
+  document.getElementById('buyerPicker').style.display = 'none';
+  document.getElementById('dBadge').className = 'badge '+p.r;
+  document.getElementById('dBadge').textContent = p.r;
+  document.getElementById('dName').textContent = p.nome;
+  document.getElementById('dTeam').textContent = p.squadra + ' — ' + ROLENAMES[p.r];
+  document.getElementById('dQt').textContent = p.q + ' crediti';
+
+  const s = computeSuggestion(p);
+  const altsBox = document.getElementById('dAlts');
+  const quickBtn = document.getElementById('dQuickBuyBtn');
+  const numEl = document.getElementById('dSuggested');
+  numEl.classList.remove('danger');
+  if(s.complete){
+    numEl.textContent = '—';
+    document.getElementById('dSuggestedLabel').textContent = 'ruolo gia completo';
+    document.getElementById('dRoleBudgetLabel').textContent = 'Rispetto al piano su questo ruolo';
+    document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
+    document.getElementById('dSlots').textContent = '0';
+    altsBox.innerHTML = '';
+    quickBtn.textContent = 'Preso a ' + p.q;
+    quickBtn.dataset.price = p.q;
+  } else {
+    numEl.textContent = s.value;
+    document.getElementById('dSuggestedLabel').textContent = s.over ? 'budget ruolo gia sforato — suggerito minimo' : 'prezzo massimo consigliato';
+    if(s.over) numEl.classList.add('danger');
+    document.getElementById('dRoleBudgetLabel').textContent = 'Budget rimasto sul ruolo';
+    document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
+    document.getElementById('dSlots').textContent = s.neededSlots;
+    quickBtn.textContent = 'Preso a ' + s.value;
+    quickBtn.dataset.price = s.value;
+
+    const alts = s.pool.filter(x=>x.id!==p.id)
+      .sort((a,b)=>Math.abs(a.q-p.q)-Math.abs(b.q-p.q)).slice(0,3);
+    if(alts.length){
+      altsBox.innerHTML = '<div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">Alternative simili</div>' +
+        alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+a.q+' cr</span></div>').join('');
+    } else {
+      altsBox.innerHTML = '';
+    }
+  }
+  document.getElementById('search').value = '';
+  renderResults('');
+  window.scrollTo({top: document.getElementById('detail').offsetTop - 10, behavior:'smooth'});
+}
+
+document.getElementById('toggleSettings').onclick = ()=>{
+  const p = document.getElementById('settings');
+  p.style.display = p.style.display==='none' ? 'block' : 'none';
+};
+['budget','slotP','slotD','slotC','slotA'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', (e)=>{
+    if(id==='budget') state.budget = Number(e.target.value)||0;
+    else state.slots[id.slice(4)] = Number(e.target.value)||0;
+    saveState();
+    renderBar();
+    if(selected) selectPlayer(selected);
+  });
+});
+ROLES.forEach(r=>{
+  const el = document.getElementById('pct'+r);
+  el.addEventListener('change', (e)=> applyPctChange(r, e.target.value));
+  el.addEventListener('blur', (e)=>{
+    const sum = ROLES.reduce((a,rr)=>a+Number(state.pct[rr]||0),0);
+    if(Number(e.target.value) !== state.pct[r] || sum !== 100) applyPctChange(r, e.target.value);
+  });
+});
+document.getElementById('resetPct').onclick = ()=>{
+  state.pct = {...DEFAULT_STATE.pct};
+  ROLES.forEach(r=> document.getElementById('pct'+r).value = state.pct[r]);
+  updatePctSum();
+  saveState();
+  renderBar();
+  if(selected) selectPlayer(selected);
+};
+document.getElementById('resetAll').onclick = ()=>{
+  state.bought = {}; state.discarded = {}; state.lastAction = null; state.market = []; state.teams = {};
+  saveState(); renderBar(); renderUndo(); renderMarket(); renderRivals(); clearRoleTab();
+  document.getElementById('detail').style.display='none';
+  renderResults('');
+};
+document.getElementById('search').addEventListener('input', (e)=>renderResults(e.target.value));
+document.getElementById('dClose').onclick = ()=>{ document.getElementById('detail').style.display='none'; selected=null; };
+document.getElementById('dSkipBtn').onclick = ()=>{
+  buyMode = 'other';
+  document.getElementById('buyerPicker').style.display='none';
+  document.getElementById('buyFormLabel').textContent = 'A quanto l\'ha preso l\'avversario?';
+  document.getElementById('buyform').style.display='flex';
+  document.getElementById('buyPrice').value = selected.q;
+  document.getElementById('buyPrice').style.borderColor = 'var(--border)';
+  document.getElementById('buyPrice').focus();
+  document.getElementById('buyPrice').select();
+};
+document.getElementById('dOtherPriceBtn').onclick = ()=>{
+  buyMode = 'mine';
+  document.getElementById('buyerPicker').style.display='none';
+  document.getElementById('buyFormLabel').textContent = 'Quanto hai pagato?';
+  document.getElementById('buyform').style.display='flex';
+  const s = computeSuggestion(selected);
+  document.getElementById('buyPrice').value = s.complete ? selected.q : s.value;
+  document.getElementById('buyPrice').style.borderColor = 'var(--border)';
+  document.getElementById('buyPrice').focus();
+  document.getElementById('buyPrice').select();
+};
+let buyMode = 'mine';
+let pendingPrice = null;
+function commitEntry(mode, price, buyer){
+  if(!price || price<1) return false;
+  const entry = {r:selected.r, price:price, nome:selected.nome, q:selected.q};
+  if(mode==='mine'){
+    state.bought[selected.id] = entry;
+  } else {
+    state.discarded[selected.id] = entry;
+    if(buyer){
+      state.teams = state.teams || {};
+      state.teams[buyer] = state.teams[buyer] || {bought:{}};
+      state.teams[buyer].bought[selected.id] = entry;
+    }
+  }
+  state.market = state.market || [];
+  state.market.push({id:selected.id, nome:selected.nome, r:selected.r, q:selected.q, squadra:selected.squadra, price:price, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
+  state.lastAction = {type: mode==='mine' ? 'buy' : 'other', id:selected.id, nome:selected.nome, price:price, buyer: buyer||null};
+  saveState();
+  renderBar();
+  renderUndo();
+  renderMarket();
+  renderRivals();
+  document.getElementById('detail').style.display='none';
+  document.getElementById('buyerPicker').style.display='none';
+  selected=null;
+  return true;
+}
+function renderBuyerPicker(){
+  const select = document.getElementById('buyerSelect');
+  select.innerHTML = '<option value="" disabled selected>Seleziona avversario…</option>' +
+    state.participants.map(n=>'<option value="'+n+'">'+n+'</option>').join('') +
+    '<option value="__untracked">Non tracciato</option>';
+}
+document.getElementById('buyerSelect').onchange = (e)=>{
+  const v = e.target.value;
+  if(!v) return;
+  const buyer = v==='__untracked' ? null : v;
+  commitEntry('other', pendingPrice, buyer);
+};
+document.getElementById('dQuickBuyBtn').onclick = (e)=>{
+  commitEntry('mine', Number(e.currentTarget.dataset.price), null);
+};
+document.getElementById('buyConfirm').onclick = ()=>{
+  const price = Number(document.getElementById('buyPrice').value);
+  if(!price || price<1){ document.getElementById('buyPrice').style.borderColor='var(--danger)'; return; }
+  if(buyMode==='mine'){ commitEntry('mine', price, null); return; }
+  if(state.participants && state.participants.length){
+    pendingPrice = price;
+    renderBuyerPicker();
+    document.getElementById('buyerPicker').style.display='block';
+  } else {
+    commitEntry('other', price, null);
+  }
+};
+
+renderUndo();
+loadState();
+</script>
+</body>
+</html>
