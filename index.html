@@ -668,6 +668,7 @@ function renderParticipantList(){
       state.participants = state.participants.filter(n=>n!==name);
       delete state.teams[name];
       saveState();
+      pushConfig();
       renderParticipantList();
       renderRivals();
     };
