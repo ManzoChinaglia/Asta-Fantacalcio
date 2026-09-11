@@ -82,6 +82,12 @@
   .chip .chipcr.over{color:var(--danger); font-weight:700;}
   #budgetLeft{font-size:16px; font-weight:700; color:var(--accent); white-space:nowrap; padding-left:6px;}
   #budgetLeft.over{color:var(--danger);}
+  #syncBar{font-size:12px; border-radius:8px; padding:9px 12px; margin-bottom:10px; line-height:1.5;}
+  #syncBar.on{background:#16281d; border:1px solid #24503a; color:#8fd0ab;}
+  #syncBar.off{background:#2a1a18; border:1px solid #5a2a26; color:#f0a79e;}
+  #syncBar b{font-weight:700;}
+  #syncBar button{background:none; border:1px solid currentColor; color:inherit;
+                  border-radius:6px; padding:4px 9px; font-size:12px; margin-left:8px;}
   #marketBar{font-size:12px; color:var(--text-dim); text-align:center; margin:0 0 10px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px;}
   #marketBar b{color:var(--text);}
   #marketSummary{cursor:pointer;}
@@ -153,6 +159,8 @@
     <h2>Situazione avversari</h2>
     <div id="rivalsList"></div>
   </div>
+
+  <div id="syncBar"></div>
 
   <div id="undoBar"><span id="undoText"></span><button id="undoBtn">Annulla</button></div>
 
@@ -290,6 +298,122 @@ async function writeStoredState(payload){
   return ok;
 }
 
+/* ---- Sincronizzazione condivisa (Supabase) ---- */
+const SB_URL = 'https://swoibefjqkpgijbzrdtd.supabase.co';
+const SB_KEY = 'sb_publishable_SURWUahFwichMQq-UJxYdQ_eaN_X2KY';
+const CODE_KEY = 'asta-code';
+const DEFAULT_CODE = 'manzo-afm94-eg776-qmp0l';
+
+function getAstaCode(){
+  try{
+    let c = window.localStorage.getItem(CODE_KEY);
+    if(!c){
+      c = DEFAULT_CODE;
+      window.localStorage.setItem(CODE_KEY, c);
+    }
+    return c;
+  }catch(e){ return 'asta-locale'; }
+}
+function setAstaCode(c){
+  try{ window.localStorage.setItem(CODE_KEY, c.trim()); }catch(e){}
+}
+let ASTA_CODE = getAstaCode();
+
+let sbOnline = false, sbLastError = null;
+
+async function sbFetch(path, opts){
+  const res = await fetch(SB_URL + '/rest/v1/' + path, Object.assign({
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  }, opts||{}));
+  if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0,120));
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+async function sbPullMovimenti(){
+  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE) + '&order=created_at.asc&limit=2000');
+}
+async function sbPullConfig(){
+  const rows = await sbFetch('asta_config?asta_code=eq.' + encodeURIComponent(ASTA_CODE) + '&limit=1');
+  return rows && rows.length ? rows[0] : null;
+}
+async function sbPushMovimento(m){
+  return await sbFetch('asta_movimenti', {
+    method:'POST',
+    body: JSON.stringify(Object.assign({asta_code: ASTA_CODE}, m))
+  });
+}
+async function sbDeleteMovimento(playerId){
+  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE) +
+                       '&player_id=eq.' + playerId, {method:'DELETE'});
+}
+async function sbDeleteAll(){
+  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE), {method:'DELETE'});
+}
+async function sbPushConfig(cfg){
+  return await sbFetch('asta_config', {
+    method:'POST',
+    headers:{
+      'apikey': SB_KEY, 'Authorization':'Bearer '+SB_KEY,
+      'Content-Type':'application/json',
+      'Prefer':'resolution=merge-duplicates,return=representation'
+    },
+    body: JSON.stringify({
+      asta_code: ASTA_CODE, budget: cfg.budget, slots: cfg.slots,
+      pct: cfg.pct, partecipanti: cfg.partecipanti, updated_at: new Date().toISOString()
+    })
+  });
+}
+
+/* ricostruisce bought/discarded/market dai movimenti remoti */
+function applyMovimenti(rows){
+  const bought = {}, discarded = {}, market = [];
+  rows.forEach(r=>{
+    const entry = {r: r.ruolo, price: r.prezzo, nome: r.nome, q: r.quotazione};
+    if(r.mine) bought[r.player_id] = entry; else discarded[r.player_id] = entry;
+    market.push({id:r.player_id, nome:r.nome, r:r.ruolo, q:r.quotazione,
+                 squadra:r.squadra, price:r.prezzo, mine:!!r.mine, buyer:r.acquirente||null});
+    if(!r.mine && r.acquirente){
+      state.teams = state.teams || {};
+      state.teams[r.acquirente] = state.teams[r.acquirente] || {bought:{}};
+      state.teams[r.acquirente].bought[r.player_id] = entry;
+    }
+  });
+  state.bought = bought; state.discarded = discarded; state.market = market;
+}
+
+async function syncFromServer(){
+  try{
+    const rows = await sbPullMovimenti();
+    state.teams = {};
+    applyMovimenti(rows || []);
+    const cfg = await sbPullConfig();
+    if(cfg){
+      if(cfg.budget) state.budget = cfg.budget;
+      if(cfg.slots) state.slots = Object.assign({}, DEFAULT_STATE.slots, cfg.slots);
+      if(cfg.pct) state.pct = Object.assign({}, DEFAULT_STATE.pct, cfg.pct);
+      if(cfg.partecipanti) state.participants = cfg.partecipanti;
+    }
+    sbOnline = true; sbLastError = null;
+  }catch(e){
+    sbOnline = false; sbLastError = e.message;
+  }
+  await writeStoredState(JSON.stringify(state));
+  normalizeBasePct();
+  renderSettings();
+  renderBar();
+  renderUndo();
+  renderMarket();
+  renderRivals();
+  renderSync();
+  renderResults(document.getElementById('search').value);
+}
+
 async function loadState(){
   try{
     const rawValue = await readStoredState();
@@ -306,6 +430,9 @@ async function loadState(){
   renderUndo();
   renderMarket();
   renderRivals();
+  renderSync();
+  await syncFromServer();
+  setInterval(syncFromServer, 5000);
 }
 async function saveState(){
   await writeStoredState(JSON.stringify(state));
@@ -454,11 +581,18 @@ function rebalancePct(changedRole, rawNewValue){
   return newPct;
 }
 
+function pushConfig(){
+  sbPushConfig({budget: state.budget, slots: state.slots, pct: state.pct,
+                partecipanti: state.participants || []})
+    .then(()=>{ sbOnline=true; renderSync(); })
+    .catch(e=>{ sbOnline=false; sbLastError=e.message; renderSync(); });
+}
+
 function applyPctChange(role, rawValue){
   state.pct = rebalancePct(role, rawValue);
   ROLES.forEach(rr=> document.getElementById('pct'+rr).value = state.pct[rr]);
   updatePctSum();
-  saveState();
+  saveState(); pushConfig();
   renderBar();
   if(selected) selectPlayer(selected);
 }
@@ -523,7 +657,7 @@ document.getElementById('addParticipant').onclick = ()=>{
   if(state.participants.includes(name)){ input.value=''; return; }
   state.participants.push(name);
   input.value='';
-  saveState();
+  saveState(); pushConfig();
   renderParticipantList();
   renderRivals();
 };
@@ -589,6 +723,32 @@ function renderBar(){
   bl.className = left<0 ? 'over' : '';
 }
 
+function renderSync(){
+  const el = document.getElementById('syncBar');
+  if(!el) return;
+  if(sbOnline){
+    el.className = 'on';
+    el.innerHTML = 'Sincronizzato · codice asta <b>'+ASTA_CODE+'</b>' +
+      '<button id="shareCode">Condividi</button><button id="joinCode">Cambia</button>';
+  } else {
+    el.className = 'off';
+    el.innerHTML = 'Non sincronizzato — stai lavorando solo su questo telefono.' +
+      (sbLastError ? '<br><span style="opacity:.8">'+sbLastError+'</span>' : '') +
+      '<button id="joinCode">Inserisci codice</button>';
+  }
+  const share = document.getElementById('shareCode');
+  if(share) share.onclick = ()=>{
+    const t = ASTA_CODE;
+    if(navigator.share){ navigator.share({title:'Codice asta', text:t}); }
+    else if(navigator.clipboard){ navigator.clipboard.writeText(t); share.textContent='Copiato'; }
+  };
+  const join = document.getElementById('joinCode');
+  if(join) join.onclick = ()=>{
+    const c = prompt('Inserisci il codice asta condiviso:', ASTA_CODE);
+    if(c && c.trim()){ setAstaCode(c); ASTA_CODE = c.trim(); syncFromServer(); }
+  };
+}
+
 function renderUndo(){
   const bar = document.getElementById('undoBar');
   if(!state.lastAction){ bar.style.display='none'; return; }
@@ -607,6 +767,8 @@ document.getElementById('undoBtn').onclick = ()=>{
     if(a.buyer && state.teams[a.buyer]) delete state.teams[a.buyer].bought[a.id];
   }
   if(state.market && state.market.length) state.market.pop();
+  sbDeleteMovimento(a.id).then(()=>{ sbOnline=true; renderSync(); })
+    .catch(e=>{ sbOnline=false; sbLastError=e.message; renderSync(); });
   state.lastAction = null;
   saveState();
   renderBar();
@@ -725,7 +887,7 @@ document.getElementById('toggleSettings').onclick = ()=>{
   document.getElementById(id).addEventListener('change', (e)=>{
     if(id==='budget') state.budget = Number(e.target.value)||0;
     else state.slots[id.slice(4)] = Number(e.target.value)||0;
-    saveState();
+    saveState(); pushConfig();
     renderBar();
     if(selected) selectPlayer(selected);
   });
@@ -748,6 +910,8 @@ document.getElementById('resetPct').onclick = ()=>{
 };
 document.getElementById('resetAll').onclick = ()=>{
   state.bought = {}; state.discarded = {}; state.lastAction = null; state.market = []; state.teams = {};
+  sbDeleteAll().then(()=>{ sbOnline=true; renderSync(); })
+    .catch(e=>{ sbOnline=false; sbLastError=e.message; renderSync(); });
   saveState(); renderBar(); renderUndo(); renderMarket(); renderRivals(); clearRoleTab();
   document.getElementById('detail').style.display='none';
   renderResults('');
@@ -793,6 +957,11 @@ function commitEntry(mode, price, buyer){
   state.market = state.market || [];
   state.market.push({id:selected.id, nome:selected.nome, r:selected.r, q:selected.q, squadra:selected.squadra, price:price, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
   state.lastAction = {type: mode==='mine' ? 'buy' : 'other', id:selected.id, nome:selected.nome, price:price, buyer: buyer||null};
+  sbPushMovimento({player_id: selected.id, nome: selected.nome, ruolo: selected.r,
+                   squadra: selected.squadra, quotazione: selected.q, prezzo: price,
+                   mine: mode==='mine', acquirente: buyer||null})
+    .then(()=>{ sbOnline=true; renderSync(); })
+    .catch(e=>{ sbOnline=false; sbLastError=e.message; renderSync(); });
   saveState();
   renderBar();
   renderUndo();
