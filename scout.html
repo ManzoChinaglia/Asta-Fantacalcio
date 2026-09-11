@@ -47,7 +47,15 @@
   .badge.C{background:#233a24; color:#7ecb7f;}
   .badge.A{background:#3a2323; color:#e07a6e;}
   .nm{flex:1; font-size:17px; font-weight:600;}
-  .sq{font-size:13px; color:var(--text-dim); font-weight:400; margin-top:2px;}
+  .sq{font-size:13px; color:var(--text-dim); font-weight:400; margin-top:3px;
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .dot.titolare{background:var(--ok);}
+  .dot.cambio{background:#c9a227;}
+  .dot.riserva{background:#5c6560;}
+  .titlab{color:var(--text-dim);}
+  .titlab.titolare{color:#7fc79c;}
+  .sep{color:#3a4a43;}
   .pricebox{text-align:right; flex-shrink:0;}
   .price{font-size:22px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
   .pricelab{font-size:10px; color:var(--text-dim); margin-top:3px;}
@@ -62,17 +70,9 @@
   #linkbar.off{border-color:#4a3a1a;}
   .togglerow{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; color:var(--text-dim);}
   .togglerow input{width:18px; height:18px;}
-  .verdict{margin-top:10px; font-size:13px; line-height:1.5;}
-  .verdict .v{font-weight:600;}
-  .v.good{color:var(--ok);} .v.hot{color:var(--accent);} .v.plain{color:var(--text-dim);}
-  .titrow{margin-top:9px; display:flex; align-items:center; gap:7px; font-size:13px;}
-  .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
-  .dot.titolare{background:var(--ok);}
-  .dot.cambio{background:var(--accent);}
-  .dot.riserva{background:#6a736e;}
-  .titrow .t1{color:var(--ok); font-weight:600;}
-  .titrow .t2{color:var(--accent); font-weight:600;}
-  .titrow .t3{color:var(--text-dim);}
+  .verdict{margin-top:11px; padding-top:10px; border-top:1px solid var(--border);
+           font-size:13px; line-height:1.55; color:var(--text-dim);}
+  .verdict .v{color:var(--text); font-weight:500;}
   .injbox{margin-top:10px; padding:9px 11px; background:#2a1a18; border-radius:8px;
           font-size:13px; color:#f0a79e; line-height:1.45;}
   .injbox b{color:#ff8e80;}
@@ -187,13 +187,13 @@ function ratio(p){ return p.fvm/p.q; }
 
 function verdict(p){
   const parts = [];
-  if(p.tags.includes('top')) parts.push('<span class="v hot">Tra i più forti del ruolo.</span>');
-  if(p.tags.includes('perla')) parts.push('<span class="v good">Vale più di quanto costa.</span>');
-  if(p.tags.includes('scommessa')) parts.push('<span class="v good">Sta salendo di prezzo: il mercato lo sta rivalutando.</span>');
-  if(p.tags.includes('low') && !p.tags.includes('perla')) parts.push('<span class="v plain">Riempitivo a costo minimo.</span>');
+  if(p.tags.includes('top')) parts.push('<span class="v">Tra i più forti del ruolo.</span>');
+  if(p.tags.includes('perla')) parts.push('<span class="v">Vale più di quanto costa.</span>');
+  if(p.tags.includes('scommessa')) parts.push('<span class="v">Sta salendo di prezzo.</span>');
+  if(p.tags.includes('low') && !p.tags.includes('perla')) parts.push('Riempitivo a costo minimo.');
   if(parts.length===0){
-    if(p.d < 0) parts.push('<span class="v plain">Prezzo in calo dall\'uscita del listone.</span>');
-    else parts.push('<span class="v plain">Nessun segnale particolare.</span>');
+    if(p.d < 0) parts.push('Prezzo in calo dall\'uscita del listone.');
+    else parts.push('Nessun segnale particolare.');
   }
   return parts.join(' ');
 }
@@ -205,15 +205,13 @@ function shortDate(d){
 }
 
 function titLine(p){
-  if(p.tit==='titolare'){
-    const pct = p.gkpct ? ' <span class="t3">('+p.gkpct+'% di presenze attese)</span>' : '';
-    return '<div class="titrow"><span class="dot titolare"></span><span class="t1">Titolare</span>'+pct+'</div>';
-  }
-  if(p.tit==='cambio'){
-    return '<div class="titrow"><span class="dot cambio"></span><span class="t2">Primo cambio</span> <span class="t3">— entra spesso</span></div>';
-  }
-  const pct = p.gkpct ? ' <span class="t3">('+p.gkpct+'%)</span>' : '';
-  return '<div class="titrow"><span class="dot riserva"></span><span class="t3">Non titolare</span>'+pct+'</div>';
+  let lab, cls;
+  if(p.tit==='titolare'){ lab='Titolare'; cls='titolare'; }
+  else if(p.tit==='cambio'){ lab='Primo cambio'; cls='cambio'; }
+  else { lab='Non titolare'; cls='riserva'; }
+  const pct = p.gkpct ? ' '+p.gkpct+'%' : '';
+  return '<span class="sep">•</span><span class="dot '+cls+'"></span>'+
+         '<span class="titlab '+cls+'">'+lab+pct+'</span>';
 }
 
 function render(){
@@ -248,13 +246,12 @@ function render(){
       : '';
     return '<div class="card'+(p.inj?' inj':'')+(st?' taken':'')+'">'+
       '<div class="top"><div class="badge '+p.r+'">'+p.r+'</div>'+
-      '<div class="nm">'+p.nome+'<div class="sq">'+p.sq+'</div></div>'+
+      '<div class="nm">'+p.nome+'<div class="sq">'+p.sq+titLine(p)+'</div></div>'+
       '<div class="pricebox"><div class="price">'+b.mid+'</div>'+
         '<div class="pricelab">crediti attesi</div>'+
         '<div class="band">'+b.lo+'–'+b.hi+'</div></div>'+
       '</div>'+
       '<div class="verdict">'+verdict(p)+'</div>'+
-      titLine(p) +
       taken + inj +
     '</div>';
   }).join('');
