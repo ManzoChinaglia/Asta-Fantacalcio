@@ -102,6 +102,18 @@
   #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px; margin-top:6px;}
   .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 8px 5px 12px; font-size:13px;}
   .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:14px; padding:0 2px;}
+  .logtabs{display:flex; gap:6px; margin-bottom:10px;}
+  .logtab{flex:1; padding:8px 0; border-radius:8px; background:var(--surface2);
+          border:1px solid var(--border); color:var(--text-dim); font-size:13px;}
+  .logtab.on{background:var(--accent); color:#241c07; border-color:var(--accent); font-weight:700;}
+  .logrow{display:flex; align-items:baseline; gap:8px; padding:6px 2px; font-size:14px;}
+  .logrow .ln{flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .logrow .lw{color:var(--text-dim); font-size:13px; flex-shrink:0;}
+  .logrow .lw.me{color:var(--ok);}
+  .logrow .lp{font-weight:700; font-variant-numeric:tabular-nums; min-width:34px; text-align:right;}
+  .logtot{display:flex; justify-content:space-between; font-size:13px; color:var(--text-dim);
+          padding:8px 2px 0; margin-top:4px; border-top:1px solid var(--border);}
+  .logtot b{color:var(--text);}
   .rivalcard{background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px;}
   .rivalname{font-weight:700; font-size:14px;}
   .rivalstats{font-size:12px; color:var(--text-dim); margin:4px 0;}
@@ -113,6 +125,7 @@
 <header>
   <h1>Asta Assistant</h1>
   <div style="display:flex; gap:8px;">
+    <button id="toggleLog">Registro</button>
     <button id="toggleRivals">Rivali</button>
     <button id="toggleSettings">Impostazioni</button>
   </div>
@@ -153,6 +166,16 @@
     <div class="row" style="margin-top:16px">
       <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
     </div>
+  </div>
+
+  <div class="panel" id="logpanel" style="display:none">
+    <h2>Registro acquisti</h2>
+    <div class="logtabs">
+      <button class="logtab on" data-l="mine">I miei</button>
+      <button class="logtab" data-l="others">Degli altri</button>
+      <button class="logtab" data-l="all">Tutti</button>
+    </div>
+    <div id="logList"></div>
   </div>
 
   <div class="panel" id="rivals" style="display:none">
@@ -411,6 +434,7 @@ async function syncFromServer(){
   renderMarket();
   renderRivals();
   renderSync();
+  renderLog();
   renderResults(document.getElementById('search').value);
 }
 
@@ -432,7 +456,8 @@ async function loadState(){
   renderRivals();
   renderSync();
   await syncFromServer();
-  setInterval(syncFromServer, 5000);
+  setInterval(syncFromServer, 1500);
+  setInterval(checkNewBuild, 45000);
 }
 async function saveState(){
   await writeStoredState(JSON.stringify(state));
@@ -999,6 +1024,57 @@ document.getElementById('buyConfirm').onclick = ()=>{
     commitEntry('other', price, null);
   }
 };
+
+/* ---- Registro acquisti ---- */
+let logFilter = 'mine';
+function renderLog(){
+  const box = document.getElementById('logList');
+  if(!box) return;
+  const rows = (state.market||[]).slice().reverse();
+  let list = rows;
+  if(logFilter==='mine') list = rows.filter(m=>m.mine);
+  if(logFilter==='others') list = rows.filter(m=>!m.mine);
+  if(list.length===0){
+    box.innerHTML = '<div class="hint" style="display:block">Nessun acquisto registrato.</div>';
+    return;
+  }
+  box.innerHTML = list.map(m=>{
+    const chi = m.mine ? '<span class="lw me">noi</span>'
+                       : '<span class="lw">'+(m.buyer || '—')+'</span>';
+    return '<div class="logrow"><span class="ln">'+m.nome+'</span>'+chi+
+           '<span class="lp">'+m.price+'</span></div>';
+  }).join('');
+  const tot = list.reduce((a,m)=>a+m.price,0);
+  box.innerHTML += '<div class="logtot"><span>'+list.length+' acquisti</span><span>Totale <b>'+tot+' cr</b></span></div>';
+}
+document.getElementById('toggleLog').onclick = ()=>{
+  const p = document.getElementById('logpanel');
+  const show = p.style.display==='none';
+  p.style.display = show ? 'block' : 'none';
+  if(show) renderLog();
+};
+document.querySelectorAll('.logtab').forEach(b=>{
+  b.onclick = ()=>{
+    logFilter = b.dataset.l;
+    document.querySelectorAll('.logtab').forEach(x=>x.classList.toggle('on', x===b));
+    renderLog();
+  };
+});
+
+/* ---- Controllo automatico nuova versione ---- */
+const BUILD = 'build-2026-09-11-c';
+let buildChecking = false;
+async function checkNewBuild(){
+  if(buildChecking) return;
+  buildChecking = true;
+  try{
+    const r = await fetch(location.pathname + '?cb=' + Date.now(), {cache:'no-store'});
+    const t = await r.text();
+    const m = t.match(/const BUILD = '([^']+)'/);
+    if(m && m[1] !== BUILD){ location.reload(); }
+  }catch(e){}
+  buildChecking = false;
+}
 
 renderUndo();
 loadState();

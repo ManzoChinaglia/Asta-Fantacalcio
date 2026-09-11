@@ -387,7 +387,22 @@ window.addEventListener('focus', pullShared);
 window.addEventListener('storage', (e)=>{ if(e.key==='asta-state') render(); });
 pullShared();
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) pullShared(); });
-setInterval(pullShared, 5000);
+setInterval(pullShared, 1500);
+
+const BUILD = 'build-2026-09-11-c';
+let buildChecking = false;
+async function checkNewBuild(){
+  if(buildChecking) return;
+  buildChecking = true;
+  try{
+    const r = await fetch(location.pathname + '?cb=' + Date.now(), {cache:'no-store'});
+    const t = await r.text();
+    const m = t.match(/const BUILD = '([^']+)'/);
+    if(m && m[1] !== BUILD){ location.reload(); }
+  }catch(e){}
+  buildChecking = false;
+}
+setInterval(checkNewBuild, 45000);
 render();
 </script>
 </body>
