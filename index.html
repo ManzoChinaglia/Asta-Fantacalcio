@@ -538,7 +538,7 @@ const players = [{"id":5841,"nome":"Svilar","r":"P","squadra":"Roma","q":18,"qi"
 const DEFAULT_STATE = {
   budget:500,
   slots:{P:3,D:8,C:8,A:6},
-  pct:{P:8,D:20,C:27,A:45},
+  pct:{P:9,D:21,C:30,A:40},
   bought:{},
   discarded:{},
   market:[],
@@ -804,12 +804,12 @@ function planTargets(r){                       // numeri interi con somma = slot
   raw.map((v,i)=>[v - fl[i], i]).sort((a,b)=>b[0]-a[0]).forEach(([,i])=>{ if(left > 0){ fl[i]++; left--; } });
   return {top:fl[0], mid:fl[1], low:fl[2]};
 }
-function planScale(){                           // fa coincidere il costo del piano intero col budget (a inflazione 1)
-  let low = 0, non = 0;
-  ROLES.forEach(r=>{ const t = planTargets(r); low += t.low * HIST[r].p.low; non += t.top * HIST[r].p.top + t.mid * HIST[r].p.mid; });
-  return non > 0 ? Math.max(0.3, (state.budget - low) / non) : 1;
+function planScale(r){                          // scala i prezzi delle fasce di ruolo sul budget di quel ruolo (% in Opzioni), a inflazione 1
+  const t = planTargets(r), roleBudget = state.budget * Number(state.pct[r]) / 100;
+  const non = t.top * HIST[r].p.top + t.mid * HIST[r].p.mid;
+  return non > 0 ? Math.max(0.3, (roleBudget - t.low * HIST[r].p.low) / non) : 1;
 }
-function tierPrice(r, t){ return t === 'low' ? HIST[r].p.low : HIST[r].p[t] * planScale() * liveFactor().k; }
+function tierPrice(r, t){ return t === 'low' ? HIST[r].p.low : HIST[r].p[t] * planScale(r) * liveFactor().k; }
 function planRole(r){
   const tg = planTargets(r), got = {top:0, mid:0, low:0};
   Object.values(state.bought).filter(b=>b.r===r).forEach(b=>{ got[tierOfPrice(b.price)]++; });
@@ -1706,7 +1706,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-h';
+const BUILD = 'build-2026-09-23-i';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

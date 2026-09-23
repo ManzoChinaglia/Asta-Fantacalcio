@@ -239,5 +239,12 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   Import rosa: ora funziona anche col link aperto ad app già aperta (`hashchange`).
   NOTA: il localStorage di Safari e quello dell'app aggiunta alla Home sono separati su iOS:
   il link #miei= va aperto nel contenitore che si usa davvero.
-  Aperto: le % per ruolo di default (P8 D20 C27 A45) vs storico (mediana P9.7 D19 C33 A37.6) e
-  il piano a fasce (implica D15% A46%) non sono coerenti tra loro — da unificare.
+
+- **23/09/2026 — fase 5: % per ruolo e piano a fasce unificati** (build `2026-09-23-i`): le %
+  in Opzioni sono ora l'unica fonte. `planScale(r)` scala i prezzi delle fasce di ogni ruolo sul
+  budget di quel ruolo (budget x %), quindi il costo del piano di un ruolo = il suo budget a
+  inflazione 1 (margine iniziale 0) e spostando uno slider i prezzi delle fasce si adeguano.
+  Default % portati alle medie reali dell'asta precedente: P9 D21 C30 A40 (prima P8 D20 C27 A45).
+  Chi ha già uno stato salvato tiene le vecchie %: "Ripristina percentuali di partenza" applica
+  le nuove. Provato in locale (default e P10 D15 C30 A45).
+  Aperto: (5) avviso tattico esteso; prova sul telefono; moltiplicatori non testati.
