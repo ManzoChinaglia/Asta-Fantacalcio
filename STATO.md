@@ -247,4 +247,14 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   Default % portati alle medie reali dell'asta precedente: P9 D21 C30 A40 (prima P8 D20 C27 A45).
   Chi ha già uno stato salvato tiene le vecchie %: "Ripristina percentuali di partenza" applica
   le nuove. Provato in locale (default e P10 D15 C30 A45).
-  Aperto: (5) avviso tattico esteso; prova sul telefono; moltiplicatori non testati.
+  Aperto: prova sul telefono; moltiplicatori non testati.
+
+- **23/09/2026 — fase 6: avvisi tattici leggeri** (build `2026-09-23-j`, punto (5) chiuso):
+  1. **Semaforo sul prezzo** nella scheda giocatore (`updatePriceFlag`, una riga sola, nessuna
+     riga se il prezzo è nella norma): verde "Affare" se sotto ~80% dell'atteso; arancio se
+     sopra la fascia realistica; rosso se sopra l'atteso E il margine sul piano, simulato
+     con quell'acquisto, va sotto zero. Si aggiorna con −5/−1/+1/+5. Al prezzo atteso non
+     avvisa mai (le stelle d'attacco partono già sopra il piano al 40%: sarebbero tutte rosse).
+  2. **Testata**: "margine fasce" a 3 livelli, verde >=0, arancio fino a −3% del budget (min 10 cr),
+     rosso oltre. Nota: il margine parte da 0 per costruzione, non ha senso una soglia "basso".
+  Provato in locale su un giocatore per ruolo (P, D, C, A) e forzando i tre stati della testata.

@@ -95,6 +95,11 @@
   .plancard .need b{color:var(--text);}
   .plannote{margin:8px 0; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.45; background:rgba(255,255,255,.06); color:var(--text-dim);}
   .plannote.warn{background:rgba(232,163,61,.12); border:1px solid rgba(232,163,61,.35); color:#f0c27a;}
+  .priceflag{margin:6px 0; padding:8px 12px; border-radius:14px; font-size:13px; line-height:1.4; font-weight:600;}
+  .priceflag.good{background:rgba(91,196,138,.14); color:var(--ok);}
+  .priceflag.warn{background:rgba(232,163,61,.14); color:#f0c27a;}
+  .priceflag.bad{background:rgba(224,96,92,.16); color:var(--danger);}
+  .planline .pwarn{color:var(--warn); font-weight:700; font-size:13px;}
   .planline{cursor:pointer;}
   .planline{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:12px; color:var(--text-dim);}
   .planline .pover{color:var(--danger); font-weight:700; font-size:13px;}
@@ -496,6 +501,7 @@
   <div id="dInjBanner"></div>
   <div id="dElsewhereBanner"></div>
   <div id="dPlanNote"></div>
+  <div id="dPriceFlag"></div>
   <div class="suggested">
     <div class="num" id="dSuggested">-</div>
     <div class="lab" id="dSuggestedLabel"></div>
@@ -1209,7 +1215,7 @@ function renderBar(){
   const pt = document.getElementById('planText');
   const pm = planMargin();
   pt.innerHTML = (totalOver > 0 ? '<span class="pover">Sforo +'+totalOver+'</span>' : '<span class="pok">In piano</span>')+
-    ' · margine fasce <b class="'+(pm.margin < 0 ? 'pover' : 'pok')+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+'</b> ›';
+    ' · margine fasce <b class="'+(pm.margin >= 0 ? 'pok' : (pm.margin >= -Math.max(10, Math.round(state.budget*.03)) ? 'pwarn' : 'pover'))+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+'</b> ›';
   renderPlan();
   renderPicksBar();
 }
@@ -1502,12 +1508,29 @@ document.getElementById('tabBtnLive').onclick = ()=> setMainTab('live');
 
 /* ---- scheda giocatore (overlay condiviso da Prepara e Live) ---- */
 let detailPrice = 1;
+/* semaforo sul prezzo: una riga sola, solo quando serve. Il margine dopo l'acquisto e' simulato sul piano vero. */
+function updatePriceFlag(){
+  const box = document.getElementById('dPriceFlag');
+  if(!box) return;
+  box.innerHTML = '';
+  if(!selected || isTaken(selected.id) || planRole(selected.r).left <= 0) return;
+  const m = marketPrice(selected), v = detailPrice;
+  state.bought[selected.id] = {r:selected.r, price:v};
+  const after = planMargin().margin;
+  delete state.bought[selected.id];
+  let cls = '', txt = '';
+  if(v > m.mid && after < 0){ cls = 'bad'; txt = 'Sopra il prezzo atteso (~'+m.mid+' cr): vai a −'+Math.abs(after)+' cr sul piano.'; }
+  else if(v > m.hi){ cls = 'warn'; txt = 'Sopra la fascia realistica (oltre '+m.hi+' cr): paghi più del mercato.'; }
+  else if(v < m.mid && v <= Math.round(m.mid*0.8)){ cls = 'good'; txt = 'Affare: sotto il prezzo atteso (~'+m.mid+' cr).'; }
+  if(cls) box.innerHTML = '<div class="priceflag '+cls+'">'+txt+'</div>';
+}
 function setDetailPrice(v){
   detailPrice = Math.max(1, Math.round(v));
   document.getElementById('dSuggested').textContent = detailPrice;
   const b = document.getElementById('dQuickBuyBtn');
   b.textContent = 'Preso a ' + detailPrice + ' cr';
   b.dataset.price = detailPrice;
+  updatePriceFlag();
 }
 document.querySelectorAll('.stepper button').forEach(b=> b.onclick = ()=> setDetailPrice(detailPrice + Number(b.dataset.step)));
 function selectPlayer(p){
@@ -1706,7 +1729,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-i';
+const BUILD = 'build-2026-09-23-j';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;
