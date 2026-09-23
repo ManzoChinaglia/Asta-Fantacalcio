@@ -12,7 +12,7 @@
   :root{
     --bg:#0b1210; --surface:#151f1a; --surface2:#1c2921; --border:#2a3a33;
     --text:#eef2ef; --text-dim:#96a89f; --accent:#e8b93f; --accent-dim:#7a611f;
-    --danger:#e2574c; --ok:#4caf7d; --info:#5fb0d6; --radius:10px;
+    --danger:#e2574c; --ok:#4caf7d; --info:#5fb0d6; --warn:#e8a33d; --radius:10px;
   }
   *{box-sizing:border-box;}
   input, select, textarea{font-size:16px;}
@@ -110,12 +110,15 @@
   #bar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; align-items:center; z-index:30;}
   .chip{flex:1; text-align:center; border-radius:8px; padding:6px 4px; font-size:12px; background:var(--surface2);}
   .chip.done{background:#1c3324; color:var(--ok);}
+  .chip.tight{background:#3a2f12; color:var(--warn);}
   .chip.warn{background:#3a2320; color:var(--danger);}
   .chip b{display:block; font-size:14px;}
   .chip .chipcr{display:block; font-size:11px; color:var(--text-dim); margin-top:2px;}
   .chip .chipcr.over{color:var(--danger); font-weight:700;}
+  .chip .chipcr.tightcr{color:var(--warn); font-weight:700;}
   #budgetLeft{font-size:16px; font-weight:700; color:var(--accent); white-space:nowrap; padding-left:6px;}
   #budgetLeft.over{color:var(--danger);}
+  #budgetLeft.tight{color:var(--warn);}
   #marketBar{font-size:12px; color:var(--text-dim); text-align:center; margin:0 0 10px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px;}
   #marketBar b{color:var(--text);}
   #marketSummary{cursor:pointer;}
@@ -125,6 +128,12 @@
   .suggested .num.danger{color:var(--danger);}
   .buyformlabel{font-size:12px; color:var(--text-dim); margin-top:10px;}
   .curpct{color:var(--accent); font-weight:400;}
+  .pctval{color:var(--text); font-weight:700;}
+  .field input[type=range]{-webkit-appearance:none; appearance:none; height:32px; background:none; padding:0;}
+  .field input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:3px; background:var(--surface2);}
+  .field input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:50%; background:var(--accent); border:none; margin-top:-10px;}
+  .field input[type=range]::-moz-range-track{height:6px; border-radius:3px; background:var(--surface2);}
+  .field input[type=range]::-moz-range-thumb{width:26px; height:26px; border-radius:50%; background:var(--accent); border:none;}
   #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px; margin-top:6px;}
   .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 8px 5px 12px; font-size:13px;}
   .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:14px; padding:0 2px;}
@@ -297,19 +306,19 @@
   </div>
   <div class="row">
     <div class="field"><label>Slot Portieri</label><input type="number" id="slotP"></div>
-    <div class="field"><label>% budget <span class="curpct" id="curP"></span></label><input type="number" id="pctP"></div>
+    <div class="field"><label>% budget <span class="pctval" id="valP"></span>% <span class="curpct" id="curP"></span></label><input type="range" min="0" max="100" id="pctP"></div>
   </div>
   <div class="row">
     <div class="field"><label>Slot Difensori</label><input type="number" id="slotD"></div>
-    <div class="field"><label>% budget <span class="curpct" id="curD"></span></label><input type="number" id="pctD"></div>
+    <div class="field"><label>% budget <span class="pctval" id="valD"></span>% <span class="curpct" id="curD"></span></label><input type="range" min="0" max="100" id="pctD"></div>
   </div>
   <div class="row">
     <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC"></div>
-    <div class="field"><label>% budget <span class="curpct" id="curC"></span></label><input type="number" id="pctC"></div>
+    <div class="field"><label>% budget <span class="pctval" id="valC"></span>% <span class="curpct" id="curC"></span></label><input type="range" min="0" max="100" id="pctC"></div>
   </div>
   <div class="row">
     <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA"></div>
-    <div class="field"><label>% budget <span class="curpct" id="curA"></span></label><input type="number" id="pctA"></div>
+    <div class="field"><label>% budget <span class="pctval" id="valA"></span>% <span class="curpct" id="curA"></span></label><input type="range" min="0" max="100" id="pctA"></div>
   </div>
   <div class="pctsum" id="pctsum"></div>
   <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:10px; font-size:14px;">Ripristina percentuali di partenza</button>
@@ -498,6 +507,11 @@ function poolFor(role){
 function roleRemainingRaw(role){
   return remainingTotalBudget() * normalizedPct(role) / 100;
 }
+function roleFloorCost(role, neededSlots){
+  if(neededSlots <= 0) return 0;
+  const q = players.filter(p=>p.r===role && !isTaken(p.id)).map(p=>p.q).sort((a,b)=>a-b);
+  return q.slice(0, neededSlots).reduce((a,b)=>a+b, 0);
+}
 function roleBudgetDisplay(role){
   const needed = state.slots[role] - boughtCount(role);
   if(needed <= 0){
@@ -609,6 +623,7 @@ function renderSettings(){
   ROLES.forEach(r=>{
     document.getElementById('slot'+r).value = state.slots[r];
     document.getElementById('pct'+r).value = state.pct[r];
+    document.getElementById('val'+r).textContent = state.pct[r];
   });
   updatePctSum();
   renderParticipantList();
@@ -648,7 +663,10 @@ function rebalancePct(changedRole, rawNewValue){
 
 function applyPctChange(role, rawValue){
   state.pct = rebalancePct(role, rawValue);
-  ROLES.forEach(rr=> document.getElementById('pct'+rr).value = state.pct[rr]);
+  ROLES.forEach(rr=>{
+    document.getElementById('pct'+rr).value = state.pct[rr];
+    document.getElementById('val'+rr).textContent = state.pct[rr];
+  });
   updatePctSum();
   saveState();
   renderBar();
@@ -669,6 +687,8 @@ function healPctTotal(){
   ROLES.forEach(r=>{
     const el = document.getElementById('pct'+r);
     if(el) el.value = state.pct[r];
+    const valEl = document.getElementById('val'+r);
+    if(valEl) valEl.textContent = state.pct[r];
   });
   updatePctSum();
   return true;
@@ -779,12 +799,18 @@ document.getElementById('toggleRivals').onclick = ()=> openSheet('rivals');
 
 function renderBar(){
   healPctTotal();
+  let totalFloor = 0;
   ROLES.forEach(r=>{
     const el = document.getElementById('chip'+r);
     const c = boughtCount(r), t = state.slots[r];
+    const neededSlots = t - c;
     const display = roleBudgetDisplay(r);
-    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr'+(display<0?' over':'')+'">'+display+' cr</span>';
-    el.className = 'chip' + (c>=t ? ' done' : (display<0 ? ' warn' : ''));
+    const floor = roleFloorCost(r, neededSlots);
+    totalFloor += floor;
+    const tight = neededSlots > 0 && display >= 0 && display < floor;
+    const crCls = display<0 ? 'over' : (tight ? 'tightcr' : '');
+    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr'+(crCls?' '+crCls:'')+'">'+display+' cr</span>';
+    el.className = 'chip' + (c>=t ? ' done' : (display<0 ? ' warn' : (tight ? ' tight' : '')));
     const ntEl = document.getElementById('nt'+r);
     if(ntEl) ntEl.textContent = c+'/'+t;
     const curEl = document.getElementById('cur'+r);
@@ -794,7 +820,7 @@ function renderBar(){
   const left = state.budget - totalSpent;
   const bl = document.getElementById('budgetLeft');
   bl.textContent = left + ' cr';
-  bl.className = left<0 ? 'over' : '';
+  bl.className = left<0 ? 'over' : (left < totalFloor ? 'tight' : '');
 }
 
 function renderUndo(){
@@ -1123,15 +1149,14 @@ function selectPlayer(p){
 });
 ROLES.forEach(r=>{
   const el = document.getElementById('pct'+r);
-  el.addEventListener('change', (e)=> applyPctChange(r, e.target.value));
-  el.addEventListener('blur', (e)=>{
-    const sum = ROLES.reduce((a,rr)=>a+Number(state.pct[rr]||0),0);
-    if(Number(e.target.value) !== state.pct[r] || sum !== 100) applyPctChange(r, e.target.value);
-  });
+  el.addEventListener('input', (e)=> applyPctChange(r, e.target.value));
 });
 document.getElementById('resetPct').onclick = ()=>{
   state.pct = {...DEFAULT_STATE.pct};
-  ROLES.forEach(r=> document.getElementById('pct'+r).value = state.pct[r]);
+  ROLES.forEach(r=>{
+    document.getElementById('pct'+r).value = state.pct[r];
+    document.getElementById('val'+r).textContent = state.pct[r];
+  });
   updatePctSum();
   saveState();
   renderBar();

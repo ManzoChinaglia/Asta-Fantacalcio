@@ -93,3 +93,21 @@ Nessuno dei punti 1, 2, 4, 5, 6 è ancora iniziato.
   Non ancora fatto: percentuali con slider, colpo d'occhio visivo (avvisi colorati oltre
   al rosso quando sfori), la grafica vera e propria — questi restano il prossimo giro.
   Commit `d4fbcbd`, pushato su GitHub.
+
+- **23/09/2026 — percentuali con slider**: i 4 campi "% budget" per ruolo in Impostazioni
+  (Portieri/Difensori/Centrocampisti/Attaccanti) sono ora slider (`type="range"`) invece
+  di campi numerici, con il valore mostrato accanto in tempo reale mentre si trascina.
+  Il ribilanciamento automatico delle altre tre percentuali (per restare a 100%) avviene
+  già durante il trascinamento, non solo al rilascio — pensato per un tocco rapido durante
+  un'asta vera. Provato in locale: trascinamento, ribilanciamento live, "Ripristina
+  percentuali di partenza". Logica di calcolo invariata, solo l'input.
+
+- **23/09/2026 — colpo d'occhio visivo**: le card ruolo nella barra in basso (e il totale
+  crediti) hanno ora un terzo stato oltre a verde (completo) e rosso (sforato): **arancio
+  ("tight")** quando il budget rimasto sul ruolo è positivo ma sotto il costo minimo per
+  completarlo (somma delle quotazioni ufficiali più basse tra i giocatori ancora liberi di
+  quel ruolo, per gli slot che mancano) — un avviso di rischio prima che sia già tardi.
+  Nuova funzione `roleFloorCost(role, neededSlots)`. Provato in locale forzando lo stato
+  (via console) nei tre casi: verde/arancio/rosso confermati sia sulle card ruolo che sul
+  totale in basso a destra.
+  Non ancora committato su git.
