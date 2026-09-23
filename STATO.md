@@ -14,8 +14,7 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   vuote e con RLS disattivata (mai usate per un'asta vera). Tabelle eliminate. Rimossi
   client, chiavi e polling da entrambe le app: ora usano solo `localStorage`, condiviso
   tra le due pagine sullo stesso origin. Commit `ab32288`, pushato su GitHub.
-  Il progetto Supabase resta attivo (senza tabelle) — cancellarlo del tutto va fatto a
-  mano dalla dashboard, nessuno strumento automatico lo fa.
+  Il progetto Supabase è stato poi cancellato del tutto dall'utente a mano (23/09/2026, sera).
 
 ## Aperto — piano di unificazione (deciso per proposte il 23/09/2026)
 
@@ -328,8 +327,8 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
 
 ## Chiusura del 23/09/2026
 - Prova sul telefono/Home: fatta dall'utente ("l'app gira bene"), chiusa.
-- Supabase: nessuna dipendenza nel codice. Il progetto vuoto `swoibefjqkpgijbzrdtd` resta da
-  cancellare a mano dalla dashboard (nessuno strumento lo fa da qui); non blocca nulla.
+- Supabase: nessuna dipendenza nel codice; progetto `swoibefjqkpgijbzrdtd` cancellato dall'utente
+  a mano dalla dashboard. Chiuso.
 - Moltiplicatore infortunati: reso proporzionale (sopra); resta un'ipotesi da verificare in asta.
 - Da ricordare in asta: registrare OGNI vendita ("Non tracciato" se non si sa chi), altrimenti
   il correttivo sui crediti sovrastima i prezzi.
