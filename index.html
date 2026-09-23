@@ -797,7 +797,19 @@ function liveFactor(){
    il calo di prezzi di fine asta quando i crediti scarseggiano. Serve che le vendite siano registrate TUTTE
    (te + "Preso da altri"): con poche registrazioni non si attiva. Cache: costoso da ricalcolare a ogni riga. */
 let _cashCache = {key:null, v:{k:1, n:0}};
-function baseAdj(p){ return baseModel(p) * (p.tit === 'cambio' || p.tit === 'riserva' ? .9 : 1) * (p.inj ? .6 : 1); }
+/* sconto per infortunio: proporzionale ai giorni di assenza (rientro previsto), non fisso. Stagione ~270 giorni;
+   1 - 1.5 x quota di stagione persa, con minimo 0.4 (anche un infortunato lungo si paga qualcosa) e 0.6 quando
+   la data non e' specificata (assenza incerta, probabilmente lunga). Nessun dato d'asta sugli infortunati: regola
+   di buon senso, non tarata. */
+function injFactor(p){
+  if(!p.inj) return 1;
+  const mt = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(p.inj.rientro || '');
+  if(!mt) return .6;
+  const days = (new Date(+mt[3], +mt[2]-1, +mt[1]) - new Date()) / 86400000;
+  if(isNaN(days)) return .6;
+  return Math.min(1, Math.max(.4, 1 - 1.5 * Math.max(0, days) / 270));
+}
+function baseAdj(p){ return baseModel(p) * (p.tit === 'cambio' || p.tit === 'riserva' ? .9 : 1) * injFactor(p); }
 function cashFactor(){
   const mk = state.market || [];
   const key = [mk.length, mk.length ? mk[mk.length-1].id : 0, state.budget, JSON.stringify(state.slots), (state.participants||[]).length,
@@ -834,7 +846,7 @@ function marketPrice(p){
   const k = base <= 2.5 ? 1 : priceFactor();      // i riempitivi da 1-2 cr non si gonfiano
   let m = base * k;
   if(p.tit === 'cambio' || p.tit === 'riserva') m *= 0.9;
-  if(p.inj) m *= 0.6;
+  m *= injFactor(p);
   const mid = Math.max(1, Math.round(m));
   // ampiezza fascia dai rapporti reali prezzo/previsto: molto larga in basso (o 1 cr o rilancio), stretta per le stelle
   const f = mid < 4 ? [0, 1.8] : mid < 12 ? [.35, 1.8] : mid < 35 ? [.6, 1.4] : [.7, 1.3];
@@ -1757,7 +1769,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-n';
+const BUILD = 'build-2026-09-23-o';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

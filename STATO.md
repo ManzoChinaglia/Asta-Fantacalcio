@@ -317,3 +317,19 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   metà asta: peggiore osservato −58 cr (prima −254). Peggiora solo se l'asta spende molto meno del
   previsto. Se si salta la registrazione di molte vendite le stime diventano ottimistiche/errate:
   meglio segnare "Preso da altri" (anche "Non tracciato") per ogni vendita.
+
+- **23/09/2026 — sconto infortunati proporzionale** (build `2026-09-23-o`): il moltiplicatore fisso
+  0,6 valeva anche per chi rientra tra 12 giorni (Calhanoglu: 57 cr invece di ~89). Ora
+  `injFactor(p)` = 1 − 1,5 × (giorni di assenza / 270), minimo 0,4; 0,6 se la data di rientro
+  non è specificata. Su 88 infortunati: 35 tra 0,9 e 1, 14 tra 0,75 e 0,9, 33 tra 0,6 e 0,75.
+  Usato da `marketPrice` e `baseAdj` (correttivo crediti). **Regola di buon senso, non tarata**:
+  non esistono dati d'asta su infortunati. Da rivedere se in una vera asta si vede che gli
+  infortunati vanno a prezzi molto diversi.
+
+## Chiusura del 23/09/2026
+- Prova sul telefono/Home: fatta dall'utente ("l'app gira bene"), chiusa.
+- Supabase: nessuna dipendenza nel codice. Il progetto vuoto `swoibefjqkpgijbzrdtd` resta da
+  cancellare a mano dalla dashboard (nessuno strumento lo fa da qui); non blocca nulla.
+- Moltiplicatore infortunati: reso proporzionale (sopra); resta un'ipotesi da verificare in asta.
+- Da ricordare in asta: registrare OGNI vendita ("Non tracciato" se non si sa chi), altrimenti
+  il correttivo sui crediti sovrastima i prezzi.
