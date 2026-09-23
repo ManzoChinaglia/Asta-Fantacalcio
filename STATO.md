@@ -119,4 +119,4 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   Si applica solo a un'installazione nuova (localStorage vuoto) — "Azzera asta" non tocca
   i partecipanti, solo acquisti/registro. Nomi restano modificabili/rimovibili dal
   pannello Impostazioni come prima. Provato in locale con localStorage pulito.
-  Non ancora committato su git.
+  Commit `8ba825d`, pushato su GitHub.
