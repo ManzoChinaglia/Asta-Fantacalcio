@@ -228,3 +228,16 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   Limiti onesti: una sola asta come campione; la nuova ha 8 squadre invece di 10 (i prezzi
   medi dovrebbero scendere: ci pensa il correttivo live); il piano a fasce e le % per ruolo
   convivono (due piani). Ancora da fare: (3) pressione sulle stelle, (5) avviso tattico esteso.
+
+- **23/09/2026 — fase 4** (build `2026-09-23-h`): tolte le quotazioni ufficiali da tutta la
+  vista (righe, scheda -> ora "Fascia di prezzo", descrizioni filtri). **(3) Pressione sulle
+  stelle**: per ruolo, stelle libere (prezzo atteso >=40) contro acquirenti attesi (media
+  storica x avversari, meno le stelle già prese) x liquidità relativa degli avversari; nel
+  foglio Piano e come nota nella scheda di una stella. Si aggiorna solo con "Preso da altri".
+  Bias trovato e corretto nel modello: nell'asta precedente portieri ~1.5x e difensori ~1.3x
+  il previsto (centrocampisti ~0.9x) -> `ROLE_ADJ` P1.3 D1.2 C0.9 A1.0 (ridotti verso 1).
+  Import rosa: ora funziona anche col link aperto ad app già aperta (`hashchange`).
+  NOTA: il localStorage di Safari e quello dell'app aggiunta alla Home sono separati su iOS:
+  il link #miei= va aperto nel contenitore che si usa davvero.
+  Aperto: le % per ruolo di default (P8 D20 C27 A45) vs storico (mediana P9.7 D19 C33 A37.6) e
+  il piano a fasce (implica D15% A46%) non sono coerenti tra loro — da unificare.

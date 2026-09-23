@@ -75,6 +75,13 @@
   .plansum .big{font-family:var(--num); font-size:54px; font-weight:700; line-height:1;}
   .plansum .big.ok{color:var(--ok);} .plansum .big.bad{color:var(--danger);}
   .plansum .sub{font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
+  .pressrow{display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:6px; background:var(--surface); border:1px solid var(--border); border-radius:14px;}
+  .pressrow .pt{flex:1; font-size:13px; line-height:1.4;}
+  .pressrow .pt small{display:block; color:var(--text-dim); font-size:11.5px;}
+  .plab{font-size:12px; font-weight:700; padding:4px 10px; border-radius:10px;}
+  .plab.low{background:rgba(91,196,138,.16); color:var(--ok);}
+  .plab.mid{background:rgba(255,255,255,.1); color:var(--text);}
+  .plab.high{background:rgba(224,96,92,.16); color:var(--danger);}
   .plancard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:10px;}
   .plancard .ph{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:700; font-size:15px;}
   .plancard .ph .cnt{margin-left:auto; font-weight:500; font-size:12.5px; color:var(--text-dim);}
@@ -452,6 +459,9 @@
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Piano a fasce</h2><button class="sheetclose" data-close>&times;</button></div>
   <div class="plansum" id="planSummary"></div>
+  <div class="sectitle" style="margin-top:0">Pressione sulle stelle</div>
+  <div id="starsBody"></div>
+  <div class="sectitle">Piano per ruolo</div>
   <div id="planBody"></div>
   <p style="font-size:11.5px; color:var(--text-dim); margin:10px 2px 0; line-height:1.5">Struttura ricavata dall'asta precedente (10 squadre, 500 crediti): ogni squadra ha preso in media 3-4 giocatori "top" (40 cr o più), 11-12 medi e 10 riempitivi (6 cr o meno). I prezzi delle fasce sono scalati sul tuo budget e seguono l'inflazione dell'asta in corso.</p>
 </div>
@@ -508,7 +518,7 @@
     <select id="buyerSelect"></select>
   </div>
   <div class="statgrid">
-    <div class="st"><div class="label">Quotazione ufficiale</div><div class="value" id="dQt"></div></div>
+    <div class="st"><div class="label">Fascia di prezzo</div><div class="value" id="dQt"></div></div>
     <div class="st"><div class="label">Valore atteso (FVM)</div><div class="value" id="dFvm"></div></div>
     <div class="st"><div class="label">Titolarità</div><div class="value" id="dTit"></div></div>
     <div class="st"><div class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</div><div class="value" id="dRoleBudget"></div></div>
@@ -645,7 +655,7 @@ async function writeStoredState(payload){
    (la rosa non sta nel codice: il repo e' pubblico) */
 function importFromHash(){
   const m = /[#&]miei=([\d,]+)/.exec(location.hash);
-  if(!m) return;
+  if(!m) return false;
   state.elsewhere = state.elsewhere || [];
   const have = new Set(state.elsewhere.map(e=>e.id));
   m[1].split(',').map(Number).forEach(id=>{
@@ -654,7 +664,10 @@ function importFromHash(){
   });
   saveState();
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  return true;
 }
+// link aperto con l'app gia' aperta: il caricamento non riparte, quindi ascolto anche il cambio di indirizzo
+window.addEventListener('hashchange', ()=>{ if(importFromHash()){ populateElsewhereOptions(); renderElsewhereList(); refreshCurrentLists(); renderBar(); } });
 async function loadState(){
   try{
     const rawValue = await readStoredState();
@@ -738,14 +751,18 @@ function peso(p){
    Rispetto al vecchio FVM/2 abbassa la fascia medio-bassa (spesso pagata meno) e tiene le stelle ~1:1.
    Errore medio sui dati d'origine ~8 cr: le aste sono rumorose, per questo si mostra sempre una fascia. */
 const PRICE_KNOTS = [[0,1],[3,2.5],[6,3.5],[9,5.5],[12,8],[15,10.5],[18,14],[22,20],[30,28],[40,38],[50,47],[63,60],[85,80],[120,105],[145,130],[210,195]];
+/* il FVM sottostima portieri e difensori: nell'asta precedente sono stati pagati ~1.5x e ~1.3x il previsto
+   (centrocampisti ~0.9x). Moltiplicatori ridotti verso 1 per il campione piccolo (30 P, 80 D, 80 C, 60 A). */
+const ROLE_ADJ = {P:1.3, D:1.2, C:0.9, A:1.0};
 function baseModel(p){
   const x = p.fvm * state.budget / 1000, K = PRICE_KNOTS;
   const last = K[K.length-1];
-  if(x >= last[0]) return last[1] * x / last[0];
-  for(let i=1;i<K.length;i++){
-    if(x <= K[i][0]){ const a=K[i-1], b=K[i]; return a[1] + (b[1]-a[1]) * (x-a[0]) / (b[0]-a[0]); }
+  let v = 1;
+  if(x >= last[0]) v = last[1] * x / last[0];
+  else for(let i=1;i<K.length;i++){
+    if(x <= K[i][0]){ const a=K[i-1], b=K[i]; v = a[1] + (b[1]-a[1]) * (x-a[0]) / (b[0]-a[0]); break; }
   }
-  return 1;
+  return Math.max(1, v * ROLE_ADJ[p.r]);
 }
 /* correttivo live: quanto l'asta sta pagando rispetto al previsto, sui prezzi VERI registrati (non i tocchi
    rapidi "est"). Pesato sui crediti, con un peso a priori di 60 cr per non ballare con poche osservazioni. */
@@ -804,6 +821,31 @@ function planRole(r){
   const cost = Math.round(TIERS.reduce((a,t)=>a + rem[t] * tierPrice(r,t), 0));
   return {tg, got, rem, left, cost};
 }
+/* ---- pressione sulle stelle (3): stelle libere (prezzo atteso >=40) contro acquirenti attesi.
+   Domanda = stelle che gli avversari prenderanno ancora (media storica per squadra x avversari, meno quelle gia'
+   prese da altri) x liquidita' relativa (crediti per slot mancante degli avversari rispetto alla partenza).
+   Si aggiorna solo con i prezzi che registri con "Preso da altri". ---- */
+const TOP_PER_TEAM = {P:.6, D:.3, C:1.1, A:1.5};
+function oppLiquidity(){
+  const opp = Math.max(1, (state.participants || []).length);
+  const gone = Object.values(state.discarded);
+  const spent = gone.reduce((a,d)=>a + (d.price || 0), 0);
+  const slotsAll = ROLES.reduce((a,r)=>a + Number(state.slots[r]), 0);
+  const cash = opp * state.budget - spent, slots = opp * slotsAll - gone.length;
+  if(slots <= 0 || cash <= 0) return 1;
+  return Math.min(1.8, Math.max(0.5, (cash / slots) / (state.budget / slotsAll)));
+}
+function starPressure(r){
+  const opp = Math.max(1, (state.participants || []).length);
+  const gone = Object.values(state.discarded).filter(d=>d.r===r && d.price >= 40).length;
+  const supply = players.filter(p=>p.r===r && !isTaken(p.id) && marketPrice(p).mid >= 40).length;
+  const buyers = Math.max(0, opp * TOP_PER_TEAM[r] - gone);
+  const ratio = (supply > 0 ? buyers / supply : (buyers > 0 ? 3 : 0)) * oppLiquidity();
+  const lvl = ratio < .7 ? 'low' : (ratio < 1.15 ? 'mid' : 'high');
+  return {supply, buyers, ratio, lvl};
+}
+const PRESS_LABEL = {low:'bassa', mid:'normale', high:'alta'};
+const PRESS_HINT = {low:'più stelle che acquirenti: puoi aspettare', mid:'domanda in linea con l\'offerta', high:'poche stelle per troppi acquirenti: non aspettare'};
 function planMargin(){
   const need = ROLES.reduce((a,r)=>a + planRole(r).cost, 0);
   const credits = state.budget - totalSpentAll();
@@ -814,6 +856,10 @@ function renderPlan(){
   const sum = document.getElementById('planSummary');
   sum.innerHTML = '<div class="big '+(pm.margin >= 0 ? 'ok' : 'bad')+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+' cr</div>'+
     '<div class="sub">'+(pm.margin >= 0 ? 'margine sul piano' : 'scoperto rispetto al piano')+'<br>servono ~'+pm.need+' cr per completare la rosa ai prezzi attuali, ne hai '+pm.credits+'</div>';
+  document.getElementById('starsBody').innerHTML = ROLES.filter(r=>state.slots[r] - boughtCount(r) > 0).map(r=>{
+    const sp = starPressure(r);
+    return '<div class="pressrow"><div class="badge '+r+'">'+r+'</div><div class="pt">'+sp.supply+' stelle libere · ~'+sp.buyers.toFixed(1).replace('.0','')+' acquirenti attesi<small>'+PRESS_HINT[sp.lvl]+'</small></div><span class="plab '+sp.lvl+'">'+PRESS_LABEL[sp.lvl]+'</span></div>';
+  }).join('') + '<div style="font-size:11.5px; color:var(--text-dim); margin:2px 2px 4px; line-height:1.5">Liquidità avversari: '+Math.round(oppLiquidity()*100)+'% della partenza. Registra "Preso da altri" per tenerla aggiornata.</div>';
   document.getElementById('planBody').innerHTML = ROLES.map(r=>{
     const pr = planRole(r), done = boughtCount(r);
     const cols = TIERS.map(t=>{
@@ -1208,7 +1254,7 @@ function compactRowHtml(p){
   return '<div class="result" data-id="'+p.id+'">'+
     '<div class="badge '+p.r+'">'+p.r+'</div>'+
     '<div class="rname"><div class="rn1">'+p.nome+'</div><div class="rteam">'+p.squadra+
-      '<span class="dot '+p.tit+'"></span><span class="titlab '+p.tit+'">'+p.q+' cr</span>'+flag+'</div></div>'+
+      '<span class="dot '+p.tit+'"></span><span class="titlab '+p.tit+'">'+(p.tit==='titolare'?'Titolare':(p.tit==='cambio'?'Primo cambio':'Non titolare'))+'</span>'+flag+'</div></div>'+
     '<button class="qbuy" data-qid="'+p.id+'">'+quickBuyValue(p)+'</button>'+
   '</div>';
 }
@@ -1326,9 +1372,9 @@ document.querySelectorAll('#liveRoleTabs .roletab').forEach(btn=>{
 const DESCR = {
   all: "",
   top: "Top — i dieci per cento più cari del ruolo. Sono quelli su cui si scatenano i rilanci e che decidono l'asta.",
-  scommessa: "Scommesse — il loro prezzo di listino è già salito da quando è uscito il listone. Significa che stanno guadagnando considerazione adesso.",
-  perla: "Perle nascoste — costano poco ma valgono molto: il mercato li valuta ben più del loro prezzo di partenza. Sono i candidati a rendere più di quanto li paghi.",
-  low: "Low budget — quotazione di listino di 4 crediti o meno: servono a riempire gli slot spendendo pochissimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
+  scommessa: "Scommesse — il loro valore è già salito da quando è uscito il listone. Significa che stanno guadagnando considerazione adesso.",
+  perla: "Perle nascoste — costano poco ma valgono molto: il mercato li valuta ben più di quanto costeranno. Sono i candidati a rendere più di quanto li paghi.",
+  low: "Low budget — costano pochissimo (pochi crediti): servono a riempire gli slot spendendo il minimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
 };
 let prepRole='P', prepCat='all', prepSort='q', prepHideTaken=false, prepOnlyTit=false, prepHideElsewhere=false;
 
@@ -1472,7 +1518,6 @@ function selectPlayer(p){
   document.getElementById('dBadge').textContent = p.r;
   document.getElementById('dName').textContent = p.nome;
   document.getElementById('dTeam').textContent = p.squadra + ' · ' + ROLENAMES[p.r];
-  document.getElementById('dQt').textContent = p.q + ' crediti';
   document.getElementById('dFvm').textContent = fvmAtteso(p) + ' crediti';
   document.getElementById('dTit').textContent = TITNAMES[p.tit] + (p.gkpct ? ' ('+p.gkpct+'% presenze attese)' : '');
 
@@ -1492,9 +1537,12 @@ function selectPlayer(p){
   setDetailPrice(m.mid);
   const pn = document.getElementById('dPlanNote');
   const tr = tierOfPrice(m.mid), pr = planRole(p.r);
+  document.getElementById('dQt').textContent = TIER_ONE[tr].charAt(0).toUpperCase() + TIER_ONE[tr].slice(1);
   if(pr.left <= 0) pn.innerHTML = '';
-  else if(pr.rem[tr] === 0) pn.innerHTML = '<div class="plannote warn">Fascia <b>'+TIER_ONE[tr]+'</b> già coperta nel tuo piano ('+pr.got[tr]+'/'+pr.tg[tr]+'): se lo prendi, i crediti li togli alle altre fasce.</div>';
-  else pn.innerHTML = '<div class="plannote">Nel piano: fascia <b>'+TIER_ONE[tr]+'</b> — te ne restano ancora '+pr.rem[tr]+' in questo ruolo.</div>';
+  const spn = (tr === 'top') ? (()=>{ const sp = starPressure(p.r); return ' Pressione sulle stelle '+p.r+': <b>'+PRESS_LABEL[sp.lvl]+'</b> ('+sp.supply+' libere).'; })() : '';
+  if(pr.left <= 0) pn.innerHTML = '';
+  else if(pr.rem[tr] === 0) pn.innerHTML = '<div class="plannote warn">Fascia <b>'+TIER_ONE[tr]+'</b> già coperta nel tuo piano ('+pr.got[tr]+'/'+pr.tg[tr]+'): se lo prendi, i crediti li togli alle altre fasce.'+spn+'</div>';
+  else pn.innerHTML = '<div class="plannote">Nel piano: fascia <b>'+TIER_ONE[tr]+'</b> — te ne restano ancora '+pr.rem[tr]+' in questo ruolo.'+spn+'</div>';
   document.getElementById('dSuggestedLabel').textContent =
     'fascia realistica ' + m.lo + '–' + m.hi + ' cr' + (liveFactor().n >= 3 ? ' · adattata all\'asta' : '');
   document.getElementById('dRoleBudgetLabel').textContent = s.complete ? 'Rispetto al piano su questo ruolo' : 'Budget rimasto sul ruolo';
@@ -1658,7 +1706,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-f';
+const BUILD = 'build-2026-09-23-h';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;
