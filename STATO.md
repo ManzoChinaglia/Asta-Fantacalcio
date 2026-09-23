@@ -166,3 +166,22 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   locale: aggiunta Svilar dalle Impostazioni, tag visibile sulla card, filtro nascondi
   funzionante (63→62 giocatori).
   Commit `cbd9960`, pushato su GitHub.
+
+- **23/09/2026 — rework UX "level up" (fase 1, NON ancora committato)**: l'app sembrava
+  "da programmatore" (una ventina di controlli visibili prima di vedere un giocatore).
+  Decisi con l'utente: uso chiave = **Live** (nome chiamato → prezzo → preso), navigazione
+  = **tab bar di vetro in basso** (Live · Prepara · Registro · Rivali · Opzioni). Rifatti
+  HTML/CSS e il JS di rendering; logica di prezzi/budget/Jarvis/storage intatta.
+  - Stile liquid glass come Jarvis (font Barlow Condensed copiati in `font/`, sfondo a
+    macchie di colore, blur, molle).
+  - Testata sempre visibile: crediti liberi grandi + 4 chip ruolo (verde/arancio/rosso).
+  - Si apre su **Live**: ricerca in alto, "Occasioni ora", poi sfoglia per ruolo.
+  - Scheda giocatore: prezzo gigante + un solo pulsante dominante "Preso a X"; dati sotto.
+  - Prepara: filtri/ordinamento/toggle spostati in un foglio "Filtri" (badge col numero
+    di filtri attivi); tag inline (infortunato, già tuo, preso) invece di riquadri.
+  - Dopo un acquisto la ricerca si svuota da sola; secondo tocco su "Live" = cursore nella
+    ricerca; trascinare un foglio verso il basso lo chiude; Registro/Rivali/Opzioni sono
+    fogli dalla tab bar.
+  - Bug corretto: data rientro "non specificata" mostrava "NaN undefined".
+  Da fare: provarla sul telefono vero, valutare "Occasioni ora" (oggi premia giocatori da
+  1 cr con FVM alto, poco utili), rifinire Opzioni/Registro/Rivali.

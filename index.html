@@ -9,224 +9,291 @@
 <meta name="theme-color" content="#0b1210">
 <title>Asta Fantalab</title>
 <style>
+  @font-face{font-family:"Barlow Condensed"; font-style:normal; font-weight:600; font-display:swap;
+             src:url("font/barlow-condensed-600.woff2") format("woff2");}
+  @font-face{font-family:"Barlow Condensed"; font-style:normal; font-weight:700; font-display:swap;
+             src:url("font/barlow-condensed-700.woff2") format("woff2");}
   :root{
-    --bg:#0b1210; --surface:#151f1a; --surface2:#1c2921; --border:#2a3a33;
-    --text:#eef2ef; --text-dim:#96a89f; --accent:#e8b93f; --accent-dim:#7a611f;
-    --danger:#e2574c; --ok:#4caf7d; --info:#5fb0d6; --warn:#e8a33d; --radius:10px;
+    --bg:#0b0e0c; --surface:rgba(255,255,255,.06); --surface2:rgba(255,255,255,.08); --border:rgba(255,255,255,.12);
+    --text:#f1f3ef; --text-dim:#9aa59e; --accent:#e8b93f; --accent-dim:#7a611f;
+    --danger:#e0605c; --ok:#5bc48a; --info:#5fb0d6; --warn:#e8a33d; --radius:18px;
+    --num:"Barlow Condensed",-apple-system,BlinkMacSystemFont,sans-serif;
+    --glass:rgba(22,28,25,.55); --glass-edge:rgba(255,255,255,.14);
+    --glass-light:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 1px rgba(255,255,255,.04);
+    --blur:blur(22px) saturate(1.8);
+    --spring:cubic-bezier(.34,1.45,.64,1); --soft:cubic-bezier(.2,.8,.2,1);
   }
-  *{box-sizing:border-box;}
-  input, select, textarea{font-size:16px;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  input, select, textarea{font-size:16px; font-family:inherit;}
+  button{font-family:inherit; cursor:pointer;}
   body{
-    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg); color:var(--text); padding-bottom:88px;
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:calc(150px + env(safe-area-inset-bottom));
+    -webkit-font-smoothing:antialiased;
   }
-  header{padding:16px 16px 8px; display:flex; justify-content:space-between; align-items:center;}
-  header h1{font-size:17px; font-weight:600; margin:0; letter-spacing:.2px;}
-  header .hbtns{display:flex; gap:8px;}
-  header button{background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:6px 10px; font-size:13px;}
-  main{padding:0 16px;}
+  /* sfondo con macchie di colore: da' al vetro qualcosa da sfocare */
+  body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(60% 38% at 12% 0%, rgba(0,158,73,.24), transparent 70%),
+      radial-gradient(50% 32% at 100% 18%, rgba(232,185,63,.16), transparent 70%),
+      radial-gradient(70% 40% at 50% 105%, rgba(0,115,58,.2), transparent 70%);}
+  main{padding:4px 14px 0;}
+  .glass{background:var(--glass); border:1px solid var(--glass-edge); border-radius:var(--radius);
+         -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
+         box-shadow:var(--glass-light), 0 10px 30px rgba(0,0,0,.3);}
 
-  .maintabs{display:flex; gap:8px; margin:4px 0 10px;}
-  .maintab{flex:1; text-align:center; padding:11px 0; border-radius:12px; background:var(--surface);
-           border:1px solid var(--border); color:var(--text-dim); font-weight:700; font-size:15px;}
-  .maintab.on{background:var(--accent); color:#241c07; border-color:var(--accent);}
-
-  /* ricerca globale: sempre visibile, funziona da qualunque scheda (priorita 1) */
-  .searchwrap{position:relative; margin-bottom: 12px;}
-  #globalSearch{width:100%; font-size:16px; padding:13px 40px 13px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
-  .searchclear{position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-dim); font-size:18px; padding:6px; display:none;}
-  .searchclear.show{display:block;}
-  #globalResults{display:none;}
-  #globalResults .count{margin-bottom:8px;}
-
-  .panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:14px;}
-  .panel h2{font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin:0 0 10px; font-weight:600;}
-  .panelhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
-  .panelhead h2{margin:0;}
-  .row{display:flex; gap:10px; margin-bottom:8px;}
-  .field{flex:1;}
-  .field label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
-  .field input{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;}
-  .pctsum{font-size:12px; color:var(--text-dim); margin-top:4px;}
-  .pctsum.warn{color:var(--danger);}
-
-  /* overlay a fogli: Impostazioni / Registro / Rivali / scheda giocatore non spingono piu la pagina (priorita 2 e 4) */
-  .sheet-backdrop{position:fixed; inset:0; background:rgba(3,6,4,0.6); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s ease;}
-  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
-  .sheet{position:fixed; left:0; right:0; bottom:0; max-height:86vh; overflow-y:auto;
-         background:var(--surface); border:1px solid var(--border); border-bottom:none;
-         border-radius:20px 20px 0 0; z-index:50; margin:0;
-         transform:translateY(105%); transition:transform .25s cubic-bezier(.32,.72,0,1);
-         padding:14px 16px calc(20px + env(safe-area-inset-bottom));
-         box-shadow:0 -10px 30px rgba(0,0,0,.4);}
-  .sheet.open{transform:translateY(0);}
-  .sheethandle{width:36px; height:4px; border-radius:3px; background:var(--border); margin:0 auto 12px;}
-  .sheetclose{background:none; border:none; color:var(--text-dim); font-size:20px; line-height:1; padding:4px;}
-
-  .result{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer;}
-  .result:active{background:var(--surface2);}
-  .badge{font-size:11px; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
-  .badge.P{background:#3a3220; color:#e8c04f;}
-  .badge.D{background:#20323a; color:#5fb0d6;}
-  .badge.C{background:#233a24; color:#7ecb7f;}
-  .badge.A{background:#3a2323; color:#e07a6e;}
-  .rname{flex:1; font-size:15px; min-width:0;}
-  .rteam{font-size:12px; color:var(--text-dim);}
-  .rq{font-size:14px; color:var(--text-dim); font-variant-numeric:tabular-nums; text-align:right;}
-  .hint{font-size:13px; color:var(--text-dim); text-align:center; padding:20px 0;}
-
-  /* acquisto in un tocco, dalla riga stessa (priorita 3) */
-  .qbuy{flex-shrink:0; background:var(--surface2); border:1px solid var(--ok); color:var(--ok); border-radius:8px; padding:8px 10px; font-size:13px; font-weight:700; white-space:nowrap;}
-  .qbuy:active{background:var(--ok); color:#08160e;}
-
-  .dhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
-  .dhead .rname{font-size:19px; font-weight:600;}
-  .injbanner{background:#2a1a18; border:1px solid #5a2a26; border-radius:10px; padding:9px 11px; margin-bottom:12px; font-size:13px; color:#f0a79e; line-height:1.45;}
-  .injbanner b{color:#ff8e80;}
-  .stat{display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border);}
-  .stat:last-child{border-bottom:none;}
-  .stat .label{font-size:13px; color:var(--text-dim);}
-  .stat .value{font-size:15px; font-variant-numeric:tabular-nums;}
-  .suggested{text-align:center; padding:16px 0 8px;}
-  .suggested .num{font-size:60px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
-  .suggested .lab{font-size:12px; color:var(--text-dim); margin-top:6px;}
-  .roletabs{display:flex; gap:8px; margin:4px 0 10px;}
-  .roletab{flex:1; text-align:center; padding:10px 0; border-radius:10px; background:var(--surface); border:1px solid var(--border); font-weight:700; font-size:14px; color:var(--text);}
-  .roletab:active{background:var(--surface2);}
-  .roletab.on{background:var(--surface2); border-color:var(--text-dim);}
-  .roletab .n{display:block; font-size:11px; font-weight:400; color:var(--text-dim); margin-top:2px;}
-  .quickbuy{background:var(--accent) !important; color:#241c07 !important; border:none !important; font-size:16px !important;}
-  #undoBar{display:none; align-items:center; justify-content:space-between; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;}
-  #undoBar button{background:none; border:none; color:var(--accent); font-weight:700; font-size:13px;}
-  .altrow{display:flex; justify-content:space-between; font-size:13px; padding:6px 0; color:var(--text-dim);}
-  .actions{display:flex; gap:10px; margin-top:12px;}
-  .actions button{flex:1; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:14px; font-weight:600;}
-  .btn-buy{background:var(--ok); color:#08160e; border:none;}
-  .btn-buy.altprice{background:none; border:1px solid var(--ok); color:var(--ok);}
-  .btn-skip{background:none; color:var(--text-dim); border:1px solid var(--border);}
-  .buyform{display:none; margin-top:10px; gap:8px;}
-  .buyform input{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px;}
-  .buyform button{background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;}
-  #bar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; align-items:center; z-index:30;}
-  .chip{flex:1; text-align:center; border-radius:8px; padding:6px 4px; font-size:12px; background:var(--surface2);}
-  .chip.done{background:#1c3324; color:var(--ok);}
-  .chip.tight{background:#3a2f12; color:var(--warn);}
-  .chip.warn{background:#3a2320; color:var(--danger);}
-  .chip b{display:block; font-size:14px;}
-  .chip .chipcr{display:block; font-size:11px; color:var(--text-dim); margin-top:2px;}
-  .chip .chipcr.over{color:var(--danger); font-weight:700;}
-  .chip .chipcr.tightcr{color:var(--warn); font-weight:700;}
-  #budgetLeft{font-size:16px; font-weight:700; color:var(--accent); white-space:nowrap; padding-left:6px;}
+  /* ---- testata sempre visibile: crediti + 4 ruoli ---- */
+  .hudwrap{position:sticky; top:0; z-index:20; padding:calc(env(safe-area-inset-top) + 8px) 12px 6px;}
+  #hud{padding:10px 12px 10px;}
+  .hudtop{display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:8px;}
+  .hudlab{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim);}
+  #budgetLeft{font-family:var(--num); font-weight:700; font-size:40px; line-height:.95; color:var(--accent);
+              font-variant-numeric:tabular-nums; letter-spacing:.01em;}
+  #budgetLeft small{font-size:16px; font-weight:600; color:var(--text-dim); margin-left:4px; letter-spacing:.04em;}
   #budgetLeft.over{color:var(--danger);}
   #budgetLeft.tight{color:var(--warn);}
-  #marketBar{font-size:12px; color:var(--text-dim); text-align:center; margin:0 0 10px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px;}
-  #marketBar b{color:var(--text);}
-  #marketSummary{cursor:pointer;}
-  .teamrow{display:flex; justify-content:space-between; font-size:12px; padding:4px 2px;}
-  .teamrow.up{color:var(--danger);}
-  .teamrow.down{color:var(--ok);}
-  .suggested .num.danger{color:var(--danger);}
-  .buyformlabel{font-size:12px; color:var(--text-dim); margin-top:10px;}
-  .curpct{color:var(--accent); font-weight:400;}
-  .pctval{color:var(--text); font-weight:700;}
-  .field input[type=range]{-webkit-appearance:none; appearance:none; height:32px; background:none; padding:0;}
-  .field input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:3px; background:var(--surface2);}
-  .field input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:50%; background:var(--accent); border:none; margin-top:-10px;}
-  .field input[type=range]::-moz-range-track{height:6px; border-radius:3px; background:var(--surface2);}
-  .field input[type=range]::-moz-range-thumb{width:26px; height:26px; border-radius:50%; background:var(--accent); border:none;}
-  #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px; margin-top:6px;}
-  .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 8px 5px 12px; font-size:13px;}
-  .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:14px; padding:0 2px;}
-  .logtabs{display:flex; gap:6px; margin-bottom:10px;}
-  .logtab{flex:1; padding:8px 0; border-radius:8px; background:var(--surface2);
-          border:1px solid var(--border); color:var(--text-dim); font-size:13px;}
-  .logtab.on{background:var(--accent); color:#241c07; border-color:var(--accent); font-weight:700;}
-  .logrow{display:flex; align-items:baseline; gap:8px; padding:6px 2px; font-size:14px;}
-  .logrow .ln{flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .logrow .lw{color:var(--text-dim); font-size:13px; flex-shrink:0;}
-  .logrow .lw.me{color:var(--ok);}
-  .logrow .lp{font-weight:700; font-variant-numeric:tabular-nums; min-width:34px; text-align:right;}
-  .logtot{display:flex; justify-content:space-between; font-size:13px; color:var(--text-dim);
-          padding:8px 2px 0; margin-top:4px; border-top:1px solid var(--border);}
-  .logtot b{color:var(--text);}
-  .rivalcard{background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px;}
-  .rivalname{font-weight:700; font-size:14px;}
-  .rivalstats{font-size:12px; color:var(--text-dim); margin:4px 0;}
-  .rivalroles{font-size:12px; color:var(--text-dim);}
-  .rivalwarn{color:var(--danger) !important; font-weight:700;}
+  #budgetLeft.bump{animation:bump .5s var(--spring);}
+  @keyframes bump{0%{transform:scale(1);} 35%{transform:scale(1.12);} 100%{transform:scale(1);}}
+  .jstat{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-dim); padding-bottom:4px;}
+  .jstat .jd{width:7px; height:7px; border-radius:50%; background:#5c6560;}
+  .jstat.ok{color:var(--ok);}
+  .jstat.ok .jd{background:var(--ok); box-shadow:0 0 8px var(--ok);}
+  .chips{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+  .chip{text-align:center; border-radius:12px; padding:6px 2px 5px; background:var(--surface2);
+        border:1px solid transparent; transition:background .25s, border-color .25s;}
+  .chip b{display:block; font-size:13px; font-weight:700;}
+  .chip .chipcr{display:block; font-size:11px; color:var(--text-dim); margin-top:1px; font-variant-numeric:tabular-nums;}
+  .chip.done{background:rgba(91,196,138,.14); border-color:rgba(91,196,138,.35); color:var(--ok);}
+  .chip.tight{background:rgba(232,163,61,.14); border-color:rgba(232,163,61,.4); color:var(--warn);}
+  .chip.warn{background:rgba(224,96,92,.16); border-color:rgba(224,96,92,.45); color:var(--danger);}
+  .chip .chipcr.over{color:var(--danger); font-weight:700;}
+  .chip .chipcr.tightcr{color:var(--warn); font-weight:700;}
 
-  /* Prepara */
-  .cats{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:10px;}
-  .cat{white-space:nowrap; padding:8px 14px; border-radius:20px; background:var(--surface);
-       border:1px solid var(--border); color:var(--text-dim); font-size:13px;}
-  .cat.on{background:var(--surface2); color:var(--text); border-color:var(--text-dim);}
-  .catdesc{font-size:12px; color:var(--text-dim); background:var(--surface); border:1px solid var(--border);
-           border-radius:8px; padding:10px; margin-bottom:12px; line-height:1.5;}
-  .sortrow{display:flex; gap:8px; align-items:center; margin-bottom:10px;}
-  .sortrow label{font-size:12px; color:var(--text-dim);}
-  .sortrow select{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text);
-         border-radius:8px; padding:8px 10px;}
-  .togglerow{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; color:var(--text-dim);}
-  .togglerow input{width:18px; height:18px;}
-  .card{background:var(--surface); border:1px solid var(--border); border-radius:12px;
-        padding:12px 14px; margin-bottom:8px; cursor:pointer;}
-  .card:active{background:var(--surface2);}
-  .card.inj{border-color:#5a2a26;}
-  .card.taken{opacity:.55;}
-  .ctop{display:flex; align-items:center; gap:10px;}
-  .cbadge{font-size:11px; font-weight:700; width:24px; height:24px; border-radius:6px;
-         display:flex; align-items:center; justify-content:center; flex-shrink:0;}
-  .cnm{flex:1; font-size:16px; font-weight:600; min-width:0;}
-  .csq{font-size:12.5px; color:var(--text-dim); font-weight:400; margin-top:3px;
-      display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
-  .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  /* ---- ricerca ---- */
+  .searchwrap{position:relative; margin:6px 0 12px;}
+  .searchwrap svg{position:absolute; z-index:1; left:14px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:var(--text-dim); pointer-events:none;}
+  #globalSearch{width:100%; font-size:17px; padding:15px 42px 15px 42px; border-radius:16px; color:var(--text);
+                border:1px solid var(--glass-edge); background:var(--glass); outline:none;
+                -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light);
+                transition:border-color .2s, box-shadow .2s;}
+  #globalSearch:focus{border-color:rgba(232,185,63,.6); box-shadow:var(--glass-light), 0 0 0 3px rgba(232,185,63,.15);}
+  #globalSearch::placeholder{color:#6f7b74;}
+  .searchclear{position:absolute; z-index:1; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-dim); font-size:22px; padding:8px 10px; display:none;}
+  .searchclear.show{display:block;}
+  #globalResults{display:none;}
+
+  .sectitle{font-size:11.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); font-weight:600; margin:14px 2px 8px;}
+  .sectitle.gold{color:var(--accent);}
+  .count{font-size:12px; color:var(--text-dim); margin:0 2px 8px;}
+  .hint{font-size:13.5px; color:var(--text-dim); text-align:center; padding:26px 20px; line-height:1.5;}
+  .empty{text-align:center; color:var(--text-dim); font-size:13.5px; padding:30px 0;}
+
+  /* ---- controlli a segmenti (ruoli) ---- */
+  .roletabs{display:flex; gap:4px; padding:4px; margin:4px 0 12px; border-radius:16px;
+            background:var(--glass); border:1px solid var(--glass-edge); box-shadow:var(--glass-light);
+            -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);}
+  .roletab{flex:1; text-align:center; padding:10px 0; border-radius:12px; background:none; border:none;
+           font-weight:700; font-size:15px; color:var(--text-dim); transition:background .2s, color .2s, transform .2s var(--spring);}
+  .roletab:active{transform:scale(.95);}
+  .roletab.on{background:var(--accent); color:#241c07;}
+  .roletab .n{display:block; font-size:10.5px; font-weight:500; opacity:.75; margin-top:1px; font-variant-numeric:tabular-nums;}
+
+  /* ---- righe giocatore (Live, ricerca, occasioni) ---- */
+  .result{display:flex; align-items:center; gap:11px; padding:11px 12px; margin-bottom:8px; cursor:pointer;
+          background:var(--glass); border:1px solid var(--glass-edge); border-radius:16px;
+          -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light);
+          transition:transform .2s var(--spring), background .2s;}
+  .result:active{transform:scale(.98); background:rgba(255,255,255,.1);}
+  .badge{font-family:var(--num); font-size:15px; font-weight:700; width:28px; height:28px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .badge.P{background:rgba(232,192,79,.18); color:#f0cb62;}
+  .badge.D{background:rgba(95,176,214,.18); color:#7cc4e6;}
+  .badge.C{background:rgba(126,203,127,.18); color:#86d688;}
+  .badge.A{background:rgba(224,122,110,.2); color:#ee8d80;}
+  .rname{flex:1; font-size:16px; font-weight:600; min-width:0;}
+  .rname .rn1{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .rteam{font-size:12px; color:var(--text-dim); font-weight:400; margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .rq{font-size:12px; color:var(--text-dim); font-variant-numeric:tabular-nums; text-align:right; line-height:1.2;}
+  .rq b{display:block; font-family:var(--num); font-size:19px; font-weight:600; color:var(--text);}
+  .qbuy{flex-shrink:0; min-width:64px; background:rgba(91,196,138,.14); border:1px solid rgba(91,196,138,.5); color:var(--ok);
+        border-radius:12px; padding:10px 12px; font-family:var(--num); font-size:19px; font-weight:700; letter-spacing:.02em;
+        white-space:nowrap; transition:transform .2s var(--spring), background .2s;}
+  .qbuy:active{background:var(--ok); color:#08160e; transform:scale(.94);}
+  .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
   .dot.titolare{background:var(--ok);}
   .dot.cambio{background:#c9a227;}
   .dot.riserva{background:#5c6560;}
+  .tag{font-size:11px; font-weight:600; padding:1px 7px; border-radius:8px;}
+  .tag.inj{background:rgba(224,96,92,.16); color:#f0a79e;}
+  .tag.else{background:rgba(95,176,214,.16); color:#8fd0e8;}
+  .tag.mine{background:rgba(91,196,138,.16); color:var(--ok);}
+  .tag.gone{background:rgba(255,255,255,.08); color:var(--text-dim);}
   .titlab{color:var(--text-dim);}
   .titlab.titolare{color:#7fc79c;}
-  .elsewheretag{color:var(--info); font-weight:600;}
-  .elsewherebanner{margin-top:9px; padding:7px 10px; background:#152a33; border-radius:8px; font-size:12px; color:#8fd0e8;}
-  .sep{color:#3a4a43;}
+
+  /* ---- Prepara ---- */
+  .cats{display:flex; gap:7px; overflow-x:auto; padding:2px 2px 8px; margin:0 -14px 4px; padding-left:14px; padding-right:14px; scrollbar-width:none;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cat{white-space:nowrap; padding:9px 15px; border-radius:20px; background:var(--glass);
+       border:1px solid var(--glass-edge); color:var(--text-dim); font-size:13.5px; font-weight:500; flex-shrink:0;
+       -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); transition:background .2s, color .2s;}
+  .cat.on{background:rgba(232,185,63,.18); color:var(--accent); border-color:rgba(232,185,63,.5);}
+  .cat.fbtn{color:var(--text);}
+  .cat .fn{display:inline-block; min-width:16px; height:16px; line-height:16px; border-radius:8px; background:var(--accent); color:#241c07; font-size:10.5px; font-weight:700; margin-left:5px; text-align:center;}
+  .catdesc{font-size:12.5px; color:var(--text-dim); margin:2px 2px 10px; line-height:1.5;}
+  .card{display:flex; align-items:center; gap:11px; padding:12px; margin-bottom:8px; cursor:pointer;
+        background:var(--glass); border:1px solid var(--glass-edge); border-radius:16px;
+        -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light);
+        transition:transform .2s var(--spring), background .2s;}
+  .card:active{transform:scale(.98); background:rgba(255,255,255,.1);}
+  .card.inj{border-color:rgba(224,96,92,.4);}
+  .card.taken{opacity:.5;}
   .pricebox{text-align:right; flex-shrink:0;}
-  .cprice{font-size:20px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
-  .pricelab{font-size:10px; color:var(--text-dim); margin-top:3px;}
-  .band{font-size:11.5px; color:var(--text-dim); margin-top:2px; font-variant-numeric:tabular-nums;}
-  .cfoot{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:9px;}
-  .takenbox{margin-top:9px; padding:7px 10px; background:var(--surface2); border-radius:8px;
-            font-size:12px; color:var(--text-dim);}
-  .takenbox b{color:var(--text);}
-  #linkbar{background:var(--surface); border:1px solid var(--border); border-radius:10px;
-           padding:10px 12px; margin-bottom:12px; font-size:12px; color:var(--text-dim); line-height:1.5;}
-  #linkbar b{color:var(--text);}
-  #picksBar{margin-bottom:12px;}
-  #picksBar .pickstitle{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em;}
-  #picksBar .result{border-color:var(--accent-dim);}
-  .count{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
-  .empty{text-align:center; color:var(--text-dim); font-size:13px; padding:30px 0;}
+  .cprice{font-family:var(--num); font-size:24px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
+  .band{font-size:11px; color:var(--text-dim); margin-top:3px; font-variant-numeric:tabular-nums;}
+
+  /* ---- Live: temperatura asta ---- */
+  #marketBar{font-size:12.5px; color:var(--text-dim); text-align:center; margin:18px 0 0; padding:10px 12px; border-radius:14px;
+             background:var(--surface); border:1px solid var(--border);}
+  #marketBar b{color:var(--text);}
+  #marketSummary{cursor:pointer;}
+  .teamrow{display:flex; justify-content:space-between; font-size:12.5px; padding:5px 2px;}
+  .teamrow.up{color:var(--danger);}
+  .teamrow.down{color:var(--ok);}
+
+  /* ---- annulla: pillola sopra la tab bar ---- */
+  #undoBar{display:none; position:fixed; left:14px; right:14px; bottom:calc(84px + env(safe-area-inset-bottom)); z-index:29;
+           align-items:center; justify-content:space-between; gap:10px; padding:10px 10px 10px 16px; font-size:14px;
+           background:rgba(30,38,34,.8); border:1px solid var(--glass-edge); border-radius:16px;
+           -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light), 0 8px 24px rgba(0,0,0,.4);
+           animation:sale .35s var(--soft);}
+  #undoBar span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  #undoBar button{background:rgba(232,185,63,.16); border:none; color:var(--accent); font-weight:700; font-size:14px; padding:8px 14px; border-radius:11px;}
+  @keyframes sale{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+
+  /* ---- tab bar in basso ---- */
+  #tabbar{position:fixed; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:30;
+          display:flex; gap:2px; padding:6px; border-radius:26px;}
+  #tabbar button{flex:1; background:none; border:none; color:var(--text-dim); display:flex; flex-direction:column; align-items:center; gap:3px;
+                 font-size:10.5px; font-weight:600; padding:8px 0 6px; border-radius:20px;
+                 transition:color .2s, background .25s, transform .25s var(--spring);}
+  #tabbar button svg{width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  #tabbar button:active{transform:scale(.92);}
+  #tabbar button.on{color:var(--accent); background:rgba(232,185,63,.14);}
+
+  /* ---- fogli a scomparsa ---- */
+  .sheet-backdrop{position:fixed; inset:0; background:rgba(3,6,4,.55); z-index:40; opacity:0; pointer-events:none; transition:opacity .25s ease;
+                  -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);}
+  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:fixed; left:0; right:0; bottom:0; max-height:90vh; overflow-y:auto; overscroll-behavior:contain; z-index:50;
+         background:rgba(20,27,23,.86); -webkit-backdrop-filter:blur(34px) saturate(1.8); backdrop-filter:blur(34px) saturate(1.8);
+         border-top:1px solid var(--glass-edge); border-radius:28px 28px 0 0;
+         box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 -12px 40px rgba(0,0,0,.5);
+         transform:translateY(105%); transition:transform .38s var(--soft); visibility:hidden;
+         padding:10px 18px calc(24px + env(safe-area-inset-bottom));}
+  .sheet.open{transform:translateY(0); visibility:visible;}
+  .sheet.dragging{transition:none;}
+  .sheethandle{width:38px; height:5px; border-radius:3px; background:rgba(255,255,255,.22); margin:0 auto 14px;}
+  .sheetclose{background:rgba(255,255,255,.08); border:none; color:var(--text-dim); font-size:18px; line-height:1; width:30px; height:30px; border-radius:50%; padding:0;}
+  .panelhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .panelhead h2{font-size:20px; font-weight:700; margin:0; letter-spacing:.2px;}
+  .sheet h2{font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); font-weight:600;}
+  .sheet .panelhead h2{font-size:20px; text-transform:none; letter-spacing:.2px; color:var(--text);}
+
+  /* scheda giocatore */
+  .dhead{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .dhead .rname{font-size:22px; font-weight:700;}
+  .injbanner{background:rgba(224,96,92,.12); border:1px solid rgba(224,96,92,.35); border-radius:14px; padding:10px 12px; margin:8px 0; font-size:13px; color:#f0a79e; line-height:1.45;}
+  .injbanner b{color:#ff8e80;}
+  .elsewherebanner{margin:8px 0; padding:9px 12px; background:rgba(95,176,214,.12); border:1px solid rgba(95,176,214,.3); border-radius:14px; font-size:13px; color:#8fd0e8;}
+  .suggested{text-align:center; padding:14px 0 12px;}
+  .suggested .num{font-family:var(--num); font-size:88px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:.9; text-shadow:0 0 40px rgba(232,185,63,.35);}
+  .suggested .num.danger{color:var(--danger); text-shadow:0 0 40px rgba(224,96,92,.35);}
+  .suggested .lab{font-size:12.5px; color:var(--text-dim); margin-top:8px;}
+  .cta{width:100%; padding:17px; border-radius:18px; border:none; font-size:19px; font-weight:700; font-family:var(--num); letter-spacing:.04em;
+       background:var(--accent); color:#241c07; box-shadow:0 8px 24px rgba(232,185,63,.3); transition:transform .2s var(--spring);}
+  .cta:active{transform:scale(.97);}
+  .actions{display:flex; gap:10px; margin-top:10px;}
+  .actions button{flex:1; padding:14px 8px; border-radius:16px; font-size:14.5px; font-weight:600; background:rgba(255,255,255,.07); color:var(--text); border:1px solid var(--border);}
+  .actions button:active{background:rgba(255,255,255,.14);}
+  .buyformlabel{font-size:12.5px; color:var(--text-dim); margin-top:14px;}
+  .buyform{display:none; margin-top:8px; gap:8px;}
+  .buyform input{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:13px; font-size:18px; min-width:0;}
+  .buyform button{background:var(--accent); color:#241c07; border:none; border-radius:12px; padding:0 22px; font-weight:700; font-size:16px;}
+  #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:13px; font-size:16px; margin-top:6px;}
+  .statgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px;}
+  .statgrid .st{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 12px;}
+  .statgrid .st .label{font-size:11.5px; color:var(--text-dim);}
+  .statgrid .st .value{font-size:16px; font-weight:600; margin-top:3px; font-variant-numeric:tabular-nums;}
+  .altrow{display:flex; justify-content:space-between; font-size:13px; padding:7px 2px; color:var(--text-dim); border-bottom:1px solid var(--border);}
+  .altrow:last-child{border-bottom:none;}
+  .altrow span:last-child{color:var(--text); font-variant-numeric:tabular-nums;}
+
+  /* impostazioni */
+  .row{display:flex; gap:10px; margin-bottom:10px; align-items:center;}
+  .field{flex:1; min-width:0;}
+  .field label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:5px;}
+  .field input{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px;}
+  .pctsum{font-size:12px; color:var(--text-dim); margin-top:4px;}
+  .pctsum.warn{color:var(--danger);}
+  .curpct{color:var(--accent); font-weight:400;}
+  .pctval{color:var(--text); font-weight:700;}
+  .field input[type=range]{-webkit-appearance:none; appearance:none; height:38px; background:none; padding:0; border:none;}
+  .field input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:3px; background:rgba(255,255,255,.14);}
+  .field input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:28px; height:28px; border-radius:50%; background:var(--accent); border:none; margin-top:-11px; box-shadow:0 2px 8px rgba(0,0,0,.4);}
+  .field input[type=range]::-moz-range-track{height:6px; border-radius:3px; background:rgba(255,255,255,.14);}
+  .field input[type=range]::-moz-range-thumb{width:28px; height:28px; border-radius:50%; background:var(--accent); border:none;}
+  .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:6px 10px 6px 13px; font-size:13.5px;}
+  .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:15px; padding:0 2px;}
+  .settings-h{margin:22px 0 8px;}
+  /* interruttori stile iOS */
+  .switchrow{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 2px; border-bottom:1px solid var(--border); font-size:15px;}
+  .switchrow:last-of-type{border-bottom:none;}
+  .switch{position:relative; width:51px; height:31px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0; position:absolute;}
+  .switch span{position:absolute; inset:0; border-radius:16px; background:rgba(255,255,255,.16); transition:background .25s;}
+  .switch span::after{content:""; position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.35); transition:transform .3s var(--spring);}
+  .switch input:checked + span{background:var(--ok);}
+  .switch input:checked + span::after{transform:translateX(20px);}
+  #sort{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:13px; margin-top:6px;}
+
+  /* registro e rivali */
+  .logtabs{display:flex; gap:4px; padding:4px; border-radius:14px; background:var(--surface2); margin-bottom:12px;}
+  .logtab{flex:1; padding:9px 0; border-radius:11px; background:none; border:none; color:var(--text-dim); font-size:13.5px; font-weight:600;}
+  .logtab.on{background:var(--accent); color:#241c07;}
+  .logrow{display:flex; align-items:baseline; gap:8px; padding:9px 2px; font-size:15px; border-bottom:1px solid var(--border);}
+  .logrow .ln{flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .logrow .lw{color:var(--text-dim); font-size:13px; flex-shrink:0;}
+  .logrow .lw.me{color:var(--ok);}
+  .logrow .lp{font-family:var(--num); font-size:19px; font-weight:700; min-width:34px; text-align:right; font-variant-numeric:tabular-nums;}
+  .logtot{display:flex; justify-content:space-between; font-size:13.5px; color:var(--text-dim); padding:12px 2px 0;}
+  .logtot b{color:var(--text);}
+  .rivalcard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:8px;}
+  .rivalname{font-weight:700; font-size:15px;}
+  .rivalstats{font-size:12.5px; color:var(--text-dim); margin:4px 0;}
+  .rivalroles{font-size:12.5px; color:var(--text-dim);}
+  .rivalwarn{color:var(--danger) !important; font-weight:700;}
 </style>
 </head>
 <body>
-<header>
-  <h1>Asta Fantalab</h1>
-  <div class="hbtns">
-    <button id="toggleLog">Registro</button>
-    <button id="toggleRivals">Rivali</button>
-    <button id="toggleSettings">Impostazioni</button>
+
+<!-- testata: crediti liberi + situazione per ruolo, sempre a portata d'occhio -->
+<div class="hudwrap"><div id="hud" class="glass">
+  <div class="hudtop">
+    <div><div class="hudlab">Crediti liberi</div><div id="budgetLeft"></div></div>
+    <div class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></div>
   </div>
-</header>
+  <div class="chips">
+    <div class="chip" id="chipP"></div>
+    <div class="chip" id="chipD"></div>
+    <div class="chip" id="chipC"></div>
+    <div class="chip" id="chipA"></div>
+  </div>
+</div></div>
+
 <main>
-
-  <div class="maintabs">
-    <button class="maintab on" id="tabBtnPrepara" data-t="prepara">Prepara</button>
-    <button class="maintab" id="tabBtnLive" data-t="live">Live</button>
-  </div>
-
-  <div id="undoBar"><span id="undoText"></span><button id="undoBtn">Annulla</button></div>
-
-  <!-- ricerca globale: funziona da qualunque scheda, senza cambiarla (priorita 1) -->
   <div class="searchwrap">
-    <input type="text" id="globalSearch" placeholder="Cerca un giocatore..." autocomplete="off">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input type="text" id="globalSearch" placeholder="Cerca il giocatore chiamato…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
     <button class="searchclear" id="searchClear">&times;</button>
   </div>
   <div id="globalResults">
@@ -234,59 +301,11 @@
     <div id="globalList"></div>
   </div>
 
-  <!-- colpo d'occhio "chi comprare ora": migliori occasioni tra i titolari liberi nei ruoli ancora da coprire -->
-  <div id="picksBar" style="display:none"></div>
-
-  <!-- ===== PREPARA ===== -->
-  <div id="tabPrepara">
-    <div id="linkbar"></div>
-
-    <div class="roletabs" id="prepRoleTabs">
-      <button class="roletab on" data-r="P">P</button>
-      <button class="roletab" data-r="D">D</button>
-      <button class="roletab" data-r="C">C</button>
-      <button class="roletab" data-r="A">A</button>
-    </div>
-    <div class="cats" id="cats">
-      <button class="cat on" data-c="all">Tutti</button>
-      <button class="cat" data-c="top">Top</button>
-      <button class="cat" data-c="scommessa">Scommesse</button>
-      <button class="cat" data-c="perla">Perle nascoste</button>
-      <button class="cat" data-c="low">Low budget</button>
-    </div>
-    <div class="catdesc" id="catdesc"></div>
-    <div class="sortrow">
-      <label>Ordina</label>
-      <select id="sort">
-        <option value="q">Prima i più costosi</option>
-        <option value="qasc">Prima i più economici</option>
-        <option value="ratio">Prima le occasioni</option>
-        <option value="trend">Prima chi sta salendo</option>
-      </select>
-    </div>
-    <div class="togglerow">
-      <input type="checkbox" id="onlyTit">
-      <label for="onlyTit">Mostra solo titolari e primi cambi</label>
-    </div>
-    <div class="togglerow">
-      <input type="checkbox" id="hideTaken">
-      <label for="hideTaken">Nascondi i giocatori già assegnati</label>
-    </div>
-    <div class="togglerow">
-      <input type="checkbox" id="hideElsewhere">
-      <label for="hideElsewhere">Nascondi i giocatori già miei altrove</label>
-    </div>
-    <div class="count" id="prepCount"></div>
-    <div id="prepList"></div>
-  </div>
-
   <!-- ===== LIVE ===== -->
-  <div id="tabLive" style="display:none">
-    <div id="marketBar">
-      <div id="marketSummary"></div>
-      <div id="marketTeams" style="display:none; margin-top:8px; text-align:left;"></div>
-    </div>
+  <div id="tabLive">
+    <div id="picksBar" style="display:none"></div>
 
+    <div class="sectitle">Sfoglia per ruolo</div>
     <div class="roletabs" id="liveRoleTabs">
       <button class="roletab" data-r="P">P<span class="n" id="ntP"></span></button>
       <button class="roletab" data-r="D">D<span class="n" id="ntD"></span></button>
@@ -294,70 +313,97 @@
       <button class="roletab" data-r="A">A<span class="n" id="ntA"></span></button>
     </div>
     <div id="liveList"></div>
-    <div class="hint" id="hint">Tocca un ruolo per vedere i migliori ancora liberi, o cerca sopra.</div>
+    <div class="hint" id="hint">Tocca un ruolo per vedere i migliori ancora liberi, oppure cerca il nome sopra.</div>
+
+    <div id="marketBar">
+      <div id="marketSummary"></div>
+      <div id="marketTeams" style="display:none; margin-top:8px; text-align:left;"></div>
+    </div>
   </div>
 
+  <!-- ===== PREPARA ===== -->
+  <div id="tabPrepara" style="display:none">
+    <div class="roletabs" id="prepRoleTabs">
+      <button class="roletab on" data-r="P">P</button>
+      <button class="roletab" data-r="D">D</button>
+      <button class="roletab" data-r="C">C</button>
+      <button class="roletab" data-r="A">A</button>
+    </div>
+    <div class="cats" id="cats">
+      <button class="cat fbtn" id="filtersBtn">Filtri<span class="fn" id="filtersN" style="display:none"></span></button>
+      <button class="cat on" data-c="all">Tutti</button>
+      <button class="cat" data-c="top">Top</button>
+      <button class="cat" data-c="scommessa">Scommesse</button>
+      <button class="cat" data-c="perla">Perle nascoste</button>
+      <button class="cat" data-c="low">Low budget</button>
+    </div>
+    <div class="catdesc" id="catdesc"></div>
+    <div class="count" id="prepCount"></div>
+    <div id="prepList"></div>
+  </div>
 </main>
 
-<div id="bar">
-  <div class="chip" id="chipP"></div>
-  <div class="chip" id="chipD"></div>
-  <div class="chip" id="chipC"></div>
-  <div class="chip" id="chipA"></div>
-  <div id="budgetLeft"></div>
-</div>
+<div id="undoBar"><span id="undoText"></span><button id="undoBtn">Annulla</button></div>
 
-<!-- overlay: Impostazioni / Registro / Rivali / scheda giocatore (priorita 2 e 4) -->
+<nav id="tabbar" class="glass">
+  <button class="on" id="tabBtnLive"><svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>Live</button>
+  <button id="tabBtnPrepara"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Prepara</button>
+  <button id="toggleLog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Registro</button>
+  <button id="toggleRivals"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.3a3.2 3.2 0 010 5.4M18 14c2 .6 3.5 2.4 3.5 5"/></svg>Rivali</button>
+  <button id="toggleSettings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Opzioni</button>
+</nav>
+
+<!-- fogli a scomparsa: Opzioni / Registro / Rivali / Filtri / scheda giocatore -->
 <div class="sheet-backdrop" id="sheetBackdrop"></div>
 
-<div class="panel sheet" id="settings">
+<div class="sheet" id="settings">
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Budget e rosa</h2><button class="sheetclose" data-close>&times;</button></div>
   <div class="row">
-    <div class="field"><label>Crediti totali</label><input type="number" id="budget"></div>
+    <div class="field"><label>Crediti totali</label><input type="number" id="budget" inputmode="numeric"></div>
   </div>
   <div class="row">
-    <div class="field"><label>Slot Portieri</label><input type="number" id="slotP"></div>
+    <div class="field"><label>Slot Portieri</label><input type="number" id="slotP" inputmode="numeric"></div>
     <div class="field"><label>% budget <span class="pctval" id="valP"></span>% <span class="curpct" id="curP"></span></label><input type="range" min="0" max="100" id="pctP"></div>
   </div>
   <div class="row">
-    <div class="field"><label>Slot Difensori</label><input type="number" id="slotD"></div>
+    <div class="field"><label>Slot Difensori</label><input type="number" id="slotD" inputmode="numeric"></div>
     <div class="field"><label>% budget <span class="pctval" id="valD"></span>% <span class="curpct" id="curD"></span></label><input type="range" min="0" max="100" id="pctD"></div>
   </div>
   <div class="row">
-    <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC"></div>
+    <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC" inputmode="numeric"></div>
     <div class="field"><label>% budget <span class="pctval" id="valC"></span>% <span class="curpct" id="curC"></span></label><input type="range" min="0" max="100" id="pctC"></div>
   </div>
   <div class="row">
-    <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA"></div>
+    <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA" inputmode="numeric"></div>
     <div class="field"><label>% budget <span class="pctval" id="valA"></span>% <span class="curpct" id="curA"></span></label><input type="range" min="0" max="100" id="pctA"></div>
   </div>
   <div class="pctsum" id="pctsum"></div>
-  <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:10px; font-size:14px;">Ripristina percentuali di partenza</button>
-  <p style="font-size:11px; color:var(--text-dim); margin:4px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta.</p>
+  <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:12px; padding:12px; font-size:14px;">Ripristina percentuali di partenza</button>
+  <p style="font-size:11.5px; color:var(--text-dim); margin:8px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta.</p>
 
-  <h2 style="margin-top:18px">Partecipanti avversari</h2>
+  <h2 class="settings-h">Partecipanti avversari</h2>
   <div class="row">
-    <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
-    <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
+    <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px; min-width:0;">
+    <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:12px; padding:0 20px; height:44px; font-weight:700; font-size:18px;">+</button>
   </div>
   <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
 
-  <h2 style="margin-top:18px">Già miei altrove</h2>
-  <p style="font-size:11px; color:var(--text-dim); margin:0 0 8px">Giocatori che hai già in un'altra lega (es. Rivoluzione Fantacalcio) — solo un promemoria scritto a mano qui, nessun collegamento automatico con altre rose.</p>
+  <h2 class="settings-h">Già miei altrove</h2>
+  <p style="font-size:11.5px; color:var(--text-dim); margin:0 0 8px">Giocatori che hai già in un'altra lega (es. Rivoluzione Fantacalcio) — solo un promemoria scritto a mano qui, nessun collegamento automatico con altre rose.</p>
   <div class="row">
-    <input type="text" id="elsewhereInput" list="elsewhereOptions" placeholder="Nome giocatore" autocomplete="off" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
-    <button id="addElsewhere" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
+    <input type="text" id="elsewhereInput" list="elsewhereOptions" placeholder="Nome giocatore" autocomplete="off" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px; min-width:0;">
+    <button id="addElsewhere" style="background:var(--accent); color:#241c07; border:none; border-radius:12px; padding:0 20px; height:44px; font-weight:700; font-size:18px;">+</button>
   </div>
   <datalist id="elsewhereOptions"></datalist>
   <div id="elsewhereList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
 
-  <div class="row" style="margin-top:16px">
-    <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
+  <div class="row" style="margin-top:24px">
+    <button id="resetAll" style="flex:1; background:rgba(224,96,92,.1); border:1px solid rgba(224,96,92,.5); color:var(--danger); border-radius:14px; padding:14px; font-size:15px; font-weight:600;">Azzera asta</button>
   </div>
 </div>
 
-<div class="panel sheet" id="logpanel">
+<div class="sheet" id="logpanel">
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Registro acquisti</h2><button class="sheetclose" data-close>&times;</button></div>
   <div class="logtabs">
@@ -368,13 +414,30 @@
   <div id="logList"></div>
 </div>
 
-<div class="panel sheet" id="rivals">
+<div class="sheet" id="rivals">
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Situazione avversari</h2><button class="sheetclose" data-close>&times;</button></div>
   <div id="rivalsList"></div>
 </div>
 
-<div class="panel sheet" id="detail">
+<div class="sheet" id="filters">
+  <div class="sheethandle"></div>
+  <div class="panelhead"><h2>Filtri Prepara</h2><button class="sheetclose" data-close>&times;</button></div>
+  <h2>Ordina</h2>
+  <select id="sort">
+    <option value="q">Prima i più costosi</option>
+    <option value="qasc">Prima i più economici</option>
+    <option value="ratio">Prima le occasioni</option>
+    <option value="trend">Prima chi sta salendo</option>
+  </select>
+  <div style="margin-top:14px">
+    <div class="switchrow"><span>Solo titolari e primi cambi</span><label class="switch"><input type="checkbox" id="onlyTit"><span></span></label></div>
+    <div class="switchrow"><span>Nascondi già assegnati</span><label class="switch"><input type="checkbox" id="hideTaken"><span></span></label></div>
+    <div class="switchrow"><span>Nascondi già miei altrove</span><label class="switch"><input type="checkbox" id="hideElsewhere"><span></span></label></div>
+  </div>
+</div>
+
+<div class="sheet" id="detail">
   <div class="sheethandle"></div>
   <div class="dhead">
     <div class="badge" id="dBadge"></div>
@@ -390,28 +453,28 @@
     <div class="num" id="dSuggested">-</div>
     <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
   </div>
-  <div class="stat"><span class="label">Quotazione ufficiale</span><span class="value" id="dQt"></span></div>
-  <div class="stat"><span class="label">Valore di mercato atteso (FVM)</span><span class="value" id="dFvm"></span></div>
-  <div class="stat"><span class="label">Titolarità</span><span class="value" id="dTit"></span></div>
-  <div class="stat"><span class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</span><span class="value" id="dRoleBudget"></span></div>
-  <div class="stat"><span class="label">Slot ancora da coprire</span><span class="value" id="dSlots"></span></div>
-  <div id="dAlts" style="margin-top:10px"></div>
+  <button class="cta quickbuy" id="dQuickBuyBtn">Preso a —</button>
   <div class="actions">
-    <button class="btn-buy quickbuy" id="dQuickBuyBtn">Preso a —</button>
-    <button class="btn-buy altprice" id="dOtherPriceBtn">Prezzo diverso</button>
-  </div>
-  <div class="actions" style="margin-top:8px">
-    <button class="btn-skip" id="dSkipBtn">Preso da altri</button>
+    <button id="dOtherPriceBtn">Prezzo diverso</button>
+    <button id="dSkipBtn">Preso da altri</button>
   </div>
   <div class="buyformlabel" id="buyFormLabel"></div>
   <div class="buyform" id="buyform" style="display:none">
-    <input type="number" id="buyPrice" placeholder="Crediti pagati">
+    <input type="number" id="buyPrice" placeholder="Crediti pagati" inputmode="numeric">
     <button id="buyConfirm">OK</button>
   </div>
   <div id="buyerPicker" style="display:none; margin-top:10px;">
     <div class="buyformlabel" style="margin-top:0">Chi se l'è aggiudicato?</div>
     <select id="buyerSelect"></select>
   </div>
+  <div class="statgrid">
+    <div class="st"><div class="label">Quotazione ufficiale</div><div class="value" id="dQt"></div></div>
+    <div class="st"><div class="label">Valore atteso (FVM)</div><div class="value" id="dFvm"></div></div>
+    <div class="st"><div class="label">Titolarità</div><div class="value" id="dTit"></div></div>
+    <div class="st"><div class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</div><div class="value" id="dRoleBudget"></div></div>
+    <div class="st"><div class="label">Slot ancora da coprire</div><div class="value" id="dSlots"></div></div>
+  </div>
+  <div id="dAlts" style="margin-top:14px"></div>
 </div>
 
 <script>
@@ -436,7 +499,7 @@ const DEFAULT_STATE = {
 
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let selected = null;
-let activeMainTab = 'prepara';
+let activeMainTab = 'live';
 
 /* ---- dati live da Jarvis (punto 2 del piano): titolarità e infortuni via URL grezzo da
    GitHub, invece di uno snapshot statico aggiornato a mano. Solo questi due file: sono gli
@@ -892,9 +955,12 @@ function renderRivals(){
 let openSheetId = null;
 function openSheet(id){
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
-  document.getElementById(id).classList.add('open');
+  const sh = document.getElementById(id);
+  sh.style.transform=''; sh.scrollTop=0;
+  sh.classList.add('open');
   document.getElementById('sheetBackdrop').classList.add('show');
   openSheetId = id;
+  syncNav();
   if(id==='rivals') renderRivals();
   if(id==='logpanel') renderLog();
 }
@@ -902,12 +968,37 @@ function closeSheets(){
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
   document.getElementById('sheetBackdrop').classList.remove('show');
   openSheetId = null;
+  syncNav();
 }
+/* la tab bar evidenzia il foglio aperto (Registro/Rivali/Opzioni) o, altrimenti, la scheda attiva */
+const NAV_SHEETS = {logpanel:'toggleLog', rivals:'toggleRivals', settings:'toggleSettings'};
+function syncNav(){
+  const sheetBtn = NAV_SHEETS[openSheetId];
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.remove('on'));
+  document.getElementById(sheetBtn || (activeMainTab==='live' ? 'tabBtnLive' : 'tabBtnPrepara')).classList.add('on');
+}
+/* trascina il foglio verso il basso per chiuderlo */
+document.querySelectorAll('.sheet').forEach(sh=>{
+  let y0=null, dy=0;
+  sh.addEventListener('touchstart', e=>{ if(sh.scrollTop<=0){ y0=e.touches[0].clientY; dy=0; } else y0=null; }, {passive:true});
+  sh.addEventListener('touchmove', e=>{
+    if(y0===null) return;
+    dy = e.touches[0].clientY - y0;
+    if(dy>0){ sh.classList.add('dragging'); sh.style.transform='translateY('+dy+'px)'; }
+  }, {passive:true});
+  sh.addEventListener('touchend', ()=>{
+    if(y0===null) return;
+    sh.classList.remove('dragging');
+    if(dy>100) closeSheets(); else sh.style.transform='';
+    y0=null; dy=0;
+  });
+});
 document.getElementById('sheetBackdrop').onclick = closeSheets;
 document.querySelectorAll('[data-close]').forEach(b=> b.onclick = closeSheets);
-document.getElementById('toggleSettings').onclick = ()=> openSheet('settings');
-document.getElementById('toggleLog').onclick = ()=> openSheet('logpanel');
-document.getElementById('toggleRivals').onclick = ()=> openSheet('rivals');
+function toggleSheet(id){ if(openSheetId===id) closeSheets(); else openSheet(id); }
+document.getElementById('toggleSettings').onclick = ()=> toggleSheet('settings');
+document.getElementById('toggleLog').onclick = ()=> toggleSheet('logpanel');
+document.getElementById('toggleRivals').onclick = ()=> toggleSheet('rivals');
 
 function renderBar(){
   healPctTotal();
@@ -931,8 +1022,11 @@ function renderBar(){
   const totalSpent = totalSpentAll();
   const left = state.budget - totalSpent;
   const bl = document.getElementById('budgetLeft');
-  bl.textContent = left + ' cr';
+  const prevLeft = bl.dataset.left;
+  bl.innerHTML = left + '<small>cr</small>';
   bl.className = left<0 ? 'over' : (left < totalFloor ? 'tight' : '');
+  if(prevLeft!==undefined && Number(prevLeft)!==left){ void bl.offsetWidth; bl.classList.add('bump'); }
+  bl.dataset.left = left;
   renderPicksBar();
 }
 
@@ -942,7 +1036,7 @@ function renderUndo(){
   bar.style.display='flex';
   const a = state.lastAction;
   document.getElementById('undoText').textContent = a.type==='buy'
-    ? a.nome+' acquistato a '+a.price+' cr'
+    ? a.nome+' preso a '+a.price+' cr'
     : a.nome+' segnato preso da altri a '+a.price+' cr';
 }
 document.getElementById('undoBtn').onclick = ()=>{
@@ -971,11 +1065,13 @@ function refreshCurrentLists(){
 
 /* ---- riga compatta riusata da Live e dalla ricerca globale, con acquisto in un tocco (priorita 3) ---- */
 function compactRowHtml(p){
+  const flag = p.inj ? '<span class="tag inj">Infortunato</span>'
+             : (isElsewhere(p) ? '<span class="tag else">Già tuo</span>' : '');
   return '<div class="result" data-id="'+p.id+'">'+
     '<div class="badge '+p.r+'">'+p.r+'</div>'+
-    '<div class="rname">'+p.nome+'<div class="rteam">'+p.squadra+'</div></div>'+
-    '<div class="rq">'+p.q+' cr</div>'+
-    '<button class="qbuy" data-qid="'+p.id+'">✓ '+quickBuyValue(p)+'</button>'+
+    '<div class="rname"><div class="rn1">'+p.nome+'</div><div class="rteam">'+p.squadra+
+      '<span class="dot '+p.tit+'"></span><span class="titlab '+p.tit+'">'+p.q+' cr</span>'+flag+'</div></div>'+
+    '<button class="qbuy" data-qid="'+p.id+'">'+quickBuyValue(p)+'</button>'+
   '</div>';
 }
 function wireCompactRows(container){
@@ -1016,7 +1112,7 @@ function renderPicksBar(){
   const picks = bestPicksNow();
   if(picks.length===0){ box.style.display='none'; box.innerHTML=''; return; }
   box.style.display='block';
-  box.innerHTML = '<div class="pickstitle">Occasioni ora</div>' + picks.map(compactRowHtml).join('');
+  box.innerHTML = '<div class="sectitle gold">Occasioni ora</div>' + picks.map(compactRowHtml).join('');
   wireCompactRows(box);
 }
 
@@ -1102,9 +1198,10 @@ function band(p){
 function ratio(p){ return p.fvm / Math.max(p.q,1); }
 
 function shortDate(d){
-  const [g,m] = d.split('/');
+  const m = /^(\d{1,2})\/(\d{1,2})/.exec(d||'');
+  if(!m) return null;
   const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  return parseInt(g,10) + ' ' + mesi[parseInt(m,10)-1];
+  return parseInt(m[1],10) + ' ' + mesi[parseInt(m[2],10)-1];
 }
 function titLine(p){
   let lab, cls;
@@ -1125,20 +1222,18 @@ function statusOf(p){
   return null;
 }
 function renderLinkbar(){
-  const el = document.getElementById('linkbar');
-  const spent = totalSpentAll();
-  const left = state.budget - spent;
-  const slots = ROLES.map(r=> r+' '+boughtCount(r)+'/'+state.slots[r]).join(' · ');
-  const assigned = Object.keys(state.bought).length + Object.keys(state.discarded).length;
-  const jarvisLine = jarvisStatus.ok
-    ? '<br><span style="color:var(--ok)">Titolarità/infortuni live da Jarvis</span> (formazioni giornata '+jarvisStatus.giornata+')'
-    : '<br><span style="color:var(--text-dim)">Titolarità/infortuni: dati statici (Jarvis non raggiungibile)</span>';
-  el.innerHTML = "Crediti che ti restano: <b>"+left+"</b> su "+state.budget+
-                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>"+jarvisLine;
+  const js = document.getElementById('jstat');
+  js.className = 'jstat' + (jarvisStatus.ok ? ' ok' : '');
+  js.querySelector('span').textContent = jarvisStatus.ok ? 'Jarvis live · g.'+jarvisStatus.giornata : 'dati statici';
+  const n = (prepSort!=='q') + prepOnlyTit + prepHideTaken + prepHideElsewhere;
+  const fn = document.getElementById('filtersN');
+  fn.textContent = n; fn.style.display = n ? 'inline-block' : 'none';
 }
 function renderPrepList(){
   renderLinkbar();
-  document.getElementById('catdesc').textContent = DESCR[prepCat];
+  const cd = document.getElementById('catdesc');
+  cd.textContent = prepCat==='all' ? '' : DESCR[prepCat];
+  cd.style.display = prepCat==='all' ? 'none' : '';
   let list = players.filter(p=>p.r===prepRole);
   if(prepCat!=='all') list = list.filter(p=>p.tags.includes(prepCat));
   if(prepHideTaken) list = list.filter(p=>!statusOf(p));
@@ -1158,22 +1253,18 @@ function renderPrepList(){
   box.innerHTML = list.map(p=>{
     const b = band(p);
     const st = statusOf(p);
-    const inj = p.inj
-      ? '<div class="injbox" style="margin-top:9px;padding:7px 10px;background:#2a1a18;border-radius:8px;font-size:12px;color:#f0a79e;">Infortunato, torna il '+shortDate(p.inj.rientro)+'</div>'
-      : '';
-    const taken = st
-      ? '<div class="takenbox">'+(st.mine
-          ? '<b>Preso da te</b>' + (st.price ? ' a '+st.price+' crediti' : '')
-          : '<b>Già assegnato</b>' + (st.price ? ' a un avversario per '+st.price+' crediti' : ' a un avversario'))+'</div>'
-      : '';
-    const cfoot = !st ? '<div class="cfoot"><button class="qbuy" data-qid="'+p.id+'">✓ '+quickBuyValue(p)+'</button></div>' : '';
+    const flag = st
+      ? (st.mine ? '<span class="tag mine">Preso da te'+(st.price?' · '+st.price:'')+'</span>'
+                 : '<span class="tag gone">Assegnato'+(st.price?' · '+st.price:'')+'</span>')
+      : (p.inj ? '<span class="tag inj">Infortunato'+(shortDate(p.inj.rientro)?' · torna '+shortDate(p.inj.rientro):'')+'</span>' : '')
+        + (isElsewhere(p) ? '<span class="tag else">Già tuo altrove</span>' : '');
+    const tit = '<span class="dot '+p.tit+'"></span><span class="titlab '+p.tit+'">'+
+      (p.tit==='titolare'?'Titolare':(p.tit==='cambio'?'Primo cambio':'Non titolare'))+(p.gkpct?' '+p.gkpct+'%':'')+'</span>';
     return '<div class="card'+(p.inj?' inj':'')+(st?' taken':'')+'" data-id="'+p.id+'">'+
-      '<div class="ctop"><div class="cbadge '+p.r+'">'+p.r+'</div>'+
-      '<div class="cnm">'+p.nome+'<div class="csq">'+p.squadra+titLine(p)+'</div></div>'+
-      '<div class="pricebox"><div class="cprice">'+b.mid+'</div>'+
-        '<div class="pricelab">crediti attesi</div>'+
-        '<div class="band">'+b.lo+'–'+b.hi+'</div></div>'+
-      '</div>'+ taken + inj + cfoot +
+      '<div class="badge '+p.r+'">'+p.r+'</div>'+
+      '<div class="rname"><div class="rn1">'+p.nome+'</div><div class="rteam">'+p.squadra+tit+flag+'</div></div>'+
+      '<div class="pricebox"><div class="cprice">'+b.mid+'</div><div class="band">'+b.lo+'–'+b.hi+'</div></div>'+
+      (!st ? '<button class="qbuy" data-qid="'+p.id+'">'+quickBuyValue(p)+'</button>' : '')+
     '</div>';
   }).join('');
   box.querySelectorAll('.card').forEach(card=>{
@@ -1202,26 +1293,25 @@ document.querySelectorAll('#cats .cat').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#cats .cat').forEach(x=>x.classList.toggle('on',x===b));
   renderPrepList();
 });
+document.getElementById('filtersBtn').onclick = ()=> openSheet('filters');
 document.getElementById('sort').onchange=(e)=>{ prepSort=e.target.value; renderPrepList(); };
 document.getElementById('hideTaken').onchange=(e)=>{ prepHideTaken=e.target.checked; renderPrepList(); };
 document.getElementById('hideElsewhere').onchange=(e)=>{ prepHideElsewhere=e.target.checked; renderPrepList(); };
 document.getElementById('onlyTit').onchange=(e)=>{ prepOnlyTit=e.target.checked; renderPrepList(); };
 
 /* ---- switch Prepara / Live: pulisce la ricerca globale, torna alla scheda scelta ---- */
-document.getElementById('tabBtnPrepara').onclick = ()=>{
-  activeMainTab='prepara';
+function setMainTab(t){
+  const again = (t===activeMainTab && !openSheetId);
+  closeSheets();
+  activeMainTab = t;
   document.getElementById('globalSearch').value='';
   renderGlobalResults('');
-  document.getElementById('tabBtnPrepara').classList.add('on');
-  document.getElementById('tabBtnLive').classList.remove('on');
-};
-document.getElementById('tabBtnLive').onclick = ()=>{
-  activeMainTab='live';
-  document.getElementById('globalSearch').value='';
-  renderGlobalResults('');
-  document.getElementById('tabBtnLive').classList.add('on');
-  document.getElementById('tabBtnPrepara').classList.remove('on');
-};
+  syncNav();
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(again) document.getElementById('globalSearch').focus();  // secondo tocco sulla scheda: pronto a scrivere il nome
+}
+document.getElementById('tabBtnPrepara').onclick = ()=> setMainTab('prepara');
+document.getElementById('tabBtnLive').onclick = ()=> setMainTab('live');
 
 /* ---- scheda giocatore (overlay condiviso da Prepara e Live) ---- */
 function selectPlayer(p){
@@ -1231,14 +1321,14 @@ function selectPlayer(p){
   document.getElementById('dBadge').className = 'badge '+p.r;
   document.getElementById('dBadge').textContent = p.r;
   document.getElementById('dName').textContent = p.nome;
-  document.getElementById('dTeam').textContent = p.squadra + ' — ' + ROLENAMES[p.r];
+  document.getElementById('dTeam').textContent = p.squadra + ' · ' + ROLENAMES[p.r];
   document.getElementById('dQt').textContent = p.q + ' crediti';
   document.getElementById('dFvm').textContent = fvmAtteso(p) + ' crediti';
   document.getElementById('dTit').textContent = TITNAMES[p.tit] + (p.gkpct ? ' ('+p.gkpct+'% presenze attese)' : '');
 
   const injBanner = document.getElementById('dInjBanner');
   injBanner.innerHTML = p.inj
-    ? '<div class="injbanner"><b>Infortunato</b> — rientro previsto il '+p.inj.rientro+' ('+p.inj.motivo+'). Il prezzo consigliato è già ridotto.</div>'
+    ? '<div class="injbanner"><b>Infortunato</b> — '+(shortDate(p.inj.rientro)?'rientro previsto il '+p.inj.rientro:'rientro non specificato')+' ('+p.inj.motivo+'). Il prezzo consigliato è già ridotto.</div>'
     : '';
   document.getElementById('dElsewhereBanner').innerHTML = isElsewhere(p)
     ? '<div class="elsewherebanner">Ce l\'hai già in un\'altra lega — considera di diversificare.</div>'
@@ -1256,7 +1346,7 @@ function selectPlayer(p){
     document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
     document.getElementById('dSlots').textContent = '0';
     altsBox.innerHTML = '';
-    quickBtn.textContent = 'Preso a ' + p.q;
+    quickBtn.textContent = 'Preso a ' + p.q + ' cr';
     quickBtn.dataset.price = p.q;
   } else {
     numEl.textContent = s.value;
@@ -1265,13 +1355,13 @@ function selectPlayer(p){
     document.getElementById('dRoleBudgetLabel').textContent = 'Budget rimasto sul ruolo';
     document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
     document.getElementById('dSlots').textContent = s.neededSlots;
-    quickBtn.textContent = 'Preso a ' + s.value;
+    quickBtn.textContent = 'Preso a ' + s.value + ' cr';
     quickBtn.dataset.price = s.value;
 
     const alts = s.pool.filter(x=>x.id!==p.id)
       .sort((a,b)=>Math.abs(peso(a)-peso(p))-Math.abs(peso(b)-peso(p))).slice(0,3);
     if(alts.length){
-      altsBox.innerHTML = '<div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">Alternative simili</div>' +
+      altsBox.innerHTML = '<div class="sectitle" style="margin:6px 2px">Alternative simili</div>' +
         alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+fvmAtteso(a)+' cr</span></div>').join('');
     } else {
       altsBox.innerHTML = '';
@@ -1357,6 +1447,8 @@ function commitEntry(mode, price, buyer, player){
   renderUndo();
   renderMarket();
   renderRivals();
+  document.getElementById('globalSearch').value = '';   // pronto per il prossimo nome chiamato
+  renderGlobalResults('');
   refreshCurrentLists();
   if(openSheetId==='detail') closeSheets();
   if(target === selected) selected = null;
@@ -1421,7 +1513,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-b';
+const BUILD = 'build-2026-09-23-c';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;
