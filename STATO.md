@@ -185,3 +185,19 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   - Bug corretto: data rientro "non specificata" mostrava "NaN undefined".
   Da fare: provarla sul telefono vero, valutare "Occasioni ora" (oggi premia giocatori da
   1 cr con FVM alto, poco utili), rifinire Opzioni/Registro/Rivali.
+
+- **23/09/2026 — rework UX fase 2 (feedback dopo la prova sul telefono)**: app rinominata
+  **FantaQintesi** (la lega nuova su Fantalab). Tolto il banner dei crediti (ridondante con
+  Fantalab); la testata ora mostra per ruolo **speso / piano** con barra e sforo in rosso
+  (+N), più una riga "Sforo sul piano: +X cr" / "In piano". Registro tolto dalla tab bar
+  (si apre da Opzioni). Righe di liste più compatte. "Occasioni ora": ora il migliore
+  titolare libero per ruolo ancora da coprire, esclusi i riempitivi (q<3 o FVM atteso<8).
+  **Rosa dell'altra lega (Rivoluzione, squadra BURKINA FASO, 25 giocatori)**: NON nel codice
+  (repo pubblico, in Jarvis le rose sono cifrate di proposito) ma con link personale
+  `index.html#miei=<id,id,...>` che la importa una volta sola in `state.elsewhere` e ripulisce
+  l'indirizzo. Fonte: `JARVIS/archivio/rose/rivoluzione-...-1789387078367.xlsx`.
+  Analisi asta precedente (Rivoluzione: 10 squadre, 500 cr, 250 acquisti su 532): quota per
+  ruolo media P 9% · D 21% · C 31% · A 40% (A varia 24–59%); prezzi molto sbilanciati
+  (A: 201, 200, 139, 118…; 4–9 giocatori a ≤2 cr per squadra); prezzo~FVM corr 0.92; stelle
+  pagate 2–5× la quotazione, riempitivi ≤ quotazione. Da qui la proposta di ricalibrare il
+  prezzo consigliato (curva empirica per rango + inflazione live) — in attesa di scelta.

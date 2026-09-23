@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Asta Fantalab">
+<meta name="apple-mobile-web-app-title" content="FantaQintesi">
 <meta name="theme-color" content="#0b1210">
-<title>Asta Fantalab</title>
+<title>FantaQintesi</title>
 <style>
   @font-face{font-family:"Barlow Condensed"; font-style:normal; font-weight:600; font-display:swap;
              src:url("font/barlow-condensed-600.woff2") format("woff2");}
@@ -66,6 +66,15 @@
   .chip.done{background:rgba(91,196,138,.14); border-color:rgba(91,196,138,.35); color:var(--ok);}
   .chip.tight{background:rgba(232,163,61,.14); border-color:rgba(232,163,61,.4); color:var(--warn);}
   .chip.warn{background:rgba(224,96,92,.16); border-color:rgba(224,96,92,.45); color:var(--danger);}
+  .chip .bar{display:block; height:4px; border-radius:2px; background:rgba(255,255,255,.12); margin:6px 8px 0; overflow:hidden;}
+  .chip .bar u{display:block; height:100%; border-radius:2px; background:var(--ok); transition:width .4s var(--soft);}
+  .chip.tight .bar u{background:var(--warn);}
+  .chip.warn .bar u{background:var(--danger);}
+  .chip em{font-style:normal; font-weight:700; color:var(--danger);}
+  .planline{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:12px; color:var(--text-dim);}
+  .planline .pover{color:var(--danger); font-weight:700; font-size:13px;}
+  .planline .pok{color:var(--ok);}
+  .jstat{padding-bottom:0 !important;}
   .chip .chipcr.over{color:var(--danger); font-weight:700;}
   .chip .chipcr.tightcr{color:var(--warn); font-weight:700;}
 
@@ -82,14 +91,14 @@
   .searchclear.show{display:block;}
   #globalResults{display:none;}
 
-  .sectitle{font-size:11.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); font-weight:600; margin:14px 2px 8px;}
+  .sectitle{font-size:11.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); font-weight:600; margin:10px 2px 6px;}
   .sectitle.gold{color:var(--accent);}
   .count{font-size:12px; color:var(--text-dim); margin:0 2px 8px;}
   .hint{font-size:13.5px; color:var(--text-dim); text-align:center; padding:26px 20px; line-height:1.5;}
   .empty{text-align:center; color:var(--text-dim); font-size:13.5px; padding:30px 0;}
 
   /* ---- controlli a segmenti (ruoli) ---- */
-  .roletabs{display:flex; gap:4px; padding:4px; margin:4px 0 12px; border-radius:16px;
+  .roletabs{display:flex; gap:4px; padding:4px; margin:4px 0 8px; border-radius:16px;
             background:var(--glass); border:1px solid var(--glass-edge); box-shadow:var(--glass-light);
             -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);}
   .roletab{flex:1; text-align:center; padding:10px 0; border-radius:12px; background:none; border:none;
@@ -99,23 +108,23 @@
   .roletab .n{display:block; font-size:10.5px; font-weight:500; opacity:.75; margin-top:1px; font-variant-numeric:tabular-nums;}
 
   /* ---- righe giocatore (Live, ricerca, occasioni) ---- */
-  .result{display:flex; align-items:center; gap:11px; padding:11px 12px; margin-bottom:8px; cursor:pointer;
+  .result{display:flex; align-items:center; gap:10px; padding:7px 10px; margin-bottom:5px; cursor:pointer;
           background:var(--glass); border:1px solid var(--glass-edge); border-radius:16px;
           -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light);
           transition:transform .2s var(--spring), background .2s;}
   .result:active{transform:scale(.98); background:rgba(255,255,255,.1);}
-  .badge{font-family:var(--num); font-size:15px; font-weight:700; width:28px; height:28px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .badge{font-family:var(--num); font-size:15px; font-weight:700; width:26px; height:26px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .badge.P{background:rgba(232,192,79,.18); color:#f0cb62;}
   .badge.D{background:rgba(95,176,214,.18); color:#7cc4e6;}
   .badge.C{background:rgba(126,203,127,.18); color:#86d688;}
   .badge.A{background:rgba(224,122,110,.2); color:#ee8d80;}
-  .rname{flex:1; font-size:16px; font-weight:600; min-width:0;}
+  .rname{flex:1; font-size:15px; font-weight:600; min-width:0;}
   .rname .rn1{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .rteam{font-size:12px; color:var(--text-dim); font-weight:400; margin-top:2px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .rq{font-size:12px; color:var(--text-dim); font-variant-numeric:tabular-nums; text-align:right; line-height:1.2;}
   .rq b{display:block; font-family:var(--num); font-size:19px; font-weight:600; color:var(--text);}
   .qbuy{flex-shrink:0; min-width:64px; background:rgba(91,196,138,.14); border:1px solid rgba(91,196,138,.5); color:var(--ok);
-        border-radius:12px; padding:10px 12px; font-family:var(--num); font-size:19px; font-weight:700; letter-spacing:.02em;
+        border-radius:11px; padding:7px 10px; font-family:var(--num); font-size:19px; font-weight:700; letter-spacing:.02em;
         white-space:nowrap; transition:transform .2s var(--spring), background .2s;}
   .qbuy:active{background:var(--ok); color:#08160e; transform:scale(.94);}
   .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
@@ -140,7 +149,7 @@
   .cat.fbtn{color:var(--text);}
   .cat .fn{display:inline-block; min-width:16px; height:16px; line-height:16px; border-radius:8px; background:var(--accent); color:#241c07; font-size:10.5px; font-weight:700; margin-left:5px; text-align:center;}
   .catdesc{font-size:12.5px; color:var(--text-dim); margin:2px 2px 10px; line-height:1.5;}
-  .card{display:flex; align-items:center; gap:11px; padding:12px; margin-bottom:8px; cursor:pointer;
+  .card{display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:5px; cursor:pointer;
         background:var(--glass); border:1px solid var(--glass-edge); border-radius:16px;
         -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); box-shadow:var(--glass-light);
         transition:transform .2s var(--spring), background .2s;}
@@ -148,7 +157,7 @@
   .card.inj{border-color:rgba(224,96,92,.4);}
   .card.taken{opacity:.5;}
   .pricebox{text-align:right; flex-shrink:0;}
-  .cprice{font-family:var(--num); font-size:24px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
+  .cprice{font-family:var(--num); font-size:22px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
   .band{font-size:11px; color:var(--text-dim); margin-top:3px; font-variant-numeric:tabular-nums;}
 
   /* ---- Live: temperatura asta ---- */
@@ -278,16 +287,13 @@
 
 <!-- testata: crediti liberi + situazione per ruolo, sempre a portata d'occhio -->
 <div class="hudwrap"><div id="hud" class="glass">
-  <div class="hudtop">
-    <div><div class="hudlab">Crediti liberi</div><div id="budgetLeft"></div></div>
-    <div class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></div>
-  </div>
   <div class="chips">
     <div class="chip" id="chipP"></div>
     <div class="chip" id="chipD"></div>
     <div class="chip" id="chipC"></div>
     <div class="chip" id="chipA"></div>
   </div>
+  <div class="planline"><span id="planText"></span><span class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></span></div>
 </div></div>
 
 <main>
@@ -348,7 +354,6 @@
 <nav id="tabbar" class="glass">
   <button class="on" id="tabBtnLive"><svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>Live</button>
   <button id="tabBtnPrepara"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Prepara</button>
-  <button id="toggleLog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Registro</button>
   <button id="toggleRivals"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.3a3.2 3.2 0 010 5.4M18 14c2 .6 3.5 2.4 3.5 5"/></svg>Rivali</button>
   <button id="toggleSettings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Opzioni</button>
 </nav>
@@ -398,7 +403,10 @@
   <datalist id="elsewhereOptions"></datalist>
   <div id="elsewhereList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
 
-  <div class="row" style="margin-top:24px">
+  <div class="row" style="margin-top:20px">
+    <button id="openLogBtn" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:14px; padding:14px; font-size:15px; font-weight:600;">Registro acquisti</button>
+  </div>
+  <div class="row" style="margin-top:4px">
     <button id="resetAll" style="flex:1; background:rgba(224,96,92,.1); border:1px solid rgba(224,96,92,.5); color:var(--danger); border-radius:14px; padding:14px; font-size:15px; font-weight:600;">Azzera asta</button>
   </div>
 </div>
@@ -601,6 +609,20 @@ async function writeStoredState(payload){
   return ok;
 }
 
+/* link personale con #miei=id,id,...: importa i giocatori "già miei altrove" una volta sola e pulisce l'indirizzo
+   (la rosa non sta nel codice: il repo e' pubblico) */
+function importFromHash(){
+  const m = /[#&]miei=([\d,]+)/.exec(location.hash);
+  if(!m) return;
+  state.elsewhere = state.elsewhere || [];
+  const have = new Set(state.elsewhere.map(e=>e.id));
+  m[1].split(',').map(Number).forEach(id=>{
+    const pl = players.find(x=>x.id===id);
+    if(pl && !have.has(id)) state.elsewhere.push({id:pl.id, nome:pl.nome, squadra:pl.squadra});
+  });
+  saveState();
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+}
 async function loadState(){
   try{
     const rawValue = await readStoredState();
@@ -612,6 +634,7 @@ async function loadState(){
     }
   }catch(e){}
   normalizeBasePct();
+  importFromHash();
   populateElsewhereOptions();
   renderSettings();
   renderBar();
@@ -971,7 +994,7 @@ function closeSheets(){
   syncNav();
 }
 /* la tab bar evidenzia il foglio aperto (Registro/Rivali/Opzioni) o, altrimenti, la scheda attiva */
-const NAV_SHEETS = {logpanel:'toggleLog', rivals:'toggleRivals', settings:'toggleSettings'};
+const NAV_SHEETS = {logpanel:'toggleSettings', rivals:'toggleRivals', settings:'toggleSettings'};
 function syncNav(){
   const sheetBtn = NAV_SHEETS[openSheetId];
   document.querySelectorAll('#tabbar button').forEach(b=>b.classList.remove('on'));
@@ -997,36 +1020,37 @@ document.getElementById('sheetBackdrop').onclick = closeSheets;
 document.querySelectorAll('[data-close]').forEach(b=> b.onclick = closeSheets);
 function toggleSheet(id){ if(openSheetId===id) closeSheets(); else openSheet(id); }
 document.getElementById('toggleSettings').onclick = ()=> toggleSheet('settings');
-document.getElementById('toggleLog').onclick = ()=> toggleSheet('logpanel');
+document.getElementById('openLogBtn').onclick = ()=> openSheet('logpanel');
 document.getElementById('toggleRivals').onclick = ()=> toggleSheet('rivals');
 
 function renderBar(){
   healPctTotal();
-  let totalFloor = 0;
+  let totalOver = 0;
   ROLES.forEach(r=>{
     const el = document.getElementById('chip'+r);
     const c = boughtCount(r), t = state.slots[r];
-    const neededSlots = t - c;
+    const needed = t - c;
     const display = roleBudgetDisplay(r);
-    const floor = roleFloorCost(r, neededSlots);
-    totalFloor += floor;
-    const tight = neededSlots > 0 && display >= 0 && display < floor;
-    const crCls = display<0 ? 'over' : (tight ? 'tightcr' : '');
-    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr'+(crCls?' '+crCls:'')+'">'+display+' cr</span>';
-    el.className = 'chip' + (c>=t ? ' done' : (display<0 ? ' warn' : (tight ? ' tight' : '')));
+    const floor = roleFloorCost(r, needed);
+    const planned = Math.round(state.budget * state.pct[r] / 100);
+    const spent = boughtSpent(r);
+    const over = Math.max(0, spent - planned);
+    totalOver += over;
+    const tight = needed > 0 && display >= 0 && display < floor;
+    const cls = (over > 0 || display < 0) ? 'warn' : (c >= t ? 'done' : (tight ? 'tight' : ''));
+    const fill = planned ? Math.min(100, spent / planned * 100) : 0;
+    el.className = 'chip' + (cls ? ' ' + cls : '');
+    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr">'+spent+' / '+planned+(over ? ' <em>+'+over+'</em>' : '')+'</span>'+
+                   '<i class="bar"><u style="width:'+fill+'%"></u></i>';
     const ntEl = document.getElementById('nt'+r);
     if(ntEl) ntEl.textContent = c+'/'+t;
     const curEl = document.getElementById('cur'+r);
     if(curEl) curEl.textContent = '(attuale: '+Math.round(normalizedPct(r))+'%)';
   });
-  const totalSpent = totalSpentAll();
-  const left = state.budget - totalSpent;
-  const bl = document.getElementById('budgetLeft');
-  const prevLeft = bl.dataset.left;
-  bl.innerHTML = left + '<small>cr</small>';
-  bl.className = left<0 ? 'over' : (left < totalFloor ? 'tight' : '');
-  if(prevLeft!==undefined && Number(prevLeft)!==left){ void bl.offsetWidth; bl.classList.add('bump'); }
-  bl.dataset.left = left;
+  const pt = document.getElementById('planText');
+  pt.innerHTML = totalOver > 0
+    ? '<span class="pover">Sforo sul piano: +'+totalOver+' cr</span>'
+    : '<span class="pok">In piano</span> · speso '+totalSpentAll()+' su '+state.budget;
   renderPicksBar();
 }
 
@@ -1098,14 +1122,17 @@ function quickBuy(p){
 /* ---- colpo d'occhio "chi comprare ora" (punto 5 del piano): migliori occasioni tra i
    titolari/primi cambi liberi, non infortunati, nei ruoli che hanno ancora slot da coprire ---- */
 function bestPicksNow(){
-  const candidates = players.filter(p=>{
-    if(isTaken(p.id)) return false;
-    if(p.tit!=='titolare' && p.tit!=='cambio') return false;
-    if(p.inj) return false;
-    if(isElsewhere(p)) return false;
-    return (state.slots[p.r] - boughtCount(p.r)) > 0;
+  const best = [];
+  ROLES.forEach(r=>{
+    if((state.slots[r] - boughtCount(r)) <= 0) return;
+    const c = players.filter(p=>{
+      if(p.r!==r || isTaken(p.id) || p.inj || isElsewhere(p)) return false;
+      if(p.tit!=='titolare') return false;
+      return p.q>=3 && fvmAtteso(p)>=8;   // niente giocatori da 1 credito: non sono occasioni, sono riempitivi
+    }).sort((a,b)=>ratio(b)-ratio(a));
+    if(c[0]) best.push(c[0]);
   });
-  return candidates.sort((a,b)=>ratio(b)-ratio(a)).slice(0,3);
+  return best.sort((a,b)=>ratio(b)-ratio(a)).slice(0,3);
 }
 function renderPicksBar(){
   const box = document.getElementById('picksBar');
@@ -1513,7 +1540,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-c';
+const BUILD = 'build-2026-09-23-d';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;
