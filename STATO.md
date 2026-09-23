@@ -258,3 +258,10 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   2. **Testata**: "margine fasce" a 3 livelli, verde >=0, arancio fino a −3% del budget (min 10 cr),
      rosso oltre. Nota: il margine parte da 0 per costruzione, non ha senso una soglia "basso".
   Provato in locale su un giocatore per ruolo (P, D, C, A) e forzando i tre stati della testata.
+
+- **23/09/2026 — tab Rivali tolta** (build `2026-09-23-k`): l'utente segue gli avversari su Fantalab;
+  qui basta segnare chi ha preso ogni giocatore (selettore "Preso da" invariato), che alimenta
+  le misure in background (liquidità avversari, pressione sulle stelle). Tab bar ora Live · Prepara ·
+  Opzioni. Il foglio Rivali resta nel codice ma non è più raggiungibile.
+  Test prima uscita: l'utente ha provato l'app sul telefono, occasioni e semaforo ok; la rosa
+  dell'altra lega non risultava caricata perché il link `#miei=` non era ancora stato aperto.

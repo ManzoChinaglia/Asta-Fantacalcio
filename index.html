@@ -386,7 +386,6 @@
 <nav id="tabbar" class="glass">
   <button class="on" id="tabBtnLive"><svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>Live</button>
   <button id="tabBtnPrepara"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Prepara</button>
-  <button id="toggleRivals"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.3a3.2 3.2 0 010 5.4M18 14c2 .6 3.5 2.4 3.5 5"/></svg>Rivali</button>
   <button id="toggleSettings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Opzioni</button>
 </nav>
 
@@ -1186,7 +1185,7 @@ document.querySelectorAll('[data-close]').forEach(b=> b.onclick = closeSheets);
 function toggleSheet(id){ if(openSheetId===id) closeSheets(); else openSheet(id); }
 document.getElementById('toggleSettings').onclick = ()=> toggleSheet('settings');
 document.getElementById('openLogBtn').onclick = ()=> openSheet('logpanel');
-document.getElementById('toggleRivals').onclick = ()=> toggleSheet('rivals');
+
 
 function renderBar(){
   healPctTotal();
@@ -1729,7 +1728,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-j';
+const BUILD = 'build-2026-09-23-k';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;
