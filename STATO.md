@@ -19,21 +19,22 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
 
 ## Aperto — piano di unificazione (deciso per proposte il 23/09/2026)
 
-1. Un'unica app, due schede: "Prepara" (oggi scout) + "Live" (oggi index), stesso
-   dataset e stesso stato.
+1. ~~Un'unica app, due schede~~ — **fatto** (sopra, index.html+scout.html uniti).
 2. Dati live da Jarvis: leggere via URL grezzo da GitHub `dati/statistiche.json`,
    `dati/titolari.json`, `dati/infortuni.json`, `dati/modello.json` del repo JARVIS
-   (pubblici, fuori dal lucchetto) invece di uno scraping proprio.
+   (pubblici, fuori dal lucchetto) invece di uno scraping proprio. **Non iniziato.**
 3. ~~Supabase da decidere~~ — **fatto**, sganciato (sopra).
 4. Diversificazione manuale: lista "giocatori già miei altrove" compilata a mano (niente
    collegamento con le rose di Rivoluzione Fantacalcio, che sono in un repo diverso e
-   cifrate).
-5. Level-up per uso durante un'asta vera: ricerca sempre a fuoco, colpo d'occhio "chi
-   comprare ora" all'apertura, undo sempre a portata (già in index), avviso sfondamento
-   budget di ruolo.
-6. Default della nuova asta: 8 partecipanti (nomi provvisori), 500 crediti.
-
-Nessuno dei punti 1, 2, 4, 5, 6 è ancora iniziato.
+   cifrate). **Non iniziato.**
+5. Level-up per uso durante un'asta vera: ricerca sempre a fuoco (**fatto**), undo sempre
+   a portata (**fatto**, già in index), avviso sfondamento budget di ruolo (**fatto**,
+   colpo d'occhio a 3 livelli sopra). Manca ancora: colpo d'occhio "chi comprare ora"
+   all'apertura dell'app (oggi si apre sulla lista giocatori del ruolo, non su un
+   riepilogo/suggerimento).
+6. ~~Default della nuova asta: 8 partecipanti (nomi provvisori), 500 crediti~~ — **fatto**,
+   7 avversari placeholder ("Avversario 1"..."Avversario 7", rinominabili/rimovibili) +
+   budget 500 di default (8 squadre totali = te + 7 avversari, coerente con Fantalab).
 
 ## Decisioni
 
@@ -110,4 +111,12 @@ Nessuno dei punti 1, 2, 4, 5, 6 è ancora iniziato.
   Nuova funzione `roleFloorCost(role, neededSlots)`. Provato in locale forzando lo stato
   (via console) nei tre casi: verde/arancio/rosso confermati sia sulle card ruolo che sul
   totale in basso a destra.
+  Commit `e52e885`, pushato su GitHub.
+
+- **23/09/2026 — default nuova asta (punto 6 del piano)**: `DEFAULT_STATE.participants`
+  ora parte con 7 avversari placeholder ("Avversario 1"..."Avversario 7") invece di lista
+  vuota — 8 squadre totali contando te, come su Fantalab. Budget 500 era già di default.
+  Si applica solo a un'installazione nuova (localStorage vuoto) — "Azzera asta" non tocca
+  i partecipanti, solo acquisti/registro. Nomi restano modificabili/rimovibili dal
+  pannello Impostazioni come prima. Provato in locale con localStorage pulito.
   Non ancora committato su git.
