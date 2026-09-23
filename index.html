@@ -1202,6 +1202,10 @@ function renderUndo(){
     ? a.nome+' preso a '+a.price+' cr'
     : a.nome+' segnato preso da altri a '+a.price+' cr';
 }
+/* Annulla a piu' livelli: torna indietro sull'ultima voce del registro, poi sulla precedente, ecc. */
+function actionFromMarket(m){
+  return m ? {type: m.mine ? 'buy' : 'other', id:m.id, nome:m.nome, price:m.price, buyer:m.buyer||null} : null;
+}
 document.getElementById('undoBtn').onclick = ()=>{
   if(!state.lastAction) return;
   const a = state.lastAction;
@@ -1211,7 +1215,7 @@ document.getElementById('undoBtn').onclick = ()=>{
     if(a.buyer && state.teams[a.buyer]) delete state.teams[a.buyer].bought[a.id];
   }
   if(state.market && state.market.length) state.market.pop();
-  state.lastAction = null;
+  state.lastAction = actionFromMarket((state.market||[])[state.market.length-1]);
   saveState();
   renderBar();
   renderUndo();
@@ -1616,7 +1620,7 @@ let buyMode = 'mine';
 let pendingPrice = null;
 function commitEntry(mode, price, buyer, player, est){
   const target = player || selected;
-  if(!target || !price || price<1) return false;
+  if(!target || !price || price<1 || isTaken(target.id)) return false;
   const entry = {r:target.r, price:price, nome:target.nome, q:target.q};
   if(mode==='mine'){
     state.bought[target.id] = entry;
@@ -1710,7 +1714,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-l';
+const BUILD = 'build-2026-09-23-m';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

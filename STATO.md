@@ -275,3 +275,29 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
     nomi escapati (`escHtml`, anche nei chip di avversari e "già miei altrove").
   Provato in locale (viewport telefono): registro con acquisti veri/stimati/altrui, conferma su
   Azzera, nessun errore in console.
+
+- **23/09/2026 — simulazione d'asta e prova di stress** (build `2026-09-23-m`): asta simulata in
+  locale (8 squadre, 500 cr, 200 vendite, io compro seguendo il prezzo consigliato) con prezzi
+  "umani" da una curva nascosta diversa dal modello + rumore lognormale, in 6 scenari (storico,
+  ruoli neutri, +50%, −40%, stelle pazze, inflazione crescente), 3 semi ciascuno. Il localStorage
+  del telefono non è stato toccato. Risultati (errore medio prezzo consigliato vs pagato, cr):
+  - MAE 7-18 a seconda dello scenario; sulle stelle (previste ≥40 cr) 33-59: il prezzo è
+    un'indicazione, la fascia lo/hi copre solo il 50-60% dei casi.
+  - Il correttivo live aiuta davvero solo quando l'asta è più economica del previsto
+    (−40%: MAE 7,0 contro 9,7 senza); negli altri scenari è neutro (±0,3). Non peggiora mai.
+  - **Difetto**: i prezzi degli ultimi 50 acquisti (attaccanti, chiamati per ultimi) sono
+    sovrastimati, MAE 21-33 contro 7-12 dei primi 50: nella simulazione i crediti finiscono e le
+    ultime chiamate vanno a meno del previsto. Il margine del piano è pessimista a metà asta
+    (fino a −250 cr con prezzi alti) e poi rientra.
+  - Idea provata offline, NON implementata: correttivo di "conservazione dei crediti" (crediti
+    rimasti di tutti / somma dei prezzi attesi dei giocatori ancora da comprare). Da solo o in
+    media geometrica con quello live riduce il MAE di 1-2,5 cr e degli ultimi 50 fino a metà
+    (gonfia 33,5→19,6), ma peggiora quando l'asta spende poco (−40%: 8,8 contro 7,0) e richiede
+    di registrare TUTTE le vendite degli altri. Decisione aperta.
+  - Robustezza: nessun NaN né errore con prezzi 1/999, budget 0, slot sotto il comprato, zero
+    avversari, avversario cancellato dopo acquisti, ruolo esaurito, ricerche strane.
+  - Corretti due buchi: lo stesso giocatore si poteva registrare due volte (duplicato nel
+    registro, falsava il correttivo live) → ora `commitEntry` lo rifiuta; «Annulla» tornava
+    indietro di una sola azione → ora a più livelli, sul registro.
+  Limiti della simulazione: prezzi generati, non veri; chi compra "vince" se il suo limite supera
+  il prezzo (nessuna maledizione del vincitore); gli avversari non si adattano ai prezzi.
