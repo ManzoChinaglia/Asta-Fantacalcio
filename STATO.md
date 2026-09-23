@@ -92,4 +92,4 @@ Nessuno dei punti 1, 2, 4, 5, 6 è ancora iniziato.
      (stesso meccanismo `openSheet`/`closeSheet`), non spingono più la pagina.
   Non ancora fatto: percentuali con slider, colpo d'occhio visivo (avvisi colorati oltre
   al rosso quando sfori), la grafica vera e propria — questi restano il prossimo giro.
-  Non ancora committato su git.
+  Commit `d4fbcbd`, pushato su GitHub.
