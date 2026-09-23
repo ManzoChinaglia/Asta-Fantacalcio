@@ -332,3 +332,5 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
 - Moltiplicatore infortunati: reso proporzionale (sopra); resta un'ipotesi da verificare in asta.
 - Da ricordare in asta: registrare OGNI vendita ("Non tracciato" se non si sa chi), altrimenti
   il correttivo sui crediti sovrastima i prezzi.
+- **23/09/2026, sera — punti d'uso chiusi dall'utente**: registrazione di ogni vendita in asta e
+  controllo dei prezzi degli infortunati considerati chiusi. Nessun punto aperto per questo progetto.
