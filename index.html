@@ -297,7 +297,7 @@
   .switch input:checked + span::after{transform:translateX(20px);}
   #sort{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:13px; margin-top:6px;}
 
-  /* registro e rivali */
+  /* registro */
   .logtabs{display:flex; gap:4px; padding:4px; border-radius:14px; background:var(--surface2); margin-bottom:12px;}
   .logtab{flex:1; padding:9px 0; border-radius:11px; background:none; border:none; color:var(--text-dim); font-size:13.5px; font-weight:600;}
   .logtab.on{background:var(--accent); color:#241c07;}
@@ -308,11 +308,23 @@
   .logrow .lp{font-family:var(--num); font-size:19px; font-weight:700; min-width:34px; text-align:right; font-variant-numeric:tabular-nums;}
   .logtot{display:flex; justify-content:space-between; font-size:13.5px; color:var(--text-dim); padding:12px 2px 0;}
   .logtot b{color:var(--text);}
-  .rivalcard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:8px;}
-  .rivalname{font-weight:700; font-size:15px;}
-  .rivalstats{font-size:12.5px; color:var(--text-dim); margin:4px 0;}
-  .rivalroles{font-size:12.5px; color:var(--text-dim);}
-  .rivalwarn{color:var(--danger) !important; font-weight:700;}
+
+  /* opzioni */
+  .optcard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:4px 14px 14px; margin-bottom:12px;}
+  .optcard .settings-h{margin:14px 0 8px;}
+  .optnav{display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:14px; padding:14px 16px; font-size:15px; font-weight:600; margin-bottom:12px;}
+  .optnav span{color:var(--text-dim); font-weight:400; font-size:13px;}
+  .optnote{font-size:11.5px; color:var(--text-dim); margin:8px 0 0; line-height:1.5;}
+  .addrow{display:flex; gap:8px; align-items:center;}
+  .addrow input{flex:1; min-width:0; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px;}
+  .addrow button{background:var(--accent); color:#241c07; border:none; border-radius:12px; width:48px; height:44px; font-weight:700; font-size:20px;}
+  .chipwrap{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .chipwrap:empty{display:none;}
+  .btn-ghost{width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:12px; padding:12px; font-size:14px;}
+  .btn-danger{width:100%; background:rgba(224,96,92,.1); border:1px solid rgba(224,96,92,.5); color:var(--danger); border-radius:14px; padding:14px; font-size:15px; font-weight:600;}
+  .dangerzone{margin-top:22px;}
+  .logrow .lt{font-size:11px; font-weight:700; color:var(--text-dim); background:var(--surface2); border-radius:6px; padding:2px 6px; flex-shrink:0;}
+  .logrow .est{color:var(--text-dim); font-size:12px; font-weight:400;}
 </style>
 </head>
 <body>
@@ -389,56 +401,64 @@
   <button id="toggleSettings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Opzioni</button>
 </nav>
 
-<!-- fogli a scomparsa: Opzioni / Registro / Rivali / Filtri / scheda giocatore -->
+<!-- fogli a scomparsa: Opzioni / Registro / Piano / Filtri / scheda giocatore -->
 <div class="sheet-backdrop" id="sheetBackdrop"></div>
 
 <div class="sheet" id="settings">
   <div class="sheethandle"></div>
-  <div class="panelhead"><h2>Budget e rosa</h2><button class="sheetclose" data-close>&times;</button></div>
-  <div class="row">
-    <div class="field"><label>Crediti totali</label><input type="number" id="budget" inputmode="numeric"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Slot Portieri</label><input type="number" id="slotP" inputmode="numeric"></div>
-    <div class="field"><label>% budget <span class="pctval" id="valP"></span>% <span class="curpct" id="curP"></span></label><input type="range" min="0" max="100" id="pctP"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Slot Difensori</label><input type="number" id="slotD" inputmode="numeric"></div>
-    <div class="field"><label>% budget <span class="pctval" id="valD"></span>% <span class="curpct" id="curD"></span></label><input type="range" min="0" max="100" id="pctD"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC" inputmode="numeric"></div>
-    <div class="field"><label>% budget <span class="pctval" id="valC"></span>% <span class="curpct" id="curC"></span></label><input type="range" min="0" max="100" id="pctC"></div>
-  </div>
-  <div class="row">
-    <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA" inputmode="numeric"></div>
-    <div class="field"><label>% budget <span class="pctval" id="valA"></span>% <span class="curpct" id="curA"></span></label><input type="range" min="0" max="100" id="pctA"></div>
-  </div>
-  <div class="pctsum" id="pctsum"></div>
-  <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:12px; padding:12px; font-size:14px;">Ripristina percentuali di partenza</button>
-  <p style="font-size:11.5px; color:var(--text-dim); margin:8px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta.</p>
+  <div class="panelhead"><h2>Opzioni</h2><button class="sheetclose" data-close>&times;</button></div>
 
-  <h2 class="settings-h">Partecipanti avversari</h2>
-  <div class="row">
-    <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px; min-width:0;">
-    <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:12px; padding:0 20px; height:44px; font-weight:700; font-size:18px;">+</button>
-  </div>
-  <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
+  <button class="optnav" id="openLogBtn">Registro acquisti<span id="logCount"></span></button>
 
-  <h2 class="settings-h">Già miei altrove</h2>
-  <p style="font-size:11.5px; color:var(--text-dim); margin:0 0 8px">Giocatori che hai già in un'altra lega (es. Rivoluzione Fantacalcio) — solo un promemoria scritto a mano qui, nessun collegamento automatico con altre rose.</p>
-  <div class="row">
-    <input type="text" id="elsewhereInput" list="elsewhereOptions" placeholder="Nome giocatore" autocomplete="off" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:11px 12px; font-size:16px; min-width:0;">
-    <button id="addElsewhere" style="background:var(--accent); color:#241c07; border:none; border-radius:12px; padding:0 20px; height:44px; font-weight:700; font-size:18px;">+</button>
+  <div class="optcard">
+    <h2 class="settings-h">Budget e rosa</h2>
+    <div class="row">
+      <div class="field"><label>Crediti totali</label><input type="number" id="budget" inputmode="numeric"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Portieri</label><input type="number" id="slotP" inputmode="numeric"></div>
+      <div class="field"><label>% budget <span class="pctval" id="valP"></span>% <span class="curpct" id="curP"></span></label><input type="range" min="0" max="100" id="pctP"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Difensori</label><input type="number" id="slotD" inputmode="numeric"></div>
+      <div class="field"><label>% budget <span class="pctval" id="valD"></span>% <span class="curpct" id="curD"></span></label><input type="range" min="0" max="100" id="pctD"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC" inputmode="numeric"></div>
+      <div class="field"><label>% budget <span class="pctval" id="valC"></span>% <span class="curpct" id="curC"></span></label><input type="range" min="0" max="100" id="pctC"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA" inputmode="numeric"></div>
+      <div class="field"><label>% budget <span class="pctval" id="valA"></span>% <span class="curpct" id="curA"></span></label><input type="range" min="0" max="100" id="pctA"></div>
+    </div>
+    <div class="pctsum" id="pctsum"></div>
+    <button id="resetPct" class="btn-ghost">Ripristina percentuali di partenza</button>
+    <p class="optnote">Se cambi una percentuale, le altre si aggiustano da sole per restare a 100%. «Attuale» è la quota che stai usando davvero durante l'asta.</p>
   </div>
-  <datalist id="elsewhereOptions"></datalist>
-  <div id="elsewhereList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
 
-  <div class="row" style="margin-top:20px">
-    <button id="openLogBtn" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:14px; padding:14px; font-size:15px; font-weight:600;">Registro acquisti</button>
+  <div class="optcard">
+    <h2 class="settings-h">Avversari</h2>
+    <div class="addrow">
+      <input type="text" id="participantInput" placeholder="Nome avversario" autocomplete="off">
+      <button id="addParticipant" aria-label="Aggiungi avversario">+</button>
+    </div>
+    <div id="participantList" class="chipwrap"></div>
+    <p class="optnote">Servono per segnare «Preso da» chi si aggiudica un giocatore.</p>
   </div>
-  <div class="row" style="margin-top:4px">
-    <button id="resetAll" style="flex:1; background:rgba(224,96,92,.1); border:1px solid rgba(224,96,92,.5); color:var(--danger); border-radius:14px; padding:14px; font-size:15px; font-weight:600;">Azzera asta</button>
+
+  <div class="optcard">
+    <h2 class="settings-h">Già miei altrove</h2>
+    <div class="addrow">
+      <input type="text" id="elsewhereInput" list="elsewhereOptions" placeholder="Nome giocatore" autocomplete="off">
+      <button id="addElsewhere" aria-label="Aggiungi giocatore">+</button>
+    </div>
+    <datalist id="elsewhereOptions"></datalist>
+    <div id="elsewhereList" class="chipwrap"></div>
+    <p class="optnote">Giocatori che hai già in un'altra lega: promemoria a mano, nessun collegamento con altre rose.</p>
+  </div>
+
+  <div class="dangerzone">
+    <button id="resetAll" class="btn-danger">Azzera asta</button>
   </div>
 </div>
 
@@ -451,12 +471,6 @@
     <button class="logtab" data-l="all">Tutti</button>
   </div>
   <div id="logList"></div>
-</div>
-
-<div class="sheet" id="rivals">
-  <div class="sheethandle"></div>
-  <div class="panelhead"><h2>Situazione avversari</h2><button class="sheetclose" data-close>&times;</button></div>
-  <div id="rivalsList"></div>
 </div>
 
 <div class="sheet" id="plan">
@@ -690,7 +704,6 @@ async function loadState(){
   renderBar();
   renderUndo();
   renderMarket();
-  renderRivals();
   renderLog();
   renderPrepList();
   loadLiveJarvisData();
@@ -1047,7 +1060,7 @@ function renderElsewhereList(){
   (state.elsewhere||[]).forEach(e=>{
     const chip = document.createElement('div');
     chip.className = 'participant-chip';
-    chip.innerHTML = '<span>'+e.nome+' ('+e.squadra+')</span><button>&times;</button>';
+    chip.innerHTML = '<span>'+escHtml(e.nome+' ('+e.squadra+')')+'</span><button>&times;</button>';
     chip.querySelector('button').onclick = ()=>{
       state.elsewhere = state.elsewhere.filter(x=>x.id!==e.id);
       saveState();
@@ -1078,13 +1091,12 @@ function renderParticipantList(){
   (state.participants||[]).forEach(name=>{
     const chip = document.createElement('div');
     chip.className = 'participant-chip';
-    chip.innerHTML = '<span>'+name+'</span><button>&times;</button>';
+    chip.innerHTML = '<span>'+escHtml(name)+'</span><button>&times;</button>';
     chip.querySelector('button').onclick = ()=>{
       state.participants = state.participants.filter(n=>n!==name);
       delete state.teams[name];
       saveState();
       renderParticipantList();
-      renderRivals();
     };
     box.appendChild(chip);
   });
@@ -1099,44 +1111,7 @@ document.getElementById('addParticipant').onclick = ()=>{
   input.value='';
   saveState();
   renderParticipantList();
-  renderRivals();
 };
-
-function rivalStats(name){
-  const team = (state.teams && state.teams[name]) || {bought:{}};
-  const bought = Object.values(team.bought||{});
-  const spent = bought.reduce((a,b)=>a+b.price,0);
-  const remaining = state.budget - spent;
-  const perRole = {};
-  let neededTotal = 0;
-  ROLES.forEach(r=>{
-    const c = bought.filter(b=>b.r===r).length;
-    const needed = state.slots[r]-c;
-    perRole[r] = {count:c, needed};
-    neededTotal += Math.max(needed,0);
-  });
-  return {spent, remaining, perRole, neededTotal};
-}
-
-function renderRivals(){
-  const box = document.getElementById('rivalsList');
-  if(!state.participants || state.participants.length===0){
-    box.innerHTML = '<div class="hint" style="display:block">Aggiungi i nomi degli avversari dalle Impostazioni per iniziare a tracciarli.</div>';
-    return;
-  }
-  box.innerHTML = '';
-  state.participants.forEach(name=>{
-    const s = rivalStats(name);
-    const tight = s.remaining < s.neededTotal;
-    const card = document.createElement('div');
-    card.className = 'rivalcard';
-    card.innerHTML =
-      '<div class="rivalname">'+name+'</div>'+
-      '<div class="rivalstats'+(tight?' rivalwarn':'')+'">Speso '+s.spent+' cr · Rimane '+s.remaining+' cr'+(tight?' — in difficolta':'')+'</div>'+
-      '<div class="rivalroles">'+ROLES.map(r=>r+' '+s.perRole[r].count+'/'+state.slots[r]).join(' · ')+'</div>';
-    box.appendChild(card);
-  });
-}
 
 /* ---- overlay a fogli (priorita 2 e 4): niente piu pannelli che spingono la pagina ---- */
 let openSheetId = null;
@@ -1148,8 +1123,7 @@ function openSheet(id){
   document.getElementById('sheetBackdrop').classList.add('show');
   openSheetId = id;
   syncNav();
-  if(id==='rivals') renderRivals();
-  if(id==='logpanel') renderLog();
+  if(id==='logpanel' || id==='settings') renderLog();
 }
 function closeSheets(){
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
@@ -1157,8 +1131,8 @@ function closeSheets(){
   openSheetId = null;
   syncNav();
 }
-/* la tab bar evidenzia il foglio aperto (Registro/Rivali/Opzioni) o, altrimenti, la scheda attiva */
-const NAV_SHEETS = {logpanel:'toggleSettings', rivals:'toggleRivals', settings:'toggleSettings'};
+/* la tab bar evidenzia il foglio aperto (Registro/Opzioni) o, altrimenti, la scheda attiva */
+const NAV_SHEETS = {logpanel:'toggleSettings', settings:'toggleSettings'};
 function syncNav(){
   const sheetBtn = NAV_SHEETS[openSheetId];
   document.querySelectorAll('#tabbar button').forEach(b=>b.classList.remove('on'));
@@ -1242,7 +1216,6 @@ document.getElementById('undoBtn').onclick = ()=>{
   renderBar();
   renderUndo();
   renderMarket();
-  renderRivals();
   refreshCurrentLists();
 };
 
@@ -1612,8 +1585,9 @@ document.getElementById('resetPct').onclick = ()=>{
   if(selected) selectPlayer(selected);
 };
 document.getElementById('resetAll').onclick = ()=>{
+  if(!confirm("Azzerare l'asta? Cancella acquisti, registro e prezzi appresi. Budget, ruoli, avversari e «già miei altrove» restano.")) return;
   state.bought = {}; state.discarded = {}; state.lastAction = null; state.market = []; state.teams = {};
-  saveState(); renderBar(); renderUndo(); renderMarket(); renderRivals();
+  saveState(); renderBar(); renderUndo(); renderMarket();
   closeSheets();
   refreshCurrentLists();
 };
@@ -1661,7 +1635,6 @@ function commitEntry(mode, price, buyer, player, est){
   renderBar();
   renderUndo();
   renderMarket();
-  renderRivals();
   document.getElementById('globalSearch').value = '';   // pronto per il prossimo nome chiamato
   renderGlobalResults('');
   refreshCurrentLists();
@@ -1699,10 +1672,17 @@ document.getElementById('buyConfirm').onclick = ()=>{
 
 /* ---- Registro acquisti ---- */
 let logFilter = 'mine';
+function escHtml(t){ return String(t).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function renderLog(){
   const box = document.getElementById('logList');
   if(!box) return;
   const rows = (state.market||[]).slice().reverse();
+  const counts = {mine: rows.filter(m=>m.mine).length, others: rows.filter(m=>!m.mine).length, all: rows.length};
+  document.querySelectorAll('.logtab').forEach(t=>{
+    const base = {mine:'I miei', others:'Degli altri', all:'Tutti'}[t.dataset.l];
+    t.textContent = base + ' · ' + counts[t.dataset.l];
+  });
+  document.getElementById('logCount').textContent = rows.length ? rows.length+' acquisti' : '';
   let list = rows;
   if(logFilter==='mine') list = rows.filter(m=>m.mine);
   if(logFilter==='others') list = rows.filter(m=>!m.mine);
@@ -1712,12 +1692,14 @@ function renderLog(){
   }
   box.innerHTML = list.map(m=>{
     const chi = m.mine ? '<span class="lw me">noi</span>'
-                       : '<span class="lw">'+(m.buyer || '—')+'</span>';
-    return '<div class="logrow"><span class="ln">'+m.nome+'</span>'+chi+
-           '<span class="lp">'+m.price+'</span></div>';
+                       : '<span class="lw">'+escHtml(m.buyer || '—')+'</span>';
+    return '<div class="logrow"><span class="lt">'+m.r+'</span><span class="ln">'+escHtml(m.nome)+'</span>'+chi+
+           '<span class="lp">'+m.price+(m.est?'<span class="est">~</span>':'')+'</span></div>';
   }).join('');
   const tot = list.reduce((a,m)=>a+m.price,0);
-  box.innerHTML += '<div class="logtot"><span>'+list.length+' acquisti</span><span>Totale <b>'+tot+' cr</b></span></div>';
+  const hasEst = list.some(m=>m.est);
+  box.innerHTML += '<div class="logtot"><span>'+list.length+' acquisti</span><span>Totale <b>'+tot+' cr</b></span></div>'+
+    (hasEst ? '<p class="optnote">~ = prezzo stimato dal tocco rapido, non entra nel calcolo dell\'inflazione.</p>' : '');
 }
 document.querySelectorAll('.logtab').forEach(b=>{
   b.onclick = ()=>{
@@ -1728,7 +1710,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-k';
+const BUILD = 'build-2026-09-23-l';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

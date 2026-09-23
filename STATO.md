@@ -265,3 +265,13 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   Opzioni. Il foglio Rivali resta nel codice ma non è più raggiungibile.
   Test prima uscita: l'utente ha provato l'app sul telefono, occasioni e semaforo ok; la rosa
   dell'altra lega non risultava caricata perché il link `#miei=` non era ancora stato aperto.
+
+- **23/09/2026 — pulizia Opzioni e Registro** (build `2026-09-23-l`, commit `3327de5`, non pushato):
+  - Tolto il codice morto dei Rivali (foglio, `renderRivals`, `rivalStats`, CSS, chiamate).
+  - Opzioni riorganizzate in schede: Budget e rosa · Avversari · Già miei altrove; "Registro
+    acquisti" in cima come voce di navigazione col conteggio; "Azzera asta" isolato in fondo e
+    ora **chiede conferma** (prima azzerava al primo tocco). Stili inline spostati in classi.
+  - Registro: tab con conteggi, badge ruolo, "~" sui prezzi stimati dal tocco rapido (con nota),
+    nomi escapati (`escHtml`, anche nei chip di avversari e "già miei altrove").
+  Provato in locale (viewport telefono): registro con acquisti veri/stimati/altrui, conferma su
+  Azzera, nessun errore in console.
