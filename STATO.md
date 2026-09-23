@@ -129,4 +129,4 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   `renderBar()`: acquisto, undo, cambio percentuali/slot, reset). Provato in locale:
   striscia visibile su Prepara e Live all'apertura, acquisto rapido da lì aggiorna budget
   e fa sparire/ricalcolare le occasioni.
-  Non ancora committato su git.
+  Commit `afcc84b`, pushato su GitHub.
