@@ -301,3 +301,19 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
     indietro di una sola azione → ora a più livelli, sul registro.
   Limiti della simulazione: prezzi generati, non veri; chi compra "vince" se il suo limite supera
   il prezzo (nessuna maledizione del vincitore); gli avversari non si adattano ai prezzi.
+
+- **23/09/2026 — correttivo "crediti in gioco" implementato** (build `2026-09-23-n`; l'utente ha
+  scelto di registrare TUTTE le vendite, quindi opzione A). `cashFactor()` = crediti rimasti di
+  tutte le squadre / somma dei prezzi attesi dei migliori N liberi per ruolo (N = slot da
+  coprire): guarda avanti, dove il live guarda solo i prezzi già pagati. `priceFactor()` =
+  media geometrica di live e crediti, con l'eccesso di crediti ridotto a 1/4 (crediti che
+  avanzano non garantiscono che vengano spesi; crediti scarsi = prezzi in calo, affidabile).
+  Usato da `marketPrice` e `tierPrice`; si attiva dopo 10 vendite registrate (te + "Preso da
+  altri", "Non tracciato" compreso); cache per non rallentare le liste. In Live, sotto il riepilogo
+  asta, riga "Crediti in gioco: N · da qui i prezzi vanno ±X%".
+  Risultati sulla stessa simulazione (errore medio in cr, solo-live → nuovo; fine asta = ultimi 50):
+  storico 12,1→11,0 (fine 21→17,6) · neutri 10,9→10,3 · +50% 17,7→14,8 (fine 32,5→20) ·
+  −40% 7,3→8,2 (fine 12,4→15) · stelle 17,7→15,5 · crescente 12,6→11,8. Margine del piano a
+  metà asta: peggiore osservato −58 cr (prima −254). Peggiora solo se l'asta spende molto meno del
+  previsto. Se si salta la registrazione di molte vendite le stime diventano ottimistiche/errate:
+  meglio segnare "Preso da altri" (anche "Non tracciato") per ogni vendita.
