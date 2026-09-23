@@ -185,6 +185,8 @@
   .dot.riserva{background:#5c6560;}
   .titlab{color:var(--text-dim);}
   .titlab.titolare{color:#7fc79c;}
+  .elsewheretag{color:var(--info); font-weight:600;}
+  .elsewherebanner{margin-top:9px; padding:7px 10px; background:#152a33; border-radius:8px; font-size:12px; color:#8fd0e8;}
   .sep{color:#3a4a43;}
   .pricebox{text-align:right; flex-shrink:0;}
   .cprice{font-size:20px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
@@ -270,6 +272,10 @@
       <input type="checkbox" id="hideTaken">
       <label for="hideTaken">Nascondi i giocatori già assegnati</label>
     </div>
+    <div class="togglerow">
+      <input type="checkbox" id="hideElsewhere">
+      <label for="hideElsewhere">Nascondi i giocatori già miei altrove</label>
+    </div>
     <div class="count" id="prepCount"></div>
     <div id="prepList"></div>
   </div>
@@ -337,6 +343,15 @@
   </div>
   <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
 
+  <h2 style="margin-top:18px">Già miei altrove</h2>
+  <p style="font-size:11px; color:var(--text-dim); margin:0 0 8px">Giocatori che hai già in un'altra lega (es. Rivoluzione Fantacalcio) — solo un promemoria scritto a mano qui, nessun collegamento automatico con altre rose.</p>
+  <div class="row">
+    <input type="text" id="elsewhereInput" list="elsewhereOptions" placeholder="Nome giocatore" autocomplete="off" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
+    <button id="addElsewhere" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
+  </div>
+  <datalist id="elsewhereOptions"></datalist>
+  <div id="elsewhereList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
+
   <div class="row" style="margin-top:16px">
     <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
   </div>
@@ -370,6 +385,7 @@
     <button class="sheetclose" id="dClose">&times;</button>
   </div>
   <div id="dInjBanner"></div>
+  <div id="dElsewhereBanner"></div>
   <div class="suggested">
     <div class="num" id="dSuggested">-</div>
     <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
@@ -414,6 +430,7 @@ const DEFAULT_STATE = {
   discarded:{},
   market:[],
   participants:['Avversario 1','Avversario 2','Avversario 3','Avversario 4','Avversario 5','Avversario 6','Avversario 7'],
+  elsewhere:[],
   teams:{}
 };
 
@@ -532,6 +549,7 @@ async function loadState(){
     }
   }catch(e){}
   normalizeBasePct();
+  populateElsewhereOptions();
   renderSettings();
   renderBar();
   renderUndo();
@@ -680,6 +698,7 @@ function renderSettings(){
   });
   updatePctSum();
   renderParticipantList();
+  renderElsewhereList();
 }
 function updatePctSum(){
   const sum = ROLES.reduce((a,r)=>a+Number(state.pct[r]),0);
@@ -762,6 +781,46 @@ function normalizeBasePct(){
   state.pct = scaled;
   saveState();
 }
+
+/* ---- diversificazione manuale (punto 4 del piano): lista a mano di giocatori già
+   posseduti in un'altra lega, nessun collegamento automatico con altre rose ---- */
+function isElsewhere(p){
+  return (state.elsewhere||[]).some(e=>e.id===p.id);
+}
+function populateElsewhereOptions(){
+  const dl = document.getElementById('elsewhereOptions');
+  dl.innerHTML = players.map(p=>'<option value="'+p.nome+' ('+p.squadra+')">').join('');
+}
+function renderElsewhereList(){
+  const box = document.getElementById('elsewhereList');
+  box.innerHTML = '';
+  (state.elsewhere||[]).forEach(e=>{
+    const chip = document.createElement('div');
+    chip.className = 'participant-chip';
+    chip.innerHTML = '<span>'+e.nome+' ('+e.squadra+')</span><button>&times;</button>';
+    chip.querySelector('button').onclick = ()=>{
+      state.elsewhere = state.elsewhere.filter(x=>x.id!==e.id);
+      saveState();
+      renderElsewhereList();
+      refreshCurrentLists();
+    };
+    box.appendChild(chip);
+  });
+}
+document.getElementById('addElsewhere').onclick = ()=>{
+  const input = document.getElementById('elsewhereInput');
+  const typed = input.value.trim();
+  if(!typed) return;
+  const p = players.find(x=> (x.nome+' ('+x.squadra+')').toLowerCase() === typed.toLowerCase());
+  if(!p){ input.value=''; return; }
+  state.elsewhere = state.elsewhere || [];
+  if(state.elsewhere.some(e=>e.id===p.id)){ input.value=''; return; }
+  state.elsewhere.push({id:p.id, nome:p.nome, squadra:p.squadra});
+  input.value = '';
+  saveState();
+  renderElsewhereList();
+  refreshCurrentLists();
+};
 
 function renderParticipantList(){
   const box = document.getElementById('participantList');
@@ -947,6 +1006,7 @@ function bestPicksNow(){
     if(isTaken(p.id)) return false;
     if(p.tit!=='titolare' && p.tit!=='cambio') return false;
     if(p.inj) return false;
+    if(isElsewhere(p)) return false;
     return (state.slots[p.r] - boughtCount(p.r)) > 0;
   });
   return candidates.sort((a,b)=>ratio(b)-ratio(a)).slice(0,3);
@@ -1033,7 +1093,7 @@ const DESCR = {
   perla: "Costano poco ma valgono molto: il mercato li valuta ben più del loro prezzo di partenza. Sono i candidati a rendere più di quanto li paghi.",
   low: "Quotazione di listino di 4 crediti o meno: servono a riempire gli slot spendendo pochissimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
 };
-let prepRole='P', prepCat='all', prepSort='q', prepHideTaken=false, prepOnlyTit=false;
+let prepRole='P', prepCat='all', prepSort='q', prepHideTaken=false, prepOnlyTit=false, prepHideElsewhere=false;
 
 function band(p){
   const e = fvmAtteso(p);
@@ -1052,8 +1112,9 @@ function titLine(p){
   else if(p.tit==='cambio'){ lab='Primo cambio'; cls='cambio'; }
   else { lab='Non titolare'; cls='riserva'; }
   const pct = p.gkpct ? ' '+p.gkpct+'%' : '';
+  const elsewhere = isElsewhere(p) ? '<span class="sep">•</span><span class="elsewheretag">Già tuo altrove</span>' : '';
   return '<span class="sep">•</span><span class="dot '+cls+'"></span>'+
-         '<span class="titlab '+cls+'">'+lab+pct+'</span>';
+         '<span class="titlab '+cls+'">'+lab+pct+'</span>'+elsewhere;
 }
 function statusOf(p){
   if(state.bought[p.id]) return {mine:true, price: state.bought[p.id].price};
@@ -1081,6 +1142,7 @@ function renderPrepList(){
   let list = players.filter(p=>p.r===prepRole);
   if(prepCat!=='all') list = list.filter(p=>p.tags.includes(prepCat));
   if(prepHideTaken) list = list.filter(p=>!statusOf(p));
+  if(prepHideElsewhere) list = list.filter(p=>!isElsewhere(p));
   if(prepOnlyTit) list = list.filter(p=>p.tit==='titolare'||p.tit==='cambio');
   const s = prepSort;
   list = list.slice().sort((a,b)=>{
@@ -1142,6 +1204,7 @@ document.querySelectorAll('#cats .cat').forEach(b=>b.onclick=()=>{
 });
 document.getElementById('sort').onchange=(e)=>{ prepSort=e.target.value; renderPrepList(); };
 document.getElementById('hideTaken').onchange=(e)=>{ prepHideTaken=e.target.checked; renderPrepList(); };
+document.getElementById('hideElsewhere').onchange=(e)=>{ prepHideElsewhere=e.target.checked; renderPrepList(); };
 document.getElementById('onlyTit').onchange=(e)=>{ prepOnlyTit=e.target.checked; renderPrepList(); };
 
 /* ---- switch Prepara / Live: pulisce la ricerca globale, torna alla scheda scelta ---- */
@@ -1176,6 +1239,9 @@ function selectPlayer(p){
   const injBanner = document.getElementById('dInjBanner');
   injBanner.innerHTML = p.inj
     ? '<div class="injbanner"><b>Infortunato</b> — rientro previsto il '+p.inj.rientro+' ('+p.inj.motivo+'). Il prezzo consigliato è già ridotto.</div>'
+    : '';
+  document.getElementById('dElsewhereBanner').innerHTML = isElsewhere(p)
+    ? '<div class="elsewherebanner">Ce l\'hai già in un\'altra lega — considera di diversificare.</div>'
     : '';
 
   const s = computeSuggestion(p);

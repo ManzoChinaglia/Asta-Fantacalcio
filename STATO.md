@@ -25,9 +25,9 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
    interni di Jarvis (array numerici senza nomi di campo, pensati solo per i suoi script
    Python), deciso il 23/09/2026 di non provare a decifrarli da fuori.
 3. ~~Supabase da decidere~~ — **fatto**, sganciato (sopra).
-4. Diversificazione manuale: lista "giocatori già miei altrove" compilata a mano (niente
-   collegamento con le rose di Rivoluzione Fantacalcio, che sono in un repo diverso e
-   cifrate). **Non iniziato.**
+4. ~~Diversificazione manuale~~ — **fatto** (sotto): lista "giocatori già miei altrove"
+   compilata a mano dalle Impostazioni, nessun collegamento con le rose di Rivoluzione
+   Fantacalcio (repo diverso, cifrato).
 5. ~~Level-up per uso durante un'asta vera~~ — **fatto**: ricerca sempre a fuoco, undo
    sempre a portata (già in index), avviso sfondamento budget di ruolo (colpo d'occhio a
    3 livelli), colpo d'occhio "chi comprare ora" (striscia "Occasioni ora", sopra).
@@ -150,3 +150,19 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   `titolari.json`), banner infortunio con motivo/data reali su un giocatore infortunato,
   fallback a dati statici forzando `jarvisStatus.ok=false`.
   Commit `9f3224b`, pushato su GitHub.
+
+- **23/09/2026 — diversificazione manuale (chiude il punto 4 del piano, e con questo
+  tutti i 6 punti del piano di unificazione)**: nuova sezione "Già miei altrove" in
+  Impostazioni, sotto Partecipanti avversari. Campo con autocompletamento (datalist su
+  tutti i 532 giocatori, "Nome (Squadra)") per aggiungere un giocatore già posseduto in
+  un'altra lega (es. Rivoluzione Fantacalcio) — solo un promemoria scritto a mano,
+  **nessun collegamento automatico** con le rose vere (che restano in un repo diverso e
+  cifrato, come deciso). I giocatori segnati mostrano un tag "Già tuo altrove" sulla card
+  in Prepara e un banner nella scheda di dettaglio; nuovo checkbox "Nascondi i giocatori
+  già miei altrove" in Prepara per filtrarli via; esclusi anche dalla striscia "Occasioni
+  ora" (non ha senso suggerire di ricomprare chi hai già). Stato in `state.elsewhere`
+  (array di `{id, nome, squadra}`), persistito come tutto il resto. Nuove funzioni
+  `isElsewhere()`, `populateElsewhereOptions()`, `renderElsewhereList()`. Provato in
+  locale: aggiunta Svilar dalle Impostazioni, tag visibile sulla card, filtro nascondi
+  funzionante (63→62 giocatori).
+  Non ancora committato su git.
