@@ -71,6 +71,24 @@
   .chip.tight .bar u{background:var(--warn);}
   .chip.warn .bar u{background:var(--danger);}
   .chip em{font-style:normal; font-weight:700; color:var(--danger);}
+  .plansum{text-align:center; padding:6px 0 16px;}
+  .plansum .big{font-family:var(--num); font-size:54px; font-weight:700; line-height:1;}
+  .plansum .big.ok{color:var(--ok);} .plansum .big.bad{color:var(--danger);}
+  .plansum .sub{font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
+  .plancard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:10px;}
+  .plancard .ph{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:700; font-size:15px;}
+  .plancard .ph .cnt{margin-left:auto; font-weight:500; font-size:12.5px; color:var(--text-dim);}
+  .tiers{display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
+  .tier{background:var(--surface2); border-radius:12px; padding:8px 4px; text-align:center;}
+  .tier .tl{font-size:11px; color:var(--text-dim);}
+  .tier .tn{font-family:var(--num); font-size:22px; font-weight:700; margin:2px 0; font-variant-numeric:tabular-nums;}
+  .tier .tp{font-size:11px; color:var(--text-dim);}
+  .tier.full .tn{color:var(--ok);} .tier.over .tn{color:var(--danger);}
+  .plancard .need{font-size:12.5px; color:var(--text-dim); margin-top:10px; line-height:1.5;}
+  .plancard .need b{color:var(--text);}
+  .plannote{margin:8px 0; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.45; background:rgba(255,255,255,.06); color:var(--text-dim);}
+  .plannote.warn{background:rgba(232,163,61,.12); border:1px solid rgba(232,163,61,.35); color:#f0c27a;}
+  .planline{cursor:pointer;}
   .planline{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:12px; color:var(--text-dim);}
   .planline .pover{color:var(--danger); font-weight:700; font-size:13px;}
   .planline .pok{color:var(--ok);}
@@ -140,13 +158,12 @@
   .titlab.titolare{color:#7fc79c;}
 
   /* ---- Prepara ---- */
-  .cats{display:flex; gap:7px; overflow-x:auto; padding:2px 2px 8px; margin:0 -14px 4px; padding-left:14px; padding-right:14px; scrollbar-width:none;}
-  .cats::-webkit-scrollbar{display:none;}
-  .cat{white-space:nowrap; padding:9px 15px; border-radius:20px; background:var(--glass);
-       border:1px solid var(--glass-edge); color:var(--text-dim); font-size:13.5px; font-weight:500; flex-shrink:0;
+  .cats{display:flex; gap:6px; margin:0 0 8px;}
+  .cat{flex:1; white-space:nowrap; padding:9px 2px; border-radius:16px; background:var(--glass); text-align:center;
+       border:1px solid var(--glass-edge); color:var(--text-dim); font-size:13px; font-weight:500; min-width:0;
        -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); transition:background .2s, color .2s;}
   .cat.on{background:rgba(232,185,63,.18); color:var(--accent); border-color:rgba(232,185,63,.5);}
-  .cat.fbtn{color:var(--text);}
+  .cat.fbtn{color:var(--text); flex:0 0 auto; padding:9px 11px;}
   .cat .fn{display:inline-block; min-width:16px; height:16px; line-height:16px; border-radius:8px; background:var(--accent); color:#241c07; font-size:10.5px; font-weight:700; margin-left:5px; text-align:center;}
   .catdesc{font-size:12.5px; color:var(--text-dim); margin:2px 2px 10px; line-height:1.5;}
   .card{display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:5px; cursor:pointer;
@@ -218,6 +235,9 @@
   .suggested .num{font-family:var(--num); font-size:88px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:.9; text-shadow:0 0 40px rgba(232,185,63,.35);}
   .suggested .num.danger{color:var(--danger); text-shadow:0 0 40px rgba(224,96,92,.35);}
   .suggested .lab{font-size:12.5px; color:var(--text-dim); margin-top:8px;}
+  .stepper{display:flex; gap:8px; justify-content:center; margin:0 0 14px;}
+  .stepper button{flex:1; max-width:76px; padding:10px 0; border-radius:12px; background:var(--surface2); border:1px solid var(--border); color:var(--text); font-family:var(--num); font-size:19px; font-weight:600;}
+  .stepper button:active{background:rgba(255,255,255,.16);}
   .cta{width:100%; padding:17px; border-radius:18px; border:none; font-size:19px; font-weight:700; font-family:var(--num); letter-spacing:.04em;
        background:var(--accent); color:#241c07; box-shadow:0 8px 24px rgba(232,185,63,.3); transition:transform .2s var(--spring);}
   .cta:active{transform:scale(.97);}
@@ -293,7 +313,7 @@
     <div class="chip" id="chipC"></div>
     <div class="chip" id="chipA"></div>
   </div>
-  <div class="planline"><span id="planText"></span><span class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></span></div>
+  <div class="planline" id="planline"><span id="planText"></span><span class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></span></div>
 </div></div>
 
 <main>
@@ -339,9 +359,9 @@
       <button class="cat fbtn" id="filtersBtn">Filtri<span class="fn" id="filtersN" style="display:none"></span></button>
       <button class="cat on" data-c="all">Tutti</button>
       <button class="cat" data-c="top">Top</button>
-      <button class="cat" data-c="scommessa">Scommesse</button>
-      <button class="cat" data-c="perla">Perle nascoste</button>
-      <button class="cat" data-c="low">Low budget</button>
+      <button class="cat" data-c="scommessa">Scomm.</button>
+      <button class="cat" data-c="perla">Perle</button>
+      <button class="cat" data-c="low">Low</button>
     </div>
     <div class="catdesc" id="catdesc"></div>
     <div class="count" id="prepCount"></div>
@@ -428,6 +448,14 @@
   <div id="rivalsList"></div>
 </div>
 
+<div class="sheet" id="plan">
+  <div class="sheethandle"></div>
+  <div class="panelhead"><h2>Piano a fasce</h2><button class="sheetclose" data-close>&times;</button></div>
+  <div class="plansum" id="planSummary"></div>
+  <div id="planBody"></div>
+  <p style="font-size:11.5px; color:var(--text-dim); margin:10px 2px 0; line-height:1.5">Struttura ricavata dall'asta precedente (10 squadre, 500 crediti): ogni squadra ha preso in media 3-4 giocatori "top" (40 cr o più), 11-12 medi e 10 riempitivi (6 cr o meno). I prezzi delle fasce sono scalati sul tuo budget e seguono l'inflazione dell'asta in corso.</p>
+</div>
+
 <div class="sheet" id="filters">
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Filtri Prepara</h2><button class="sheetclose" data-close>&times;</button></div>
@@ -457,9 +485,13 @@
   </div>
   <div id="dInjBanner"></div>
   <div id="dElsewhereBanner"></div>
+  <div id="dPlanNote"></div>
   <div class="suggested">
     <div class="num" id="dSuggested">-</div>
-    <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
+    <div class="lab" id="dSuggestedLabel"></div>
+  </div>
+  <div class="stepper">
+    <button data-step="-5">−5</button><button data-step="-1">−1</button><button data-step="1">+1</button><button data-step="5">+5</button>
   </div>
   <button class="cta quickbuy" id="dQuickBuyBtn">Preso a —</button>
   <div class="actions">
@@ -700,6 +732,102 @@ function peso(p){
   return Math.round((p.q + fvmAtteso(p)) / 2);
 }
 
+/* ---- prezzo atteso di mercato (1) + correttivo live (2) ----
+   Curva ricavata dall'asta precedente (Rivoluzione 2026: 10 squadre x 500 cr, 250 acquisti, prezzi veri):
+   x = FVM in crediti (fvm*budget/1000) -> prezzo medio realmente pagato, regressione monotona lisciata.
+   Rispetto al vecchio FVM/2 abbassa la fascia medio-bassa (spesso pagata meno) e tiene le stelle ~1:1.
+   Errore medio sui dati d'origine ~8 cr: le aste sono rumorose, per questo si mostra sempre una fascia. */
+const PRICE_KNOTS = [[0,1],[3,2.5],[6,3.5],[9,5.5],[12,8],[15,10.5],[18,14],[22,20],[30,28],[40,38],[50,47],[63,60],[85,80],[120,105],[145,130],[210,195]];
+function baseModel(p){
+  const x = p.fvm * state.budget / 1000, K = PRICE_KNOTS;
+  const last = K[K.length-1];
+  if(x >= last[0]) return last[1] * x / last[0];
+  for(let i=1;i<K.length;i++){
+    if(x <= K[i][0]){ const a=K[i-1], b=K[i]; return a[1] + (b[1]-a[1]) * (x-a[0]) / (b[0]-a[0]); }
+  }
+  return 1;
+}
+/* correttivo live: quanto l'asta sta pagando rispetto al previsto, sui prezzi VERI registrati (non i tocchi
+   rapidi "est"). Pesato sui crediti, con un peso a priori di 60 cr per non ballare con poche osservazioni. */
+function liveFactor(){
+  const obs = (state.market || []).filter(m => !m.est && m.exp > 0);
+  if(!obs.length) return {k:1, n:0};
+  const W = 60;
+  const paid = obs.reduce((a,m)=>a+m.price,0), exp = obs.reduce((a,m)=>a+m.exp,0);
+  return {k: Math.min(1.6, Math.max(0.6, (paid + W) / (exp + W))), n: obs.length};
+}
+function marketPrice(p){
+  const base = baseModel(p);
+  const k = base <= 2.5 ? 1 : liveFactor().k;      // i riempitivi da 1-2 cr non si gonfiano
+  let m = base * k;
+  if(p.tit === 'cambio' || p.tit === 'riserva') m *= 0.9;
+  if(p.inj) m *= 0.6;
+  const mid = Math.max(1, Math.round(m));
+  // ampiezza fascia dai rapporti reali prezzo/previsto: molto larga in basso (o 1 cr o rilancio), stretta per le stelle
+  const f = mid < 4 ? [0, 1.8] : mid < 12 ? [.35, 1.8] : mid < 35 ? [.6, 1.4] : [.7, 1.3];
+  return {base, mid, lo: Math.max(1, Math.round(m*f[0])), hi: Math.max(mid, Math.round(m*f[1]))};
+}
+
+/* ---- piano a fasce (4): Top >=40 cr, Medi 7-39, Riempitivi <=6, dalla struttura media delle 10 squadre
+   dell'asta precedente. Conta solo cio' che HAI comprato (state.bought), per fascia di prezzo pagato. ---- */
+const TIERS = ['top','mid','low'];
+const TIER_LABEL = {top:'Top', mid:'Medi', low:'Riempitivi'};
+const TIER_ONE = {top:'top', mid:'medio', low:'riempitivo'};
+const HIST = {
+  P:{n:{top:.6, mid:.9, low:1.5}, p:{top:52, mid:12, low:2}},
+  D:{n:{top:.3, mid:4.3, low:3.4}, p:{top:55, mid:18, low:2}},
+  C:{n:{top:1.1, mid:4.1, low:2.8}, p:{top:61, mid:19, low:2}},
+  A:{n:{top:1.5, mid:2.3, low:2.2}, p:{top:103, mid:17, low:2}}
+};
+function tierOfPrice(v){ return v >= 40 ? 'top' : (v >= 7 ? 'mid' : 'low'); }
+function planTargets(r){                       // numeri interi con somma = slot del ruolo (resto maggiore)
+  const sl = state.slots[r], h = HIST[r].n, tot = h.top + h.mid + h.low;
+  const raw = TIERS.map(t => h[t] / tot * sl), fl = raw.map(Math.floor);
+  let left = sl - fl.reduce((a,b)=>a+b, 0);
+  raw.map((v,i)=>[v - fl[i], i]).sort((a,b)=>b[0]-a[0]).forEach(([,i])=>{ if(left > 0){ fl[i]++; left--; } });
+  return {top:fl[0], mid:fl[1], low:fl[2]};
+}
+function planScale(){                           // fa coincidere il costo del piano intero col budget (a inflazione 1)
+  let low = 0, non = 0;
+  ROLES.forEach(r=>{ const t = planTargets(r); low += t.low * HIST[r].p.low; non += t.top * HIST[r].p.top + t.mid * HIST[r].p.mid; });
+  return non > 0 ? Math.max(0.3, (state.budget - low) / non) : 1;
+}
+function tierPrice(r, t){ return t === 'low' ? HIST[r].p.low : HIST[r].p[t] * planScale() * liveFactor().k; }
+function planRole(r){
+  const tg = planTargets(r), got = {top:0, mid:0, low:0};
+  Object.values(state.bought).filter(b=>b.r===r).forEach(b=>{ got[tierOfPrice(b.price)]++; });
+  const left = state.slots[r] - boughtCount(r);
+  const rem = {top:Math.max(0,tg.top-got.top), mid:Math.max(0,tg.mid-got.mid), low:Math.max(0,tg.low-got.low)};
+  let sum = rem.top + rem.mid + rem.low;
+  for(const t of TIERS){ while(sum > left && rem[t] > 0){ rem[t]--; sum--; } }   // sforato: si rinuncia prima ai top
+  while(sum < left && left > 0){ rem.low++; sum++; }
+  const cost = Math.round(TIERS.reduce((a,t)=>a + rem[t] * tierPrice(r,t), 0));
+  return {tg, got, rem, left, cost};
+}
+function planMargin(){
+  const need = ROLES.reduce((a,r)=>a + planRole(r).cost, 0);
+  const credits = state.budget - totalSpentAll();
+  return {need, credits, margin: credits - need};
+}
+function renderPlan(){
+  const pm = planMargin();
+  const sum = document.getElementById('planSummary');
+  sum.innerHTML = '<div class="big '+(pm.margin >= 0 ? 'ok' : 'bad')+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+' cr</div>'+
+    '<div class="sub">'+(pm.margin >= 0 ? 'margine sul piano' : 'scoperto rispetto al piano')+'<br>servono ~'+pm.need+' cr per completare la rosa ai prezzi attuali, ne hai '+pm.credits+'</div>';
+  document.getElementById('planBody').innerHTML = ROLES.map(r=>{
+    const pr = planRole(r), done = boughtCount(r);
+    const cols = TIERS.map(t=>{
+      const cls = pr.got[t] > pr.tg[t] ? ' over' : (pr.got[t] >= pr.tg[t] && pr.tg[t] > 0 ? ' full' : '');
+      return '<div class="tier'+cls+'"><div class="tl">'+TIER_LABEL[t]+'</div><div class="tn">'+pr.got[t]+'/'+pr.tg[t]+'</div><div class="tp">~'+Math.round(tierPrice(r,t))+' cr</div></div>';
+    }).join('');
+    const parts = TIERS.filter(t=>pr.rem[t] > 0).map(t=>pr.rem[t]+' '+(pr.rem[t] === 1 ? TIER_ONE[t] : TIER_LABEL[t].toLowerCase()));
+    const need = pr.left > 0 ? 'Ti restano <b>'+pr.left+'</b> slot: '+parts.join(' + ')+' ≈ <b>'+pr.cost+' cr</b>' : 'Ruolo completo.';
+    return '<div class="plancard"><div class="ph"><div class="badge '+r+'">'+r+'</div>'+({P:'Portieri',D:'Difensori',C:'Centrocampisti',A:'Attaccanti'})[r]+'<span class="cnt">'+done+'/'+state.slots[r]+'</span></div>'+
+           '<div class="tiers">'+cols+'</div><div class="need">'+need+'</div></div>';
+  }).join('');
+}
+document.getElementById('planline').onclick = ()=> openSheet('plan');
+
 function computeSuggestion(player){
   const role = player.r;
   const raw = roleRemainingRaw(role);
@@ -709,37 +837,22 @@ function computeSuggestion(player){
     return {complete:true, remainingBudget, raw, neededSlots};
   }
   const pool = poolFor(role);
-  const target = pool.slice(0, neededSlots);
-  const sumPeso = target.reduce((a,p)=>a+peso(p),0) || 1;
-  let value = Math.max(1, Math.round(remainingBudget * (peso(player) / sumPeso)));
-
-  if(player.tit === 'riserva') value = Math.round(value * 0.6);
-  else if(player.tit === 'cambio') value = Math.round(value * 0.85);
-  if(player.inj) value = Math.max(1, Math.round(value * 0.4));
-  value = Math.max(1, value);
-
-  return {complete:false, value, remainingBudget, raw, neededSlots, pool, over: raw<0};
+  return {complete:false, value: marketPrice(player).mid, remainingBudget, raw, neededSlots, pool, over: raw<0};
 }
 /* prezzo del tocco rapido: quello che comparirebbe come "prezzo massimo consigliato" nella scheda */
-function quickBuyValue(p){
-  const s = computeSuggestion(p);
-  return s.complete ? p.q : s.value;
-}
+function quickBuyValue(p){ return marketPrice(p).mid; }
 
 function marketTemp(){
-  const log = state.market || [];
-  if(log.length < 3) return {n: log.length};
-  const ratios = log.map(m=>m.price/m.q);
-  const avg = ratios.reduce((a,b)=>a+b,0)/ratios.length;
-  return {pct: Math.round((avg-1)*100), n: log.length};
+  const f = liveFactor();
+  return {pct: Math.round((f.k - 1) * 100), n: f.n};
 }
 function marketTeamTemp(){
-  const log = state.market || [];
+  const log = (state.market || []).filter(m => !m.est && m.exp > 0);
   const groups = {};
   log.forEach(m=>{
     const team = m.squadra || 'N/D';
     groups[team] = groups[team] || [];
-    groups[team].push(m.price / m.q);
+    groups[team].push(m.price / m.exp);
   });
   return Object.entries(groups)
     .filter(([team, arr]) => arr.length >= 2)
@@ -753,10 +866,10 @@ function renderMarket(){
   const t = marketTemp();
   const summary = document.getElementById('marketSummary');
   if(t.n < 3){
-    summary.textContent = 'Temperatura asta: dati insufficienti (' + t.n + ' osservate)';
+    summary.textContent = 'Prezzi reali registrati: ' + t.n + ' — dal terzo in poi le stime si adattano all\'asta';
   } else {
     const sign = t.pct>0 ? '+' : '';
-    summary.innerHTML = 'Temperatura asta: <b>'+sign+t.pct+'% sul listino</b> ('+t.n+' osservate) — tocca per il dettaglio squadre';
+    summary.innerHTML = 'Asta: prezzi <b>'+sign+t.pct+'% sul previsto</b> ('+t.n+' registrati, stime già corrette) — tocca per le squadre';
   }
   const teams = marketTeamTemp();
   const box = document.getElementById('marketTeams');
@@ -1048,9 +1161,10 @@ function renderBar(){
     if(curEl) curEl.textContent = '(attuale: '+Math.round(normalizedPct(r))+'%)';
   });
   const pt = document.getElementById('planText');
-  pt.innerHTML = totalOver > 0
-    ? '<span class="pover">Sforo sul piano: +'+totalOver+' cr</span>'
-    : '<span class="pok">In piano</span> · speso '+totalSpentAll()+' su '+state.budget;
+  const pm = planMargin();
+  pt.innerHTML = (totalOver > 0 ? '<span class="pover">Sforo +'+totalOver+'</span>' : '<span class="pok">In piano</span>')+
+    ' · margine fasce <b class="'+(pm.margin < 0 ? 'pover' : 'pok')+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+'</b> ›';
+  renderPlan();
   renderPicksBar();
 }
 
@@ -1116,7 +1230,7 @@ function wireCompactRows(container){
   });
 }
 function quickBuy(p){
-  commitEntry('mine', quickBuyValue(p), null, p);
+  commitEntry('mine', quickBuyValue(p), null, p, true);   // tocco rapido: prezzo stimato, non entra nel correttivo live
 }
 
 /* ---- colpo d'occhio "chi comprare ora" (punto 5 del piano): migliori occasioni tra i
@@ -1210,17 +1324,17 @@ document.querySelectorAll('#liveRoleTabs .roletab').forEach(btn=>{
 
 /* ---- Prepara: filtri e lista ---- */
 const DESCR = {
-  all: "Tutti i giocatori del ruolo. Il numero giallo è quanto ci si aspetta che costi davvero in un'asta con il tuo monte crediti, con sotto la fascia realistica di oscillazione.",
-  top: "I dieci per cento più cari del ruolo. Sono quelli su cui si scatenano i rilanci e che decidono l'asta.",
-  scommessa: "Il loro prezzo di listino è già salito da quando è uscito il listone. Significa che stanno guadagnando considerazione adesso.",
-  perla: "Costano poco ma valgono molto: il mercato li valuta ben più del loro prezzo di partenza. Sono i candidati a rendere più di quanto li paghi.",
-  low: "Quotazione di listino di 4 crediti o meno: servono a riempire gli slot spendendo pochissimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
+  all: "",
+  top: "Top — i dieci per cento più cari del ruolo. Sono quelli su cui si scatenano i rilanci e che decidono l'asta.",
+  scommessa: "Scommesse — il loro prezzo di listino è già salito da quando è uscito il listone. Significa che stanno guadagnando considerazione adesso.",
+  perla: "Perle nascoste — costano poco ma valgono molto: il mercato li valuta ben più del loro prezzo di partenza. Sono i candidati a rendere più di quanto li paghi.",
+  low: "Low budget — quotazione di listino di 4 crediti o meno: servono a riempire gli slot spendendo pochissimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
 };
 let prepRole='P', prepCat='all', prepSort='q', prepHideTaken=false, prepOnlyTit=false, prepHideElsewhere=false;
 
 function band(p){
-  const e = fvmAtteso(p);
-  return { lo: Math.max(1, Math.round(e*0.75)), hi: Math.max(1, Math.round(e*1.25)), mid: Math.max(1, e) };
+  const m = marketPrice(p);
+  return { lo: m.lo, hi: m.hi, mid: m.mid };
 }
 function ratio(p){ return p.fvm / Math.max(p.q,1); }
 
@@ -1341,6 +1455,15 @@ document.getElementById('tabBtnPrepara').onclick = ()=> setMainTab('prepara');
 document.getElementById('tabBtnLive').onclick = ()=> setMainTab('live');
 
 /* ---- scheda giocatore (overlay condiviso da Prepara e Live) ---- */
+let detailPrice = 1;
+function setDetailPrice(v){
+  detailPrice = Math.max(1, Math.round(v));
+  document.getElementById('dSuggested').textContent = detailPrice;
+  const b = document.getElementById('dQuickBuyBtn');
+  b.textContent = 'Preso a ' + detailPrice + ' cr';
+  b.dataset.price = detailPrice;
+}
+document.querySelectorAll('.stepper button').forEach(b=> b.onclick = ()=> setDetailPrice(detailPrice + Number(b.dataset.step)));
 function selectPlayer(p){
   selected = p;
   document.getElementById('buyform').style.display = 'none';
@@ -1362,37 +1485,33 @@ function selectPlayer(p){
     : '';
 
   const s = computeSuggestion(p);
+  const m = marketPrice(p);
   const altsBox = document.getElementById('dAlts');
-  const quickBtn = document.getElementById('dQuickBuyBtn');
   const numEl = document.getElementById('dSuggested');
   numEl.classList.remove('danger');
+  setDetailPrice(m.mid);
+  const pn = document.getElementById('dPlanNote');
+  const tr = tierOfPrice(m.mid), pr = planRole(p.r);
+  if(pr.left <= 0) pn.innerHTML = '';
+  else if(pr.rem[tr] === 0) pn.innerHTML = '<div class="plannote warn">Fascia <b>'+TIER_ONE[tr]+'</b> già coperta nel tuo piano ('+pr.got[tr]+'/'+pr.tg[tr]+'): se lo prendi, i crediti li togli alle altre fasce.</div>';
+  else pn.innerHTML = '<div class="plannote">Nel piano: fascia <b>'+TIER_ONE[tr]+'</b> — te ne restano ancora '+pr.rem[tr]+' in questo ruolo.</div>';
+  document.getElementById('dSuggestedLabel').textContent =
+    'fascia realistica ' + m.lo + '–' + m.hi + ' cr' + (liveFactor().n >= 3 ? ' · adattata all\'asta' : '');
+  document.getElementById('dRoleBudgetLabel').textContent = s.complete ? 'Rispetto al piano su questo ruolo' : 'Budget rimasto sul ruolo';
+  document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
+  document.getElementById('dSlots').textContent = s.complete ? '0' : s.neededSlots;
   if(s.complete){
-    numEl.textContent = '—';
-    document.getElementById('dSuggestedLabel').textContent = 'ruolo gia completo';
-    document.getElementById('dRoleBudgetLabel').textContent = 'Rispetto al piano su questo ruolo';
-    document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
-    document.getElementById('dSlots').textContent = '0';
+    numEl.classList.add('danger');
+    document.getElementById('dSuggestedLabel').textContent += ' · ruolo già completo';
     altsBox.innerHTML = '';
-    quickBtn.textContent = 'Preso a ' + p.q + ' cr';
-    quickBtn.dataset.price = p.q;
   } else {
-    numEl.textContent = s.value;
-    document.getElementById('dSuggestedLabel').textContent = s.over ? 'budget ruolo gia sforato — suggerito minimo' : 'prezzo massimo consigliato';
-    if(s.over) numEl.classList.add('danger');
-    document.getElementById('dRoleBudgetLabel').textContent = 'Budget rimasto sul ruolo';
-    document.getElementById('dRoleBudget').textContent = roleBudgetDisplay(p.r) + ' cr';
-    document.getElementById('dSlots').textContent = s.neededSlots;
-    quickBtn.textContent = 'Preso a ' + s.value + ' cr';
-    quickBtn.dataset.price = s.value;
-
+    if(s.over){ numEl.classList.add('danger'); document.getElementById('dSuggestedLabel').textContent += ' · budget ruolo sforato'; }
     const alts = s.pool.filter(x=>x.id!==p.id)
       .sort((a,b)=>Math.abs(peso(a)-peso(p))-Math.abs(peso(b)-peso(p))).slice(0,3);
-    if(alts.length){
-      altsBox.innerHTML = '<div class="sectitle" style="margin:6px 2px">Alternative simili</div>' +
-        alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+fvmAtteso(a)+' cr</span></div>').join('');
-    } else {
-      altsBox.innerHTML = '';
-    }
+    altsBox.innerHTML = alts.length
+      ? '<div class="sectitle" style="margin:6px 2px">Alternative simili</div>' +
+        alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+marketPrice(a).mid+' cr</span></div>').join('')
+      : '';
   }
   openSheet('detail');
 }
@@ -1434,7 +1553,7 @@ document.getElementById('dSkipBtn').onclick = ()=>{
   document.getElementById('buyerPicker').style.display='none';
   document.getElementById('buyFormLabel').textContent = 'A quanto l\'ha preso l\'avversario?';
   document.getElementById('buyform').style.display='flex';
-  document.getElementById('buyPrice').value = selected.q;
+  document.getElementById('buyPrice').value = detailPrice;
   document.getElementById('buyPrice').style.borderColor = 'var(--border)';
   document.getElementById('buyPrice').focus();
   document.getElementById('buyPrice').select();
@@ -1444,15 +1563,14 @@ document.getElementById('dOtherPriceBtn').onclick = ()=>{
   document.getElementById('buyerPicker').style.display='none';
   document.getElementById('buyFormLabel').textContent = 'Quanto hai pagato?';
   document.getElementById('buyform').style.display='flex';
-  const s = computeSuggestion(selected);
-  document.getElementById('buyPrice').value = s.complete ? selected.q : s.value;
+  document.getElementById('buyPrice').value = detailPrice;
   document.getElementById('buyPrice').style.borderColor = 'var(--border)';
   document.getElementById('buyPrice').focus();
   document.getElementById('buyPrice').select();
 };
 let buyMode = 'mine';
 let pendingPrice = null;
-function commitEntry(mode, price, buyer, player){
+function commitEntry(mode, price, buyer, player, est){
   const target = player || selected;
   if(!target || !price || price<1) return false;
   const entry = {r:target.r, price:price, nome:target.nome, q:target.q};
@@ -1467,7 +1585,7 @@ function commitEntry(mode, price, buyer, player){
     }
   }
   state.market = state.market || [];
-  state.market.push({id:target.id, nome:target.nome, r:target.r, q:target.q, squadra:target.squadra, price:price, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
+  state.market.push({id:target.id, nome:target.nome, r:target.r, q:target.q, squadra:target.squadra, price:price, est:!!est, exp:Math.round(baseModel(target)*10)/10, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
   state.lastAction = {type: mode==='mine' ? 'buy' : 'other', id:target.id, nome:target.nome, price:price, buyer: buyer||null};
   saveState();
   renderBar();
@@ -1540,7 +1658,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-d';
+const BUILD = 'build-2026-09-23-f';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

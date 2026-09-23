@@ -201,3 +201,30 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   (A: 201, 200, 139, 118…; 4–9 giocatori a ≤2 cr per squadra); prezzo~FVM corr 0.92; stelle
   pagate 2–5× la quotazione, riempitivi ≤ quotazione. Da qui la proposta di ricalibrare il
   prezzo consigliato (curva empirica per rango + inflazione live) — in attesa di scelta.
+
+- **23/09/2026 — fase 3: modello di prezzo empirico + correttivo live + piano a fasce**
+  (build `2026-09-23-f`). Analisi sui 250 acquisti veri dell'asta precedente (Rivoluzione,
+  10 squadre x 500 cr) incrociati col listone. Cose emerse, da non rifare da zero:
+  - Il vecchio FVM/2 era già un buon predittore (errore medio ~8 cr); un modello log-lineare
+    con FVM+quotazione+ruolo NON lo batteva (le aste sono rumorose, residuo std 0.8 in log).
+    Il "prezzo irrealistico" veniva soprattutto dal calcolo a budget di `computeSuggestion`
+    (quota del budget di ruolo), non dal FVM. Fascia bassa/media: o 1 cr o rilancio (bimodale).
+  - **(1) Prezzo atteso**: `baseModel(p)` = curva monotona lisciata FVM(crediti)->prezzo
+    (`PRICE_KNOTS`, da regressione isotonica sui dati veri); `marketPrice(p)` = atteso +
+    fascia realistica larga (0–1.8x sotto i 12 cr, ±30-40% sopra). Sostituisce il prezzo a
+    budget in scheda, righe, Prepara, alternative. Sconto 0.9 per cambio/riserva (i dati non
+    mostravano sconto per titolarità), 0.6 per infortunato (nessun dato, ipotesi).
+  - **(2) Correttivo live**: `liveFactor()` = crediti pagati / crediti previsti sui prezzi
+    VERI registrati (peso a priori 60 cr, limitato a 0.6–1.6); sale/scende da solo e corregge
+    tutte le stime. Il tocco rapido "✓ prezzo" sulle righe è una stima (`est:true`) e NON
+    entra nel calcolo; la scheda ha ora −5/−1/+1/+5 e il suo "Preso a" conta come prezzo vero,
+    così come "Preso da altri". I prezzi degli altri vanno registrati per far imparare l'app.
+  - **(4) Piano a fasce**: Top >=40 cr, Medi 7–39, Riempitivi <=6, struttura media per
+    squadra dall'asta precedente (P 1/1/1, D 0/4/4, C 1/4/3, A 2/2/2 sugli slot di default),
+    prezzi di fascia scalati sul budget e sull'inflazione. Foglio "Piano a fasce" (tocco sulla
+    riga sotto la testata) con margine ±cr e cosa ti resta da prendere; nota nella scheda
+    giocatore se la fascia è già coperta nel piano.
+  - Filtri categoria (Tutti/Top/Scomm./Perle/Low) ora su una riga, senza scroll laterale.
+  Limiti onesti: una sola asta come campione; la nuova ha 8 squadre invece di 10 (i prezzi
+  medi dovrebbero scendere: ci pensa il correttivo live); il piano a fasce e le % per ruolo
+  convivono (due piani). Ancora da fare: (3) pressione sulle stelle, (5) avviso tattico esteso.
