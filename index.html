@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Asta Assistant">
+<meta name="apple-mobile-web-app-title" content="Asta Fantalab">
 <meta name="theme-color" content="#0b1210">
-<title>Asta Assistant — Fantacalcio</title>
+<title>Asta Fantalab</title>
 <style>
   :root{
     --bg:#0b1210; --surface:#151f1a; --surface2:#1c2921; --border:#2a3a33;
     --text:#eef2ef; --text-dim:#96a89f; --accent:#e8b93f; --accent-dim:#7a611f;
-    --danger:#e2574c; --ok:#4caf7d; --radius:10px;
+    --danger:#e2574c; --ok:#4caf7d; --info:#5fb0d6; --radius:10px;
   }
   *{box-sizing:border-box;}
   input, select, textarea{font-size:16px;}
@@ -22,32 +22,67 @@
   }
   header{padding:16px 16px 8px; display:flex; justify-content:space-between; align-items:center;}
   header h1{font-size:17px; font-weight:600; margin:0; letter-spacing:.2px;}
+  header .hbtns{display:flex; gap:8px;}
   header button{background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:6px 10px; font-size:13px;}
   main{padding:0 16px;}
+
+  .maintabs{display:flex; gap:8px; margin:4px 0 10px;}
+  .maintab{flex:1; text-align:center; padding:11px 0; border-radius:12px; background:var(--surface);
+           border:1px solid var(--border); color:var(--text-dim); font-weight:700; font-size:15px;}
+  .maintab.on{background:var(--accent); color:#241c07; border-color:var(--accent);}
+
+  /* ricerca globale: sempre visibile, funziona da qualunque scheda (priorita 1) */
+  .searchwrap{position:relative; margin-bottom: 12px;}
+  #globalSearch{width:100%; font-size:16px; padding:13px 40px 13px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text);}
+  .searchclear{position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-dim); font-size:18px; padding:6px; display:none;}
+  .searchclear.show{display:block;}
+  #globalResults{display:none;}
+  #globalResults .count{margin-bottom:8px;}
+
   .panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:14px;}
   .panel h2{font-size:13px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin:0 0 10px; font-weight:600;}
+  .panelhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .panelhead h2{margin:0;}
   .row{display:flex; gap:10px; margin-bottom:8px;}
   .field{flex:1;}
   .field label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
   .field input{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;}
   .pctsum{font-size:12px; color:var(--text-dim); margin-top:4px;}
   .pctsum.warn{color:var(--danger);}
-  #search{width:100%; font-size:17px; padding:14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); margin:6px 0 10px;}
-  #results{display:flex; flex-direction:column; gap:6px; margin-bottom:12px;}
-  .result{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; cursor:pointer;}
+
+  /* overlay a fogli: Impostazioni / Registro / Rivali / scheda giocatore non spingono piu la pagina (priorita 2 e 4) */
+  .sheet-backdrop{position:fixed; inset:0; background:rgba(3,6,4,0.6); z-index:40; opacity:0; pointer-events:none; transition:opacity .2s ease;}
+  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:fixed; left:0; right:0; bottom:0; max-height:86vh; overflow-y:auto;
+         background:var(--surface); border:1px solid var(--border); border-bottom:none;
+         border-radius:20px 20px 0 0; z-index:50; margin:0;
+         transform:translateY(105%); transition:transform .25s cubic-bezier(.32,.72,0,1);
+         padding:14px 16px calc(20px + env(safe-area-inset-bottom));
+         box-shadow:0 -10px 30px rgba(0,0,0,.4);}
+  .sheet.open{transform:translateY(0);}
+  .sheethandle{width:36px; height:4px; border-radius:3px; background:var(--border); margin:0 auto 12px;}
+  .sheetclose{background:none; border:none; color:var(--text-dim); font-size:20px; line-height:1; padding:4px;}
+
+  .result{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px; cursor:pointer;}
   .result:active{background:var(--surface2);}
   .badge{font-size:11px; font-weight:700; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
   .badge.P{background:#3a3220; color:#e8c04f;}
   .badge.D{background:#20323a; color:#5fb0d6;}
   .badge.C{background:#233a24; color:#7ecb7f;}
   .badge.A{background:#3a2323; color:#e07a6e;}
-  .rname{flex:1; font-size:15px;}
+  .rname{flex:1; font-size:15px; min-width:0;}
   .rteam{font-size:12px; color:var(--text-dim);}
-  .rq{font-size:14px; color:var(--text-dim); font-variant-numeric:tabular-nums;}
+  .rq{font-size:14px; color:var(--text-dim); font-variant-numeric:tabular-nums; text-align:right;}
   .hint{font-size:13px; color:var(--text-dim); text-align:center; padding:20px 0;}
-  #detail{display:none;}
+
+  /* acquisto in un tocco, dalla riga stessa (priorita 3) */
+  .qbuy{flex-shrink:0; background:var(--surface2); border:1px solid var(--ok); color:var(--ok); border-radius:8px; padding:8px 10px; font-size:13px; font-weight:700; white-space:nowrap;}
+  .qbuy:active{background:var(--ok); color:#08160e;}
+
   .dhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
   .dhead .rname{font-size:19px; font-weight:600;}
+  .injbanner{background:#2a1a18; border:1px solid #5a2a26; border-radius:10px; padding:9px 11px; margin-bottom:12px; font-size:13px; color:#f0a79e; line-height:1.45;}
+  .injbanner b{color:#ff8e80;}
   .stat{display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border);}
   .stat:last-child{border-bottom:none;}
   .stat .label{font-size:13px; color:var(--text-dim);}
@@ -58,10 +93,9 @@
   .roletabs{display:flex; gap:8px; margin:4px 0 10px;}
   .roletab{flex:1; text-align:center; padding:10px 0; border-radius:10px; background:var(--surface); border:1px solid var(--border); font-weight:700; font-size:14px; color:var(--text);}
   .roletab:active{background:var(--surface2);}
+  .roletab.on{background:var(--surface2); border-color:var(--text-dim);}
   .roletab .n{display:block; font-size:11px; font-weight:400; color:var(--text-dim); margin-top:2px;}
   .quickbuy{background:var(--accent) !important; color:#241c07 !important; border:none !important; font-size:16px !important;}
-  .secondbtns{display:flex; gap:10px; margin-top:8px;}
-  .linkbtn{background:none; border:none; color:var(--text-dim); font-size:13px; text-decoration:underline; padding:6px;}
   #undoBar{display:none; align-items:center; justify-content:space-between; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;}
   #undoBar button{background:none; border:none; color:var(--accent); font-weight:700; font-size:13px;}
   .altrow{display:flex; justify-content:space-between; font-size:13px; padding:6px 0; color:var(--text-dim);}
@@ -73,10 +107,10 @@
   .buyform{display:none; margin-top:10px; gap:8px;}
   .buyform input{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px;}
   .buyform button{background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;}
-  .closebtn{margin-left:auto; background:none; border:none; color:var(--text-dim); font-size:20px; line-height:1; padding:4px;}
-  #bar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; align-items:center;}
+  #bar{position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:8px; align-items:center; z-index:30;}
   .chip{flex:1; text-align:center; border-radius:8px; padding:6px 4px; font-size:12px; background:var(--surface2);}
   .chip.done{background:#1c3324; color:var(--ok);}
+  .chip.warn{background:#3a2320; color:var(--danger);}
   .chip b{display:block; font-size:14px;}
   .chip .chipcr{display:block; font-size:11px; color:var(--text-dim); margin-top:2px;}
   .chip .chipcr.over{color:var(--danger); font-weight:700;}
@@ -91,8 +125,6 @@
   .suggested .num.danger{color:var(--danger);}
   .buyformlabel{font-size:12px; color:var(--text-dim); margin-top:10px;}
   .curpct{color:var(--accent); font-weight:400;}
-  .pillbtn{background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:20px; padding:8px 14px; font-size:13px;}
-  .pillbtn.ghost{color:var(--text-dim);}
   #buyerSelect{width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:10px; font-size:16px; margin-top:6px;}
   .participant-chip{display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 8px 5px 12px; font-size:13px;}
   .participant-chip button{background:none; border:none; color:var(--text-dim); font-size:14px; padding:0 2px;}
@@ -113,122 +145,137 @@
   .rivalstats{font-size:12px; color:var(--text-dim); margin:4px 0;}
   .rivalroles{font-size:12px; color:var(--text-dim);}
   .rivalwarn{color:var(--danger) !important; font-weight:700;}
+
+  /* Prepara */
+  .cats{display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:10px;}
+  .cat{white-space:nowrap; padding:8px 14px; border-radius:20px; background:var(--surface);
+       border:1px solid var(--border); color:var(--text-dim); font-size:13px;}
+  .cat.on{background:var(--surface2); color:var(--text); border-color:var(--text-dim);}
+  .catdesc{font-size:12px; color:var(--text-dim); background:var(--surface); border:1px solid var(--border);
+           border-radius:8px; padding:10px; margin-bottom:12px; line-height:1.5;}
+  .sortrow{display:flex; gap:8px; align-items:center; margin-bottom:10px;}
+  .sortrow label{font-size:12px; color:var(--text-dim);}
+  .sortrow select{flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+         border-radius:8px; padding:8px 10px;}
+  .togglerow{display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:13px; color:var(--text-dim);}
+  .togglerow input{width:18px; height:18px;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:12px;
+        padding:12px 14px; margin-bottom:8px; cursor:pointer;}
+  .card:active{background:var(--surface2);}
+  .card.inj{border-color:#5a2a26;}
+  .card.taken{opacity:.55;}
+  .ctop{display:flex; align-items:center; gap:10px;}
+  .cbadge{font-size:11px; font-weight:700; width:24px; height:24px; border-radius:6px;
+         display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .cnm{flex:1; font-size:16px; font-weight:600; min-width:0;}
+  .csq{font-size:12.5px; color:var(--text-dim); font-weight:400; margin-top:3px;
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .dot.titolare{background:var(--ok);}
+  .dot.cambio{background:#c9a227;}
+  .dot.riserva{background:#5c6560;}
+  .titlab{color:var(--text-dim);}
+  .titlab.titolare{color:#7fc79c;}
+  .sep{color:#3a4a43;}
+  .pricebox{text-align:right; flex-shrink:0;}
+  .cprice{font-size:20px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1;}
+  .pricelab{font-size:10px; color:var(--text-dim); margin-top:3px;}
+  .band{font-size:11.5px; color:var(--text-dim); margin-top:2px; font-variant-numeric:tabular-nums;}
+  .cfoot{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:9px;}
+  .takenbox{margin-top:9px; padding:7px 10px; background:var(--surface2); border-radius:8px;
+            font-size:12px; color:var(--text-dim);}
+  .takenbox b{color:var(--text);}
+  #linkbar{background:var(--surface); border:1px solid var(--border); border-radius:10px;
+           padding:10px 12px; margin-bottom:12px; font-size:12px; color:var(--text-dim); line-height:1.5;}
+  #linkbar b{color:var(--text);}
+  .count{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
+  .empty{text-align:center; color:var(--text-dim); font-size:13px; padding:30px 0;}
 </style>
 </head>
 <body>
 <header>
-  <h1>Asta Assistant</h1>
-  <div style="display:flex; gap:8px;">
+  <h1>Asta Fantalab</h1>
+  <div class="hbtns">
     <button id="toggleLog">Registro</button>
     <button id="toggleRivals">Rivali</button>
     <button id="toggleSettings">Impostazioni</button>
   </div>
 </header>
 <main>
-  <div class="panel" id="settings" style="display:none">
-    <h2>Budget e rosa</h2>
-    <div class="row">
-      <div class="field"><label>Crediti totali</label><input type="number" id="budget"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Slot Portieri</label><input type="number" id="slotP"></div>
-      <div class="field"><label>% budget <span class="curpct" id="curP"></span></label><input type="number" id="pctP"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Slot Difensori</label><input type="number" id="slotD"></div>
-      <div class="field"><label>% budget <span class="curpct" id="curD"></span></label><input type="number" id="pctD"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC"></div>
-      <div class="field"><label>% budget <span class="curpct" id="curC"></span></label><input type="number" id="pctC"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA"></div>
-      <div class="field"><label>% budget <span class="curpct" id="curA"></span></label><input type="number" id="pctA"></div>
-    </div>
-    <div class="pctsum" id="pctsum"></div>
-    <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:10px; font-size:14px;">Ripristina percentuali di partenza</button>
-    <p style="font-size:11px; color:var(--text-dim); margin:4px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta: si sposta ulteriormente sugli altri ruoli se sfori o risparmi, e cresce sui ruoli non ancora completi.</p>
 
-    <h2 style="margin-top:18px">Partecipanti avversari</h2>
-    <div class="row">
-      <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
-      <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
-    </div>
-    <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
-
-    <div class="row" style="margin-top:16px">
-      <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
-    </div>
-  </div>
-
-  <div class="panel" id="logpanel" style="display:none">
-    <h2>Registro acquisti</h2>
-    <div class="logtabs">
-      <button class="logtab on" data-l="mine">I miei</button>
-      <button class="logtab" data-l="others">Degli altri</button>
-      <button class="logtab" data-l="all">Tutti</button>
-    </div>
-    <div id="logList"></div>
-  </div>
-
-  <div class="panel" id="rivals" style="display:none">
-    <h2>Situazione avversari</h2>
-    <div id="rivalsList"></div>
+  <div class="maintabs">
+    <button class="maintab on" id="tabBtnPrepara" data-t="prepara">Prepara</button>
+    <button class="maintab" id="tabBtnLive" data-t="live">Live</button>
   </div>
 
   <div id="undoBar"><span id="undoText"></span><button id="undoBtn">Annulla</button></div>
 
-  <div id="marketBar">
-    <div id="marketSummary"></div>
-    <div id="marketTeams" style="display:none; margin-top:8px; text-align:left;"></div>
+  <!-- ricerca globale: funziona da qualunque scheda, senza cambiarla (priorita 1) -->
+  <div class="searchwrap">
+    <input type="text" id="globalSearch" placeholder="Cerca un giocatore..." autocomplete="off">
+    <button class="searchclear" id="searchClear">&times;</button>
+  </div>
+  <div id="globalResults">
+    <div class="count" id="globalCount"></div>
+    <div id="globalList"></div>
   </div>
 
-  <div class="roletabs">
-    <button class="roletab" data-r="P">P<span class="n" id="ntP"></span></button>
-    <button class="roletab" data-r="D">D<span class="n" id="ntD"></span></button>
-    <button class="roletab" data-r="C">C<span class="n" id="ntC"></span></button>
-    <button class="roletab" data-r="A">A<span class="n" id="ntA"></span></button>
+  <!-- ===== PREPARA ===== -->
+  <div id="tabPrepara">
+    <div id="linkbar"></div>
+
+    <div class="roletabs" id="prepRoleTabs">
+      <button class="roletab on" data-r="P">P</button>
+      <button class="roletab" data-r="D">D</button>
+      <button class="roletab" data-r="C">C</button>
+      <button class="roletab" data-r="A">A</button>
+    </div>
+    <div class="cats" id="cats">
+      <button class="cat on" data-c="all">Tutti</button>
+      <button class="cat" data-c="top">Top</button>
+      <button class="cat" data-c="scommessa">Scommesse</button>
+      <button class="cat" data-c="perla">Perle nascoste</button>
+      <button class="cat" data-c="low">Low budget</button>
+    </div>
+    <div class="catdesc" id="catdesc"></div>
+    <div class="sortrow">
+      <label>Ordina</label>
+      <select id="sort">
+        <option value="q">Prima i più costosi</option>
+        <option value="qasc">Prima i più economici</option>
+        <option value="ratio">Prima le occasioni</option>
+        <option value="trend">Prima chi sta salendo</option>
+      </select>
+    </div>
+    <div class="togglerow">
+      <input type="checkbox" id="onlyTit">
+      <label for="onlyTit">Mostra solo titolari e primi cambi</label>
+    </div>
+    <div class="togglerow">
+      <input type="checkbox" id="hideTaken">
+      <label for="hideTaken">Nascondi i giocatori già assegnati</label>
+    </div>
+    <div class="count" id="prepCount"></div>
+    <div id="prepList"></div>
   </div>
 
-  <input type="text" id="search" placeholder="Cerca un giocatore..." autocomplete="off">
-  <div id="results"></div>
-  <div class="hint" id="hint">Scrivi un nome, o tocca un ruolo qui sopra per vedere i migliori ancora liberi.</div>
+  <!-- ===== LIVE ===== -->
+  <div id="tabLive" style="display:none">
+    <div id="marketBar">
+      <div id="marketSummary"></div>
+      <div id="marketTeams" style="display:none; margin-top:8px; text-align:left;"></div>
+    </div>
 
-  <div class="panel" id="detail">
-    <div class="dhead">
-      <div class="badge" id="dBadge"></div>
-      <div>
-        <div class="rname" id="dName"></div>
-        <div class="rteam" id="dTeam"></div>
-      </div>
-      <button class="closebtn" id="dClose">&times;</button>
+    <div class="roletabs" id="liveRoleTabs">
+      <button class="roletab" data-r="P">P<span class="n" id="ntP"></span></button>
+      <button class="roletab" data-r="D">D<span class="n" id="ntD"></span></button>
+      <button class="roletab" data-r="C">C<span class="n" id="ntC"></span></button>
+      <button class="roletab" data-r="A">A<span class="n" id="ntA"></span></button>
     </div>
-    <div class="suggested">
-      <div class="num" id="dSuggested">-</div>
-      <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
-    </div>
-    <div class="stat"><span class="label">Quotazione ufficiale</span><span class="value" id="dQt"></span></div>
-    <div class="stat"><span class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</span><span class="value" id="dRoleBudget"></span></div>
-    <div class="stat"><span class="label">Slot ancora da coprire</span><span class="value" id="dSlots"></span></div>
-    <div id="dAlts" style="margin-top:10px"></div>
-    <div class="actions">
-      <button class="btn-buy quickbuy" id="dQuickBuyBtn">Preso a —</button>
-      <button class="btn-buy altprice" id="dOtherPriceBtn">Prezzo diverso</button>
-    </div>
-    <div class="actions" style="margin-top:8px">
-      <button class="btn-skip" id="dSkipBtn">Preso da altri</button>
-    </div>
-    <div class="buyformlabel" id="buyFormLabel"></div>
-    <div class="buyform" id="buyform" style="display:none">
-      <input type="number" id="buyPrice" placeholder="Crediti pagati">
-      <button id="buyConfirm">OK</button>
-    </div>
-    <div id="buyerPicker" style="display:none; margin-top:10px;">
-      <div class="buyformlabel" style="margin-top:0">Chi se l'è aggiudicato?</div>
-      <select id="buyerSelect"></select>
-    </div>
+    <div id="liveList"></div>
+    <div class="hint" id="hint">Tocca un ruolo per vedere i migliori ancora liberi, o cerca sopra.</div>
   </div>
+
 </main>
 
 <div id="bar">
@@ -239,11 +286,110 @@
   <div id="budgetLeft"></div>
 </div>
 
+<!-- overlay: Impostazioni / Registro / Rivali / scheda giocatore (priorita 2 e 4) -->
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+<div class="panel sheet" id="settings">
+  <div class="sheethandle"></div>
+  <div class="panelhead"><h2>Budget e rosa</h2><button class="sheetclose" data-close>&times;</button></div>
+  <div class="row">
+    <div class="field"><label>Crediti totali</label><input type="number" id="budget"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>Slot Portieri</label><input type="number" id="slotP"></div>
+    <div class="field"><label>% budget <span class="curpct" id="curP"></span></label><input type="number" id="pctP"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>Slot Difensori</label><input type="number" id="slotD"></div>
+    <div class="field"><label>% budget <span class="curpct" id="curD"></span></label><input type="number" id="pctD"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC"></div>
+    <div class="field"><label>% budget <span class="curpct" id="curC"></span></label><input type="number" id="pctC"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA"></div>
+    <div class="field"><label>% budget <span class="curpct" id="curA"></span></label><input type="number" id="pctA"></div>
+  </div>
+  <div class="pctsum" id="pctsum"></div>
+  <button id="resetPct" style="width:100%; margin-top:8px; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:8px; padding:10px; font-size:14px;">Ripristina percentuali di partenza</button>
+  <p style="font-size:11px; color:var(--text-dim); margin:4px 0 0">Se cambi una percentuale, le altre tre si aggiustano da sole per restare a 100%. "Attuale" invece è la quota reale che stai usando adesso durante l'asta.</p>
+
+  <h2 style="margin-top:18px">Partecipanti avversari</h2>
+  <div class="row">
+    <input type="text" id="participantInput" placeholder="Nome avversario" style="flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:8px 10px; font-size:16px;">
+    <button id="addParticipant" style="background:var(--accent); color:#241c07; border:none; border-radius:8px; padding:0 16px; font-weight:700;">+</button>
+  </div>
+  <div id="participantList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;"></div>
+
+  <div class="row" style="margin-top:16px">
+    <button id="resetAll" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px;">Azzera asta</button>
+  </div>
+</div>
+
+<div class="panel sheet" id="logpanel">
+  <div class="sheethandle"></div>
+  <div class="panelhead"><h2>Registro acquisti</h2><button class="sheetclose" data-close>&times;</button></div>
+  <div class="logtabs">
+    <button class="logtab on" data-l="mine">I miei</button>
+    <button class="logtab" data-l="others">Degli altri</button>
+    <button class="logtab" data-l="all">Tutti</button>
+  </div>
+  <div id="logList"></div>
+</div>
+
+<div class="panel sheet" id="rivals">
+  <div class="sheethandle"></div>
+  <div class="panelhead"><h2>Situazione avversari</h2><button class="sheetclose" data-close>&times;</button></div>
+  <div id="rivalsList"></div>
+</div>
+
+<div class="panel sheet" id="detail">
+  <div class="sheethandle"></div>
+  <div class="dhead">
+    <div class="badge" id="dBadge"></div>
+    <div style="flex:1; min-width:0;">
+      <div class="rname" id="dName"></div>
+      <div class="rteam" id="dTeam"></div>
+    </div>
+    <button class="sheetclose" id="dClose">&times;</button>
+  </div>
+  <div id="dInjBanner"></div>
+  <div class="suggested">
+    <div class="num" id="dSuggested">-</div>
+    <div class="lab" id="dSuggestedLabel">prezzo massimo consigliato</div>
+  </div>
+  <div class="stat"><span class="label">Quotazione ufficiale</span><span class="value" id="dQt"></span></div>
+  <div class="stat"><span class="label">Valore di mercato atteso (FVM)</span><span class="value" id="dFvm"></span></div>
+  <div class="stat"><span class="label">Titolarità</span><span class="value" id="dTit"></span></div>
+  <div class="stat"><span class="label" id="dRoleBudgetLabel">Budget rimasto sul ruolo</span><span class="value" id="dRoleBudget"></span></div>
+  <div class="stat"><span class="label">Slot ancora da coprire</span><span class="value" id="dSlots"></span></div>
+  <div id="dAlts" style="margin-top:10px"></div>
+  <div class="actions">
+    <button class="btn-buy quickbuy" id="dQuickBuyBtn">Preso a —</button>
+    <button class="btn-buy altprice" id="dOtherPriceBtn">Prezzo diverso</button>
+  </div>
+  <div class="actions" style="margin-top:8px">
+    <button class="btn-skip" id="dSkipBtn">Preso da altri</button>
+  </div>
+  <div class="buyformlabel" id="buyFormLabel"></div>
+  <div class="buyform" id="buyform" style="display:none">
+    <input type="number" id="buyPrice" placeholder="Crediti pagati">
+    <button id="buyConfirm">OK</button>
+  </div>
+  <div id="buyerPicker" style="display:none; margin-top:10px;">
+    <div class="buyformlabel" style="margin-top:0">Chi se l'è aggiudicato?</div>
+    <select id="buyerSelect"></select>
+  </div>
+</div>
+
 <script>
-const RAW = [["Svilar","P","Roma",18,5841],["Carnesecchi","P","Atalanta",17,4431],["Martinez Jo.","P","Inter",17,5116],["Vicario","P","Juventus",16,4964],["Butez","P","Como",15,6966],["Maignan","P","Milan",15,4312],["Caprile","P","Cagliari",11,4360],["Mandas","P","Lazio",11,6482],["Meret","P","Napoli",11,572],["Skorupski","P","Bologna",10,133],["De Gea","P","Fiorentina",10,2521],["Okoye","P","Udinese",9,6462],["Perri","P","Torino",9,6534],["Falcone","P","Lecce",8,2134],["Sanchez Ro.","P","Como",8,6344],["Bijlow","P","Genoa",7,7332],["Muric","P","Sassuolo",7,4236],["Daffara","P","Parma",6,7411],["Stankovic F.","P","Venezia",6,6248],["Palmisani","P","Frosinone",5,6415],["Thiam","P","Monza",4,4485],["Milinkovic-Savic V.","P","Napoli",4,2170],["Corvi","P","Parma",3,6662],["Sportiello","P","Atalanta",1,4],["Happonen","P","Bologna",1,7533],["Pessina Mas.","P","Bologna",1,7172],["Sherri","P","Cagliari",1,6650],["Tornqvist","P","Monza",1,7301],["Vigorito","P","Como",1,2809],["Christensen O.","P","Fiorentina",1,6403],["Lezzerini","P","Fiorentina",1,158],["Desplanches","P","Frosinone",1,7463],["Lolic","P","Frosinone",1,7466],["Sommariva","P","Genoa",1,219],["Stolz","P","Genoa",1,6569],["Di Gennaro","P","Inter",1,1926],["Provedel","P","Inter",1,2814],["Pinsoglio","P","Juventus",1,1930],["Motta","P","Lazio",1,7337],["Renzetti","P","Lazio",1,7534],["Terracciano","P","Milan",1,2815],["Torriani","P","Milan",1,6813],["Strajnar","P","Monza",1,7475],["Contini","P","Napoli",1,2845],["De Marzi","P","Roma",1,7048],["Gollini","P","Roma",1,610],["Russo A.","P","Sassuolo",1,4518],["Turati","P","Sassuolo",1,4867],["Mascardi","P","Torino",1,7457],["Siviero","P","Torino",1,7363],["Padelli","P","Udinese",1,543],["Grandi","P","Venezia",1,6671],["Pozzi","P","Venezia",1,7531],["Satalino","P","Sassuolo",1,2127],["Penev","P","Lecce",1,7557],["Pisseri","P","Frosinone",1,7560],["Radunovic","P","Cagliari",1,3],["Montipò","P","Venezia",1,4957],["Bleve","P","Lecce",1,4468],["Grabara","P","Juventus",1,7603],["Mrozek","P","Udinese",1,7611],["Ghidotti","P","Parma",1,2874],["Pompei","P","Atalanta",1,7626],["Dimarco","D","Inter",31,254],["Wesley","D","Roma",18,7181],["Molina N.","D","Roma",18,4998],["Bremer","D","Juventus",16,2788],["Akanji","D","Inter",15,4159],["Mancini","D","Roma",15,2296],["Bastoni","D","Inter",14,2120],["Kalulu","D","Juventus",14,4976],["Pavlovic","D","Milan",14,5022],["Rrahmani","D","Napoli",14,4409],["Bisseck","D","Inter",13,6217],["Gila","D","Milan",13,5833],["Solet","D","Udinese",13,6956],["Stones","D","Inter",12,2514],["Di Lorenzo","D","Napoli",12,2816],["Hermoso","D","Roma",12,4807],["N'Dicka","D","Roma",12,4317],["Scalvini","D","Atalanta",11,5526],["Spence","D","Inter",11,5982],["Ramon","D","Como",10,6869],["Ostigard","D","Genoa",10,5750],["Kamara H.","D","Udinese",10,5555],["Chalobah T.","D","Como",10,5641],["Miranda J.","D","Bologna",9,4734],["Dodò","D","Fiorentina",9,5885],["Vasquez","D","Genoa",9,5514],["Valeri","D","Parma",9,5862],["Vojvoda","D","Udinese",9,4994],["Couto","D","Como",9,6727],["Zappacosta","D","Atalanta",8,554],["Lucumì","D","Juventus",8,6042],["Obert","D","Cagliari",8,5701],["Bracaglia","D","Frosinone",8,7469],["Celik","D","Juventus",8,4657],["Cambiaso","D","Juventus",8,5520],["Doekhi","D","Lazio",8,6320],["Tiago Gabriel","D","Lecce",8,6989],["Bartesaghi","D","Milan",8,6496],["Spinazzola","D","Napoli",8,1852],["Delprato","D","Parma",8,6664],["Koulierakis","D","Roma",8,7529],["Comuzzo","D","Torino",8,6495],["Ismajli","D","Torino",8,5010],["Theate","D","Bologna",8,5675],["Belghali","D","Torino",8,7220],["Diego Carlos","D","Parma",8,4137],["Hien","D","Atalanta",7,6046],["Mina","D","Cagliari",7,4210],["Valle","D","Como",7,6867],["Dragusin","D","Fiorentina",7,5365],["Jimenez A.","D","Fiorentina",7,6531],["Oyono A.","D","Frosinone",7,6238],["Carlos Augusto","D","Inter",7,5877],["Tavares N.","D","Lazio",7,5620],["Gabbia","D","Milan",7,4401],["Mangas","D","Monza",7,7485],["Idzes","D","Sassuolo",7,6672],["Doig","D","Sassuolo",7,5851],["Coco","D","Torino",7,6642],["Kolasinac","D","Atalanta",6,2640],["Holm","D","Bologna",6,5678],["Zortea","D","Bologna",6,4433],["Kofler","D","Cagliari",6,7532],["Zè Pedro","D","Cagliari",6,7274],["Kaiki","D","Como",6,7414],["Calvani","D","Frosinone",6,7467],["Monterisi","D","Frosinone",6,4952],["Marcandalli","D","Genoa",6,6660],["Pavard","D","Inter",6,4177],["Pedraza","D","Lazio",6,4817],["Marusic","D","Lazio",6,2188],["Tomori","D","Milan",6,4751],["Buongiorno","D","Napoli",6,2724],["Kristensen T.","D","Atalanta",6,6485],["Obrador","D","Sassuolo",6,7329],["Fortini","D","Torino",6,7069],["Leysen F.","D","Sassuolo",6,7564],["Badiashile","D","Napoli",6,4664],["Sutalo J.","D","Lazio",6,7580],["Balerdi","D","Roma",6,4705],["Caleta-Car","D","Sassuolo",6,4147],["Sugawara","D","Cagliari",6,7621],["Leite","D","Lazio",6,6319],["Bellanova","D","Atalanta",5,4887],["Bernasconi","D","Atalanta",5,7219],["Heggem","D","Bologna",5,7212],["Rodriguez Ju.","D","Cagliari",5,7268],["Kempf","D","Como",5,6893],["Valdepenas","D","Fiorentina",5,7294],["Viery","D","Fiorentina",5,7410],["Gatti","D","Juventus",5,5831],["Kelly L.","D","Juventus",5,6766],["Gaspar K.","D","Lecce",5,6632],["Veiga D.","D","Lecce",5,6990],["Gallo","D","Lecce",5,4502],["De Winter","D","Milan",5,5739],["Birindelli","D","Monza",5,5838],["Beukema","D","Napoli",5,6202],["Ghilardi","D","Roma",5,6631],["Comert","D","Torino",5,7526],["Bella-Kotchap","D","Venezia",5,7253],["Correia T.","D","Venezia",5,4845],["Hainaut","D","Venezia",5,6821],["Haps","D","Venezia",5,5695],["Patterson","D","Torino",5,5751],["Rodriguez R.","D","Torino",5,2169],["Kossounou","D","Atalanta",4,5578],["Vitik","D","Bologna",4,7068],["Smolcic I.","D","Como",4,7014],["Parisi","D","Fiorentina",4,5449],["Cittadini","D","Frosinone",4,5757],["Provstgaard","D","Lazio",4,7012],["Floriani Mussolini","D","Lazio",4,7131],["Siebert","D","Lecce",4,7240],["Lucchesi","D","Monza",4,6659],["Kouadio","D","Monza",4,7238],["Carboni A.","D","Monza",4,4925],["Olivera","D","Napoli",4,5840],["Troilo","D","Parma",4,7235],["Valenti","D","Parma",4,5307],["Britschgi","D","Parma",4,7255],["Rensch","D","Roma",4,6986],["Kabasele","D","Udinese",4,4263],["Bertola","D","Udinese",4,5820],["Moreno M.","D","Venezia",4,6890],["Sagrado","D","Venezia",4,6681],["Terzic","D","Frosinone",4,4375],["Cinquegrano","D","Sassuolo",4,7573],["Juan Jesus","D","Venezia",4,256],["Ehizibue","D","Genoa",4,6047],["Helland","D","Bologna",3,7326],["Pongracic","D","Fiorentina",3,5603],["Joao Mario","D","Fiorentina",3,7175],["Mitaj","D","Genoa",3,7537],["Estupinan","D","Milan",3,5273],["Walukiewicz","D","Sassuolo",3,4374],["Abankwah","D","Udinese",3,6021],["Ebosse","D","Udinese",3,5994],["Zanoli","D","Udinese",3,5527],["Arizala","D","Udinese",3,7312],["Halhal","D","Venezia",3,7538],["Schingtienne","D","Venezia",3,6892],["Odenthal","D","Sassuolo",3,7154],["Favasuli","D","Napoli",3,7563],["Lulli","D","Roma",3,7599],["Tchato","D","Frosinone",3,7605],["Kambwala","D","Como",3,6601],["Drameh","D","Genoa",3,5742],["Casale","D","Bologna",2,5498],["Alhassane","D","Bologna",2,7483],["Idrissi R.","D","Cagliari",2,7125],["Ranieri L.","D","Fiorentina",2,4378],["Akpoguma","D","Frosinone",2,7540],["Otoa","D","Genoa",2,6977],["Sabelli","D","Genoa",2,791],["Marin R.","D","Napoli",2,6638],["Candè","D","Sassuolo",2,6985],["Palma","D","Udinese",2,6925],["Sverko","D","Venezia",2,6673],["Franjic","D","Venezia",2,7478],["Goglichidze","D","Monza",2,6537],["Drobnic","D","Parma",2,7615],["De Silvestri","D","Bologna",1,487],["Goldaniga","D","Como",1,418],["Van Der Brempt","D","Sassuolo",1,6896],["Amey","D","Frosinone",1,5424],["Puczka","D","Genoa",1,7413],["Rugani","D","Juventus",1,294],["Cabal","D","Juventus",1,6039],["Patric","D","Lazio",1,327],["Lazzari","D","Lazio",1,2263],["Pellegrini Lu.","D","Lazio",1,2728],["Jean","D","Lecce",1,6883],["Ndaba","D","Lecce",1,7182],["Diawara S.","D","Milan",1,7525],["Antov","D","Monza",1,5399],["Bakoune","D","Monza",1,7476],["Marianucci","D","Napoli",1,6809],["Mazzocchi","D","Venezia",1,5481],["Ndiaye","D","Parma",1,7202],["Carboni F.","D","Parma",1,6149],["Ziolkowski","D","Monza",1,7260],["Pieragnolo","D","Sassuolo",1,7156],["Biraghi","D","Torino",1,252],["Gomes","D","Venezia",1,7454],["Aurelio","D","Cagliari",1,7548],["Omar Fayed","D","Frosinone",1,7553],["Terracciano F.","D","Milan",1,5812],["Maye","D","Monza",1,7604],["Dembelè A.","D","Lecce",1,6826],["Paz N.","C","Como",30,6875],["Calhanoglu","C","Inter",28,2194],["McTominay","C","Napoli",26,4777],["Orsolini","C","Bologna",25,2167],["Pulisic","C","Milan",23,2423],["Rabiot","C","Milan",22,2379],["Baturina","C","Como",21,7126],["Mora","C","Roma",20,7556],["Da Cunha","C","Como",18,5559],["Barella","C","Inter",17,1870],["De Bruyne","C","Napoli",17,2517],["Zaniolo","C","Udinese",17,2766],["McKennie","C","Juventus",16,4973],["Zaccagni","C","Lazio",16,632],["Atta","C","Fiorentina",15,6908],["Ederson D.S.","C","Atalanta",13,5792],["Samardzic","C","Atalanta",13,5119],["Gudmundsson A.","C","Lazio",13,5800],["Conceicao","C","Juventus",13,6884],["Taylor K.","C","Lazio",13,7314],["Vlasic","C","Torino",13,5687],["Gonzalez N.","C","Juventus",13,4179],["Zielinski","C","Inter",12,152],["Modric","C","Milan",12,2606],["Ekkelenkamp","C","Udinese",12,6684],["Jones C.","C","Inter",12,5172],["Kessiè","C","Atalanta",12,1850],["Goncalves P.","C","Fiorentina",12,7625],["Perrone","C","Como",11,6151],["Rodriguez Je.","C","Como",11,7129],["Baldanzi","C","Genoa",11,5823],["Frattesi","C","Lazio",11,2848],["Alajbegovic","C","Juventus",11,7436],["Saelemaekers","C","Milan",11,4892],["Mastantuono","C","Fiorentina",11,7078],["Moreira","C","Milan",11,6372],["Bernardeschi","C","Bologna",10,184],["Rowe","C","Atalanta",10,6844],["Mandragora","C","Torino",10,1933],["Zambo Anguissa","C","Napoli",10,4220],["Politano","C","Napoli",10,536],["Konè M.","C","Roma",10,5589],["Thorstvedt","C","Sassuolo",10,5844],["Diouf","C","Inter",9,6274],["Sucic P.","C","Inter",9,7070],["Locatelli","C","Juventus",9,827],["Thuram K.","C","Juventus",9,5562],["Cancellieri","C","Lazio",9,5500],["Isaksen","C","Lazio",9,6398],["Colpani","C","Monza",9,5878],["Vergara","C","Napoli",9,7223],["Cristante","C","Roma",9,779],["Volpato","C","Sassuolo",9,5735],["Casadei","C","Torino",9,5888],["Pellegrini Lo.","C","Roma",9,530],["Pasalic","C","Atalanta",8,2077],["Ferguson","C","Bologna",8,5858],["Odgaard","C","Bologna",8,2765],["Cambiaghi","C","Bologna",8,4436],["Romano","C","Cagliari",8,7311],["Fazzini","C","Cagliari",8,6010],["Calò","C","Frosinone",8,7472],["Chukwueze","C","Milan",8,4856],["Lobotka","C","Napoli",8,4287],["Konè I.","C","Sassuolo",8,6717],["Karlstrom","C","Udinese",8,6680],["Schmid","C","Frosinone",8,7551],["Hutchinson","C","Milan",8,7618],["Mbangula","C","Bologna",8,6833],["Gaetano","C","Atalanta",7,4364],["Zalewski","C","Atalanta",7,5422],["Adopo","C","Cagliari",7,4870],["Winks","C","Cagliari",7,4260],["Caqueret","C","Como",7,5036],["Fagioli","C","Fiorentina",7,4465],["Ndour","C","Fiorentina",7,6294],["Frendrup","C","Genoa",7,5791],["Koopmeiners","C","Juventus",7,5685],["Rovella","C","Lazio",7,4459],["Coulibaly L.","C","Lecce",7,5504],["Akinsanmiro","C","Monza",7,6593],["Bernabè","C","Parma",7,6666],["Pisilli","C","Roma",7,6190],["Adzic","C","Sassuolo",7,6677],["Sow","C","Genoa",7,5946],["Cissè A.","C","Milan",7,6618],["Elmas","C","Atalanta",7,4479],["Monteiro J.","C","Lecce",7,7619],["Sarr P.","C","Juventus",7,5680],["El Shaarawy","C","Genoa",7,795],["Pobega","C","Bologna",6,5298],["Milla","C","Como",6,7412],["Liberali","C","Como",6,6678],["Oulai","C","Fiorentina",6,7464],["Zerbin","C","Frosinone",6,5998],["Ellertsson","C","Genoa",6,6020],["Zhegrova","C","Juventus",6,5761],["Pierotti","C","Lecce",6,6549],["Pessina","C","Monza",6,2741],["Matic","C","Sassuolo",6,2528],["Bakola","C","Sassuolo",6,7036],["Cacciamani","C","Torino",6,7060],["Fitz-Jim","C","Torino",6,7535],["Oristanio","C","Torino",6,6218],["Piotrowski","C","Udinese",6,7198],["Unai Gomez","C","Udinese",6,6783],["Basic","C","Venezia",6,5674],["Busio","C","Venezia",6,5507],["Braganca","C","Torino",6,7624],["Felici","C","Cagliari",5,6640],["Fini ","C","Frosinone",5,6506],["Masini","C","Frosinone",5,6917],["Meichtry","C","Genoa",5,7409],["Messias","C","Genoa",5,4970],["Luis Henrique","C","Inter",5,5301],["Jashari","C","Milan",5,7203],["Keita M.","C","Parma",5,6898],["Nicolussi Caviglia","C","Parma",5,4349],["Gineitis","C","Torino",5,6170],["Njie","C","Fiorentina",5,6827],["Sohm","C","Venezia",5,5319],["Perez K.","C","Venezia",5,6994],["Tourè I.","C","Monza",5,7146],["Amondarain","C","Bologna",4,7528],["Moro N.","C","Bologna",4,6054],["Deiola","C","Cagliari",4,1871],["Addai","C","Como",4,7127],["Brescianini","C","Fiorentina",4,4947],["Fabbian","C","Parma",4,6206],["Cichella","C","Frosinone",4,7473],["Amorim","C","Genoa",4,7341],["Traorè Hj.","C","Genoa",4,2857],["Mkhitaryan","C","Inter",4,2529],["Douglas Luiz","C","Juventus",4,4911],["Dele-Bashiru","C","Lazio",4,6629],["Ngom","C","Lecce",4,7322],["Berisha M.","C","Lecce",4,6015],["Gandelman","C","Lecce",4,7318],["Musah","C","Milan",4,5295],["Loftus-Cheek","C","Milan",4,4199],["Folorunsho","C","Monza",4,6252],["Almqvist","C","Parma",4,6207],["Ilkhan","C","Torino",4,6005],["Miller L.","C","Udinese",4,7208],["Grillitsch","C","Frosinone",4,7550],["Massolin","C","Cagliari",4,7579],["Fernandez T.","C","Venezia",4,7232],["De Roon","C","Roma",3,22],["Sulemana I.","C","Sassuolo",3,6024],["Dominguez B.","C","Sassuolo",3,6895],["Fadera","C","Cagliari",3,6815],["Belahyane","C","Lazio",3,6191],["Cataldi","C","Lazio",3,333],["Gorter","C","Lecce",3,7248],["Maleh","C","Lecce",3,5457],["Ricci S.","C","Como",3,5453],["Ordonez C.","C","Parma",3,7138],["Diallo O.","C","Parma",3,7536],["Aboukhlal","C","Torino",3,7183],["Gagliardini","C","Cagliari",3,801],["El Azzouzi O.","C","Bologna",2,6225],["Gelli F.","C","Frosinone",2,6241],["Hasa","C","Frosinone",2,6903],["Stankovic A.","C","Inter",2,6503],["Colombo L.","C","Monza",2,7477],["Gilmour","C","Napoli",2,5131],["Cremaschi","C","Parma",2,7276],["Lipani","C","Sassuolo",2,6246],["Zarraga","C","Udinese",2,6212],["Helgason","C","Venezia",2,5872],["Forson O.","C","Monza",2,6592],["Foe Ondoa","C","Monza",2,7574],["Jovanovic","C","Udinese",2,7092],["Liteta","C","Cagliari",1,7165],["Lahdo","C","Como",1,7357],["El Azzouzi A.","C","Frosinone",1,7456],["Kone B.","C","Frosinone",1,5725],["Venturino","C","Genoa",1,6980],["Przyborek","C","Lazio",1,7345],["Kaba","C","Lecce",1,6410],["Fofana Sa.","C","Lecce",1,7319],["Ciurria","C","Monza",1,5880],["Boloca","C","Sassuolo",1,6219],["Ilic","C","Lecce",1,5007],["Chakvetadze","C","Udinese",1,7418],["Dagasso","C","Venezia",1,7481],["Duncan","C","Venezia",1,526],["Laerke","C","Lecce",1,7571],["Comotto","C","Milan",1,7572],["Mout","C","Monza",1,7575],["Ciervo","C","Cagliari",1,5462],["Sierro","C","Parma",1,7628],["Libra","C","Bologna",1,7629],["Malen","A","Roma",37,5585],["Martinez L.","A","Inter",35,2764],["Hojlund","A","Napoli",29,6052],["Thuram","A","Inter",28,4871],["Ramos G.","A","Milan",27,6397],["Kean","A","Como",25,2097],["Kolo Muani","A","Juventus",24,5951],["Woltemade","A","Juventus",23,6752],["Douvikas","A","Como",21,7017],["Yildiz","A","Juventus",21,6434],["Scamacca","A","Atalanta",19,2137],["Berardi","A","Sassuolo",19,531],["Davis K.","A","Udinese",19,5637],["Krstovic","A","Atalanta",18,6435],["De Ketelaere","A","Atalanta",17,5995],["Esposito F.P.","A","Inter",17,7071],["Dovbyk","A","Bologna",16,6675],["Dybala","A","Roma",16,309],["Soulè","A","Roma",15,5734],["Laurientè","A","Sassuolo",15,6060],["Diao","A","Como",14,6967],["Santos A.","A","Napoli",14,7351],["Pellegrino M.","A","Fiorentina",14,7023],["Castro S.","A","Roma",14,6572],["Simeone","A","Torino",14,2061],["Beto","A","Fiorentina",14,5694],["Raspadori","A","Atalanta",13,4371],["Esposito Se.","A","Sassuolo",12,4463],["Pinamonti","A","Lazio",12,2038],["Adams C.","A","Torino",12,6646],["Kevin Carlos","A","Cagliari",12,7547],["Raimondo","A","Frosinone",11,5436],["Colombo","A","Genoa",11,4923],["Adams A.","A","Venezia",11,7484],["Tourè E.","A","Parma",11,6229],["Bowie","A","Sassuolo",10,7347],["Yeboah J.","A","Venezia",10,6904],["Romero D.","A","Parma",10,7554],["Piccoli","A","Bologna",9,4359],["Ghedjemis","A","Frosinone",9,6530],["Cutrone","A","Monza",9,2155],["Osmajic","A","Genoa",9,7600],["Kvernadze","A","Frosinone",8,6204],["Geubbels","A","Lecce",8,5029],["Bobcek","A","Frosinone",8,7612],["Maldini","A","Cagliari",7,4896],["Vitinha O.","A","Genoa",7,6164],["Bonny","A","Inter",7,6669],["Varela G.","A","Monza",7,7523],["Rrahmani Al.","A","Venezia",7,7449],["Gnonto","A","Fiorentina",7,7623],["Boga","A","Juventus",6,2832],["Noslin","A","Lazio",6,6556],["Stulic","A","Lecce",6,7252],["Zapata D.","A","Torino",6,608],["Robinson J.","A","Monza",6,7546],["Zeballos","A","Monza",6,7620],["Sulemana K.","A","Atalanta",5,5918],["Mendy P.","A","Cagliari",5,7374],["Mota","A","Monza",5,5882],["Neres","A","Napoli",5,6831],["Lontani","A","Parma",5,7561],["N'Dri","A","Lecce",4,7001],["Camarda","A","Milan",4,6519],["Frigan","A","Parma",4,7213],["Kulenovic","A","Torino",4,7349],["Gueye","A","Udinese",4,7272],["Adorante","A","Venezia",4,4387],["Milik","A","Juventus",4,2012],["Fatah","A","Lecce",4,7602],["Birligea","A","Frosinone",4,7610],["Ngonge","A","Monza",4,6145],["Nzola","A","Cagliari",4,5336],["Havel","A","Genoa",3,7453],["Giovane","A","Napoli",3,7162],["Lang","A","Napoli",3,7120],["Lucca","A","Napoli",3,6215],["Elphege","A","Parma",3,7342],["Ekhator","A","Juventus",2,6822],["Lauberbach","A","Venezia",2,7482],["Enem","A","Bologna",2,7627],["Trepy","A","Cagliari",1,7317],["Bayo V.","A","Udinese",1,7161],["Lisman","A","Venezia",1,7408],["De Martis","A","Parma",1,7568],["Robinho Junior","A","Genoa",1,7622]];
 const ROLES = ['P','D','C','A'];
 const ROLENAMES = {P:'Portiere', D:'Difensore', C:'Centrocampista', A:'Attaccante'};
-const players = RAW.map((p,i)=>({id:p[4], nome:p[0], r:p[1], squadra:p[2], q:p[3]}));
+const TITNAMES = {titolare:'Titolare', cambio:'Primo cambio', riserva:'Non titolare'};
+
+/* dataset unico: quotazione ufficiale + FVM + titolarità + infortuni + trend */
+const players = [{"id":5841,"nome":"Svilar","r":"P","squadra":"Roma","q":18,"qi":18,"d":0,"fvm":83,"tags":["top"],"inj":null,"tit":"titolare","gkpct":85},{"id":4431,"nome":"Carnesecchi","r":"P","squadra":"Atalanta","q":17,"qi":16,"d":1,"fvm":57,"tags":["top"],"inj":null,"tit":"titolare","gkpct":80},{"id":5116,"nome":"Martinez Jo.","r":"P","squadra":"Inter","q":17,"qi":17,"d":0,"fvm":68,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4964,"nome":"Vicario","r":"P","squadra":"Juventus","q":16,"qi":16,"d":0,"fvm":69,"tags":["top"],"inj":null,"tit":"titolare","gkpct":85},{"id":6966,"nome":"Butez","r":"P","squadra":"Como","q":15,"qi":16,"d":-1,"fvm":50,"tags":["top"],"inj":null,"tit":"titolare","gkpct":75},{"id":4312,"nome":"Maignan","r":"P","squadra":"Milan","q":15,"qi":15,"d":0,"fvm":52,"tags":["top"],"inj":null,"tit":"titolare","gkpct":90},{"id":4360,"nome":"Caprile","r":"P","squadra":"Cagliari","q":11,"qi":9,"d":2,"fvm":25,"tags":["top"],"inj":null,"tit":"titolare","gkpct":85},{"id":6482,"nome":"Mandas","r":"P","squadra":"Lazio","q":11,"qi":9,"d":2,"fvm":37,"tags":["top"],"inj":null,"tit":"titolare","gkpct":75},{"id":572,"nome":"Meret","r":"P","squadra":"Napoli","q":11,"qi":11,"d":0,"fvm":49,"tags":["top"],"inj":null,"tit":"titolare","gkpct":70},{"id":133,"nome":"Skorupski","r":"P","squadra":"Bologna","q":10,"qi":10,"d":0,"fvm":32,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":80},{"id":2521,"nome":"De Gea","r":"P","squadra":"Fiorentina","q":10,"qi":13,"d":-3,"fvm":25,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":80},{"id":6462,"nome":"Okoye","r":"P","squadra":"Udinese","q":9,"qi":9,"d":0,"fvm":28,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":80},{"id":6534,"nome":"Perri","r":"P","squadra":"Torino","q":9,"qi":9,"d":0,"fvm":23,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":75},{"id":2134,"nome":"Falcone","r":"P","squadra":"Lecce","q":8,"qi":8,"d":0,"fvm":26,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":85},{"id":6344,"nome":"Sanchez Ro.","r":"P","squadra":"Como","q":8,"qi":8,"d":0,"fvm":15,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":7332,"nome":"Bijlow","r":"P","squadra":"Genoa","q":7,"qi":8,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":80},{"id":4236,"nome":"Muric","r":"P","squadra":"Sassuolo","q":7,"qi":7,"d":0,"fvm":15,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":75},{"id":7411,"nome":"Daffara","r":"P","squadra":"Parma","q":6,"qi":7,"d":-1,"fvm":7,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6248,"nome":"Stankovic F.","r":"P","squadra":"Venezia","q":6,"qi":6,"d":0,"fvm":11,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6415,"nome":"Palmisani","r":"P","squadra":"Frosinone","q":5,"qi":4,"d":1,"fvm":12,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":75},{"id":4485,"nome":"Thiam","r":"P","squadra":"Monza","q":4,"qi":5,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"titolare","gkpct":70},{"id":2170,"nome":"Milinkovic-Savic V.","r":"P","squadra":"Napoli","q":4,"qi":5,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6662,"nome":"Corvi","r":"P","squadra":"Parma","q":3,"qi":1,"d":2,"fvm":10,"tags":["scommessa","low"],"inj":null,"tit":"titolare","gkpct":65},{"id":4,"nome":"Sportiello","r":"P","squadra":"Atalanta","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7533,"nome":"Happonen","r":"P","squadra":"Bologna","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7172,"nome":"Pessina Mas.","r":"P","squadra":"Bologna","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6650,"nome":"Sherri","r":"P","squadra":"Cagliari","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7301,"nome":"Tornqvist","r":"P","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2809,"nome":"Vigorito","r":"P","squadra":"Como","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6403,"nome":"Christensen O.","r":"P","squadra":"Fiorentina","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":158,"nome":"Lezzerini","r":"P","squadra":"Fiorentina","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7463,"nome":"Desplanches","r":"P","squadra":"Frosinone","q":1,"qi":2,"d":-1,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7466,"nome":"Lolic","r":"P","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":219,"nome":"Sommariva","r":"P","squadra":"Genoa","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6569,"nome":"Stolz","r":"P","squadra":"Genoa","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":1926,"nome":"Di Gennaro","r":"P","squadra":"Inter","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2814,"nome":"Provedel","r":"P","squadra":"Inter","q":1,"qi":2,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":1930,"nome":"Pinsoglio","r":"P","squadra":"Juventus","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7337,"nome":"Motta","r":"P","squadra":"Lazio","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7534,"nome":"Renzetti","r":"P","squadra":"Lazio","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2815,"nome":"Terracciano","r":"P","squadra":"Milan","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6813,"nome":"Torriani","r":"P","squadra":"Milan","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7475,"nome":"Strajnar","r":"P","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2845,"nome":"Contini","r":"P","squadra":"Napoli","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7048,"nome":"De Marzi","r":"P","squadra":"Roma","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":610,"nome":"Gollini","r":"P","squadra":"Roma","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4518,"nome":"Russo A.","r":"P","squadra":"Sassuolo","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4867,"nome":"Turati","r":"P","squadra":"Sassuolo","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7457,"nome":"Mascardi","r":"P","squadra":"Torino","q":1,"qi":1,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7363,"nome":"Siviero","r":"P","squadra":"Torino","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":543,"nome":"Padelli","r":"P","squadra":"Udinese","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6671,"nome":"Grandi","r":"P","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7531,"nome":"Pozzi","r":"P","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2127,"nome":"Satalino","r":"P","squadra":"Sassuolo","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7557,"nome":"Penev","r":"P","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7560,"nome":"Pisseri","r":"P","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":3,"nome":"Radunovic","r":"P","squadra":"Cagliari","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4957,"nome":"Montipò","r":"P","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4468,"nome":"Bleve","r":"P","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7603,"nome":"Grabara","r":"P","squadra":"Juventus","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7611,"nome":"Mrozek","r":"P","squadra":"Udinese","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2874,"nome":"Ghidotti","r":"P","squadra":"Parma","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7626,"nome":"Pompei","r":"P","squadra":"Atalanta","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":254,"nome":"Dimarco","r":"D","squadra":"Inter","q":31,"qi":32,"d":-1,"fvm":250,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":7181,"nome":"Wesley","r":"D","squadra":"Roma","q":18,"qi":17,"d":1,"fvm":95,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4998,"nome":"Molina N.","r":"D","squadra":"Roma","q":18,"qi":18,"d":0,"fvm":71,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2788,"nome":"Bremer","r":"D","squadra":"Juventus","q":16,"qi":15,"d":1,"fvm":60,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4159,"nome":"Akanji","r":"D","squadra":"Inter","q":15,"qi":16,"d":-1,"fvm":45,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2296,"nome":"Mancini","r":"D","squadra":"Roma","q":15,"qi":15,"d":0,"fvm":50,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2120,"nome":"Bastoni","r":"D","squadra":"Inter","q":14,"qi":14,"d":0,"fvm":42,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4976,"nome":"Kalulu","r":"D","squadra":"Juventus","q":14,"qi":13,"d":1,"fvm":47,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5022,"nome":"Pavlovic","r":"D","squadra":"Milan","q":14,"qi":14,"d":0,"fvm":47,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4409,"nome":"Rrahmani","r":"D","squadra":"Napoli","q":14,"qi":14,"d":0,"fvm":50,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6217,"nome":"Bisseck","r":"D","squadra":"Inter","q":13,"qi":11,"d":2,"fvm":36,"tags":["top"],"inj":null,"tit":"cambio","gkpct":null},{"id":5833,"nome":"Gila","r":"D","squadra":"Milan","q":13,"qi":12,"d":1,"fvm":31,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6956,"nome":"Solet","r":"D","squadra":"Udinese","q":13,"qi":13,"d":0,"fvm":40,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2514,"nome":"Stones","r":"D","squadra":"Inter","q":12,"qi":12,"d":0,"fvm":22,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2816,"nome":"Di Lorenzo","r":"D","squadra":"Napoli","q":12,"qi":12,"d":0,"fvm":37,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4807,"nome":"Hermoso","r":"D","squadra":"Roma","q":12,"qi":10,"d":2,"fvm":35,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4317,"nome":"N'Dicka","r":"D","squadra":"Roma","q":12,"qi":13,"d":-1,"fvm":41,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5526,"nome":"Scalvini","r":"D","squadra":"Atalanta","q":11,"qi":10,"d":1,"fvm":26,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5982,"nome":"Spence","r":"D","squadra":"Inter","q":11,"qi":12,"d":-1,"fvm":32,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6869,"nome":"Ramon","r":"D","squadra":"Como","q":10,"qi":10,"d":0,"fvm":31,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5750,"nome":"Ostigard","r":"D","squadra":"Genoa","q":10,"qi":11,"d":-1,"fvm":34,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5555,"nome":"Kamara H.","r":"D","squadra":"Udinese","q":10,"qi":6,"d":4,"fvm":12,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":5641,"nome":"Chalobah T.","r":"D","squadra":"Como","q":10,"qi":9,"d":1,"fvm":32,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4734,"nome":"Miranda J.","r":"D","squadra":"Bologna","q":9,"qi":8,"d":1,"fvm":25,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5885,"nome":"Dodò","r":"D","squadra":"Fiorentina","q":9,"qi":10,"d":-1,"fvm":20,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5514,"nome":"Vasquez","r":"D","squadra":"Genoa","q":9,"qi":9,"d":0,"fvm":30,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5862,"nome":"Valeri","r":"D","squadra":"Parma","q":9,"qi":8,"d":1,"fvm":22,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4994,"nome":"Vojvoda","r":"D","squadra":"Udinese","q":9,"qi":8,"d":1,"fvm":19,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6727,"nome":"Couto","r":"D","squadra":"Como","q":9,"qi":8,"d":1,"fvm":32,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":554,"nome":"Zappacosta","r":"D","squadra":"Atalanta","q":8,"qi":8,"d":0,"fvm":16,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6042,"nome":"Lucumì","r":"D","squadra":"Juventus","q":8,"qi":8,"d":0,"fvm":17,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5701,"nome":"Obert","r":"D","squadra":"Cagliari","q":8,"qi":7,"d":1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7469,"nome":"Bracaglia","r":"D","squadra":"Frosinone","q":8,"qi":5,"d":3,"fvm":16,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":4657,"nome":"Celik","r":"D","squadra":"Juventus","q":8,"qi":8,"d":0,"fvm":16,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5520,"nome":"Cambiaso","r":"D","squadra":"Juventus","q":8,"qi":9,"d":-1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6320,"nome":"Doekhi","r":"D","squadra":"Lazio","q":8,"qi":7,"d":1,"fvm":16,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6989,"nome":"Tiago Gabriel","r":"D","squadra":"Lecce","q":8,"qi":7,"d":1,"fvm":20,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6496,"nome":"Bartesaghi","r":"D","squadra":"Milan","q":8,"qi":8,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":1852,"nome":"Spinazzola","r":"D","squadra":"Napoli","q":8,"qi":8,"d":0,"fvm":24,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6664,"nome":"Delprato","r":"D","squadra":"Parma","q":8,"qi":8,"d":0,"fvm":21,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7529,"nome":"Koulierakis","r":"D","squadra":"Roma","q":8,"qi":8,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6495,"nome":"Comuzzo","r":"D","squadra":"Torino","q":8,"qi":6,"d":2,"fvm":13,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":5010,"nome":"Ismajli","r":"D","squadra":"Torino","q":8,"qi":7,"d":1,"fvm":13,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5675,"nome":"Theate","r":"D","squadra":"Bologna","q":8,"qi":8,"d":0,"fvm":20,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7220,"nome":"Belghali","r":"D","squadra":"Torino","q":8,"qi":7,"d":1,"fvm":18,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4137,"nome":"Diego Carlos","r":"D","squadra":"Parma","q":8,"qi":8,"d":0,"fvm":23,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6046,"nome":"Hien","r":"D","squadra":"Atalanta","q":7,"qi":8,"d":-1,"fvm":11,"tags":[],"inj":{"rientro":"11/10/2026","motivo":"Lesione tendine semimembranoso"},"tit":"riserva","gkpct":null},{"id":4210,"nome":"Mina","r":"D","squadra":"Cagliari","q":7,"qi":8,"d":-1,"fvm":20,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6867,"nome":"Valle","r":"D","squadra":"Como","q":7,"qi":6,"d":1,"fvm":26,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5365,"nome":"Dragusin","r":"D","squadra":"Fiorentina","q":7,"qi":8,"d":-1,"fvm":20,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6531,"nome":"Jimenez A.","r":"D","squadra":"Fiorentina","q":7,"qi":8,"d":-1,"fvm":17,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6238,"nome":"Oyono A.","r":"D","squadra":"Frosinone","q":7,"qi":5,"d":2,"fvm":10,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":5877,"nome":"Carlos Augusto","r":"D","squadra":"Inter","q":7,"qi":7,"d":0,"fvm":20,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5620,"nome":"Tavares N.","r":"D","squadra":"Lazio","q":7,"qi":6,"d":1,"fvm":27,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":4401,"nome":"Gabbia","r":"D","squadra":"Milan","q":7,"qi":7,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7485,"nome":"Mangas","r":"D","squadra":"Monza","q":7,"qi":6,"d":1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6672,"nome":"Idzes","r":"D","squadra":"Sassuolo","q":7,"qi":7,"d":0,"fvm":19,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5851,"nome":"Doig","r":"D","squadra":"Sassuolo","q":7,"qi":4,"d":3,"fvm":10,"tags":["scommessa"],"inj":null,"tit":"cambio","gkpct":null},{"id":6642,"nome":"Coco","r":"D","squadra":"Torino","q":7,"qi":7,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2640,"nome":"Kolasinac","r":"D","squadra":"Atalanta","q":6,"qi":5,"d":1,"fvm":8,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5678,"nome":"Holm","r":"D","squadra":"Bologna","q":6,"qi":5,"d":1,"fvm":13,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4433,"nome":"Zortea","r":"D","squadra":"Bologna","q":6,"qi":6,"d":0,"fvm":19,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7532,"nome":"Kofler","r":"D","squadra":"Cagliari","q":6,"qi":5,"d":1,"fvm":8,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7274,"nome":"Zè Pedro","r":"D","squadra":"Cagliari","q":6,"qi":5,"d":1,"fvm":13,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":7414,"nome":"Kaiki","r":"D","squadra":"Como","q":6,"qi":7,"d":-1,"fvm":13,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7467,"nome":"Calvani","r":"D","squadra":"Frosinone","q":6,"qi":4,"d":2,"fvm":13,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":4952,"nome":"Monterisi","r":"D","squadra":"Frosinone","q":6,"qi":6,"d":0,"fvm":13,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6660,"nome":"Marcandalli","r":"D","squadra":"Genoa","q":6,"qi":6,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4177,"nome":"Pavard","r":"D","squadra":"Inter","q":6,"qi":6,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4817,"nome":"Pedraza","r":"D","squadra":"Lazio","q":6,"qi":5,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2188,"nome":"Marusic","r":"D","squadra":"Lazio","q":6,"qi":6,"d":0,"fvm":20,"tags":["perla"],"inj":{"rientro":"16/09/2026","motivo":"Problema muscolare coscia"},"tit":"titolare","gkpct":null},{"id":4751,"nome":"Tomori","r":"D","squadra":"Milan","q":6,"qi":7,"d":-1,"fvm":8,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":2724,"nome":"Buongiorno","r":"D","squadra":"Napoli","q":6,"qi":7,"d":-1,"fvm":15,"tags":[],"inj":{"rientro":"30/09/2026","motivo":"Riparazione menisco mediale"},"tit":"titolare","gkpct":null},{"id":6485,"nome":"Kristensen T.","r":"D","squadra":"Atalanta","q":6,"qi":7,"d":-1,"fvm":20,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7329,"nome":"Obrador","r":"D","squadra":"Sassuolo","q":6,"qi":6,"d":0,"fvm":13,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7069,"nome":"Fortini","r":"D","squadra":"Torino","q":6,"qi":5,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":7564,"nome":"Leysen F.","r":"D","squadra":"Sassuolo","q":6,"qi":5,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4664,"nome":"Badiashile","r":"D","squadra":"Napoli","q":6,"qi":7,"d":-1,"fvm":18,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":7580,"nome":"Sutalo J.","r":"D","squadra":"Lazio","q":6,"qi":7,"d":-1,"fvm":19,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4705,"nome":"Balerdi","r":"D","squadra":"Roma","q":6,"qi":6,"d":0,"fvm":11,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4147,"nome":"Caleta-Car","r":"D","squadra":"Sassuolo","q":6,"qi":6,"d":0,"fvm":11,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7621,"nome":"Sugawara","r":"D","squadra":"Cagliari","q":6,"qi":6,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6319,"nome":"Leite","r":"D","squadra":"Lazio","q":6,"qi":6,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4887,"nome":"Bellanova","r":"D","squadra":"Atalanta","q":5,"qi":6,"d":-1,"fvm":17,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":7219,"nome":"Bernasconi","r":"D","squadra":"Atalanta","q":5,"qi":6,"d":-1,"fvm":18,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7212,"nome":"Heggem","r":"D","squadra":"Bologna","q":5,"qi":6,"d":-1,"fvm":15,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7268,"nome":"Rodriguez Ju.","r":"D","squadra":"Cagliari","q":5,"qi":3,"d":2,"fvm":14,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":6893,"nome":"Kempf","r":"D","squadra":"Como","q":5,"qi":5,"d":0,"fvm":13,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7294,"nome":"Valdepenas","r":"D","squadra":"Fiorentina","q":5,"qi":6,"d":-1,"fvm":13,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7410,"nome":"Viery","r":"D","squadra":"Fiorentina","q":5,"qi":6,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5831,"nome":"Gatti","r":"D","squadra":"Juventus","q":5,"qi":4,"d":1,"fvm":10,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6766,"nome":"Kelly L.","r":"D","squadra":"Juventus","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6632,"nome":"Gaspar K.","r":"D","squadra":"Lecce","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6990,"nome":"Veiga D.","r":"D","squadra":"Lecce","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4502,"nome":"Gallo","r":"D","squadra":"Lecce","q":5,"qi":6,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5739,"nome":"De Winter","r":"D","squadra":"Milan","q":5,"qi":3,"d":2,"fvm":25,"tags":["scommessa","perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":5838,"nome":"Birindelli","r":"D","squadra":"Monza","q":5,"qi":4,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6202,"nome":"Beukema","r":"D","squadra":"Napoli","q":5,"qi":6,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6631,"nome":"Ghilardi","r":"D","squadra":"Roma","q":5,"qi":4,"d":1,"fvm":10,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7526,"nome":"Comert","r":"D","squadra":"Torino","q":5,"qi":4,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7253,"nome":"Bella-Kotchap","r":"D","squadra":"Venezia","q":5,"qi":6,"d":-1,"fvm":13,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4845,"nome":"Correia T.","r":"D","squadra":"Venezia","q":5,"qi":4,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6821,"nome":"Hainaut","r":"D","squadra":"Venezia","q":5,"qi":3,"d":2,"fvm":12,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":5695,"nome":"Haps","r":"D","squadra":"Venezia","q":5,"qi":5,"d":0,"fvm":10,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5751,"nome":"Patterson","r":"D","squadra":"Torino","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":2169,"nome":"Rodriguez R.","r":"D","squadra":"Torino","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5578,"nome":"Kossounou","r":"D","squadra":"Atalanta","q":4,"qi":3,"d":1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7068,"nome":"Vitik","r":"D","squadra":"Bologna","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7014,"nome":"Smolcic I.","r":"D","squadra":"Como","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5449,"nome":"Parisi","r":"D","squadra":"Fiorentina","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":{"rientro":"01/11/2026","motivo":"Ricostruzione crociato anteriore"},"tit":"riserva","gkpct":null},{"id":5757,"nome":"Cittadini","r":"D","squadra":"Frosinone","q":4,"qi":3,"d":1,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7012,"nome":"Provstgaard","r":"D","squadra":"Lazio","q":4,"qi":3,"d":1,"fvm":13,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7131,"nome":"Floriani Mussolini","r":"D","squadra":"Lazio","q":4,"qi":3,"d":1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7240,"nome":"Siebert","r":"D","squadra":"Lecce","q":4,"qi":4,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6659,"nome":"Lucchesi","r":"D","squadra":"Monza","q":4,"qi":4,"d":0,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7238,"nome":"Kouadio","r":"D","squadra":"Monza","q":4,"qi":3,"d":1,"fvm":14,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":4925,"nome":"Carboni A.","r":"D","squadra":"Monza","q":4,"qi":3,"d":1,"fvm":9,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":5840,"nome":"Olivera","r":"D","squadra":"Napoli","q":4,"qi":5,"d":-1,"fvm":13,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7235,"nome":"Troilo","r":"D","squadra":"Parma","q":4,"qi":3,"d":1,"fvm":14,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":5307,"nome":"Valenti","r":"D","squadra":"Parma","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7255,"nome":"Britschgi","r":"D","squadra":"Parma","q":4,"qi":3,"d":1,"fvm":10,"tags":["low"],"inj":null,"tit":"cambio","gkpct":null},{"id":6986,"nome":"Rensch","r":"D","squadra":"Roma","q":4,"qi":5,"d":-1,"fvm":14,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4263,"nome":"Kabasele","r":"D","squadra":"Udinese","q":4,"qi":4,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":5820,"nome":"Bertola","r":"D","squadra":"Udinese","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":6890,"nome":"Moreno M.","r":"D","squadra":"Venezia","q":4,"qi":5,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":6681,"nome":"Sagrado","r":"D","squadra":"Venezia","q":4,"qi":2,"d":2,"fvm":4,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4375,"nome":"Terzic","r":"D","squadra":"Frosinone","q":4,"qi":4,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7573,"nome":"Cinquegrano","r":"D","squadra":"Sassuolo","q":4,"qi":1,"d":3,"fvm":4,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":256,"nome":"Juan Jesus","r":"D","squadra":"Venezia","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6047,"nome":"Ehizibue","r":"D","squadra":"Genoa","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7326,"nome":"Helland","r":"D","squadra":"Bologna","q":3,"qi":2,"d":1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5603,"nome":"Pongracic","r":"D","squadra":"Fiorentina","q":3,"qi":4,"d":-1,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7175,"nome":"Joao Mario","r":"D","squadra":"Fiorentina","q":3,"qi":3,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7537,"nome":"Mitaj","r":"D","squadra":"Genoa","q":3,"qi":4,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5273,"nome":"Estupinan","r":"D","squadra":"Milan","q":3,"qi":3,"d":0,"fvm":13,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4374,"nome":"Walukiewicz","r":"D","squadra":"Sassuolo","q":3,"qi":4,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6021,"nome":"Abankwah","r":"D","squadra":"Udinese","q":3,"qi":1,"d":2,"fvm":10,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5994,"nome":"Ebosse","r":"D","squadra":"Udinese","q":3,"qi":2,"d":1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5527,"nome":"Zanoli","r":"D","squadra":"Udinese","q":3,"qi":4,"d":-1,"fvm":10,"tags":["low"],"inj":{"rientro":"11/09/2026","motivo":"Lesione crociato anteriore"},"tit":"riserva","gkpct":null},{"id":7312,"nome":"Arizala","r":"D","squadra":"Udinese","q":3,"qi":4,"d":-1,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7538,"nome":"Halhal","r":"D","squadra":"Venezia","q":3,"qi":4,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6892,"nome":"Schingtienne","r":"D","squadra":"Venezia","q":3,"qi":3,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7154,"nome":"Odenthal","r":"D","squadra":"Sassuolo","q":3,"qi":1,"d":2,"fvm":8,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7563,"nome":"Favasuli","r":"D","squadra":"Napoli","q":3,"qi":4,"d":-1,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7599,"nome":"Lulli","r":"D","squadra":"Roma","q":3,"qi":1,"d":2,"fvm":10,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7605,"nome":"Tchato","r":"D","squadra":"Frosinone","q":3,"qi":3,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6601,"nome":"Kambwala","r":"D","squadra":"Como","q":3,"qi":3,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5742,"nome":"Drameh","r":"D","squadra":"Genoa","q":3,"qi":3,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5498,"nome":"Casale","r":"D","squadra":"Bologna","q":2,"qi":3,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7483,"nome":"Alhassane","r":"D","squadra":"Bologna","q":2,"qi":2,"d":0,"fvm":6,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7125,"nome":"Idrissi R.","r":"D","squadra":"Cagliari","q":2,"qi":3,"d":-1,"fvm":3,"tags":["low"],"inj":{"rientro":"11/10/2026","motivo":"Ricostruzione crociato anteriore"},"tit":"riserva","gkpct":null},{"id":4378,"nome":"Ranieri L.","r":"D","squadra":"Fiorentina","q":2,"qi":3,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7540,"nome":"Akpoguma","r":"D","squadra":"Frosinone","q":2,"qi":3,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":6977,"nome":"Otoa","r":"D","squadra":"Genoa","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":791,"nome":"Sabelli","r":"D","squadra":"Genoa","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6638,"nome":"Marin R.","r":"D","squadra":"Napoli","q":2,"qi":2,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6985,"nome":"Candè","r":"D","squadra":"Sassuolo","q":2,"qi":3,"d":-1,"fvm":7,"tags":["low"],"inj":{"rientro":"15/09/2026","motivo":"Ricostruzione crociato anteriore"},"tit":"riserva","gkpct":null},{"id":6925,"nome":"Palma","r":"D","squadra":"Udinese","q":2,"qi":2,"d":0,"fvm":11,"tags":["low"],"inj":{"rientro":"22/09/2026","motivo":"Problema muscolare coscia"},"tit":"riserva","gkpct":null},{"id":6673,"nome":"Sverko","r":"D","squadra":"Venezia","q":2,"qi":3,"d":-1,"fvm":7,"tags":["low"],"inj":{"rientro":"17/10/2026","motivo":"Infortunio alle anche"},"tit":"riserva","gkpct":null},{"id":7478,"nome":"Franjic","r":"D","squadra":"Venezia","q":2,"qi":2,"d":0,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6537,"nome":"Goglichidze","r":"D","squadra":"Monza","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7615,"nome":"Drobnic","r":"D","squadra":"Parma","q":2,"qi":1,"d":1,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":487,"nome":"De Silvestri","r":"D","squadra":"Bologna","q":1,"qi":1,"d":0,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":418,"nome":"Goldaniga","r":"D","squadra":"Como","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6896,"nome":"Van Der Brempt","r":"D","squadra":"Sassuolo","q":1,"qi":2,"d":-1,"fvm":11,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":5424,"nome":"Amey","r":"D","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7413,"nome":"Puczka","r":"D","squadra":"Genoa","q":1,"qi":2,"d":-1,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":294,"nome":"Rugani","r":"D","squadra":"Juventus","q":1,"qi":1,"d":0,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6039,"nome":"Cabal","r":"D","squadra":"Juventus","q":1,"qi":1,"d":0,"fvm":4,"tags":["low"],"inj":{"rientro":"08/10/2026","motivo":"Lesione semimembranoso"},"tit":"riserva","gkpct":null},{"id":327,"nome":"Patric","r":"D","squadra":"Lazio","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2263,"nome":"Lazzari","r":"D","squadra":"Lazio","q":1,"qi":2,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2728,"nome":"Pellegrini Lu.","r":"D","squadra":"Lazio","q":1,"qi":2,"d":-1,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6883,"nome":"Jean","r":"D","squadra":"Lecce","q":1,"qi":2,"d":-1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7182,"nome":"Ndaba","r":"D","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7525,"nome":"Diawara S.","r":"D","squadra":"Milan","q":1,"qi":2,"d":-1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5399,"nome":"Antov","r":"D","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":2,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7476,"nome":"Bakoune","r":"D","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6809,"nome":"Marianucci","r":"D","squadra":"Napoli","q":1,"qi":1,"d":0,"fvm":3,"tags":["low"],"inj":{"rientro":"11/10/2026","motivo":"Lesione collaterale mediale"},"tit":"riserva","gkpct":null},{"id":5481,"nome":"Mazzocchi","r":"D","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7202,"nome":"Ndiaye","r":"D","squadra":"Parma","q":1,"qi":1,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6149,"nome":"Carboni F.","r":"D","squadra":"Parma","q":1,"qi":1,"d":0,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7260,"nome":"Ziolkowski","r":"D","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7156,"nome":"Pieragnolo","r":"D","squadra":"Sassuolo","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":{"rientro":"01/10/2026","motivo":"Ricostruzione crociato anteriore"},"tit":"riserva","gkpct":null},{"id":252,"nome":"Biraghi","r":"D","squadra":"Torino","q":1,"qi":2,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7454,"nome":"Gomes","r":"D","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7548,"nome":"Aurelio","r":"D","squadra":"Cagliari","q":1,"qi":2,"d":-1,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7553,"nome":"Omar Fayed","r":"D","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5812,"nome":"Terracciano F.","r":"D","squadra":"Milan","q":1,"qi":2,"d":-1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7604,"nome":"Maye","r":"D","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6826,"nome":"Dembelè A.","r":"D","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":2,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6875,"nome":"Paz N.","r":"C","squadra":"Como","q":30,"qi":30,"d":0,"fvm":250,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2194,"nome":"Calhanoglu","r":"C","squadra":"Inter","q":28,"qi":27,"d":1,"fvm":242,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4777,"nome":"McTominay","r":"C","squadra":"Napoli","q":26,"qi":28,"d":-2,"fvm":190,"tags":["top"],"inj":{"rientro":"11/10/2026","motivo":"Aritmia benigna, ablazione"},"tit":"titolare","gkpct":null},{"id":2167,"nome":"Orsolini","r":"C","squadra":"Bologna","q":25,"qi":26,"d":-1,"fvm":152,"tags":["top"],"inj":{"rientro":"22/09/2026","motivo":"Risentimento flessori"},"tit":"titolare","gkpct":null},{"id":2423,"nome":"Pulisic","r":"C","squadra":"Milan","q":23,"qi":25,"d":-2,"fvm":140,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2379,"nome":"Rabiot","r":"C","squadra":"Milan","q":22,"qi":22,"d":0,"fvm":142,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":7126,"nome":"Baturina","r":"C","squadra":"Como","q":21,"qi":19,"d":2,"fvm":155,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":7556,"nome":"Mora","r":"C","squadra":"Roma","q":20,"qi":19,"d":1,"fvm":100,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5559,"nome":"Da Cunha","r":"C","squadra":"Como","q":18,"qi":18,"d":0,"fvm":85,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":1870,"nome":"Barella","r":"C","squadra":"Inter","q":17,"qi":17,"d":0,"fvm":81,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2517,"nome":"De Bruyne","r":"C","squadra":"Napoli","q":17,"qi":15,"d":2,"fvm":103,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2766,"nome":"Zaniolo","r":"C","squadra":"Udinese","q":17,"qi":18,"d":-1,"fvm":75,"tags":["top"],"inj":{"rientro":"01/10/2026","motivo":"Sospetto stiramento"},"tit":"titolare","gkpct":null},{"id":4973,"nome":"McKennie","r":"C","squadra":"Juventus","q":16,"qi":17,"d":-1,"fvm":70,"tags":["top"],"inj":{"rientro":"11/09/2026","motivo":"Affaticamento muscolare"},"tit":"titolare","gkpct":null},{"id":632,"nome":"Zaccagni","r":"C","squadra":"Lazio","q":16,"qi":16,"d":0,"fvm":92,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6908,"nome":"Atta","r":"C","squadra":"Fiorentina","q":15,"qi":17,"d":-2,"fvm":72,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5792,"nome":"Ederson D.S.","r":"C","squadra":"Atalanta","q":13,"qi":12,"d":1,"fvm":50,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5119,"nome":"Samardzic","r":"C","squadra":"Atalanta","q":13,"qi":12,"d":1,"fvm":43,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5800,"nome":"Gudmundsson A.","r":"C","squadra":"Lazio","q":13,"qi":13,"d":0,"fvm":44,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6884,"nome":"Conceicao","r":"C","squadra":"Juventus","q":13,"qi":12,"d":1,"fvm":69,"tags":["top"],"inj":null,"tit":"cambio","gkpct":null},{"id":7314,"nome":"Taylor K.","r":"C","squadra":"Lazio","q":13,"qi":13,"d":0,"fvm":45,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5687,"nome":"Vlasic","r":"C","squadra":"Torino","q":13,"qi":14,"d":-1,"fvm":65,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4179,"nome":"Gonzalez N.","r":"C","squadra":"Juventus","q":13,"qi":11,"d":2,"fvm":48,"tags":["top"],"inj":null,"tit":"riserva","gkpct":null},{"id":152,"nome":"Zielinski","r":"C","squadra":"Inter","q":12,"qi":10,"d":2,"fvm":42,"tags":["scommessa","perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":2606,"nome":"Modric","r":"C","squadra":"Milan","q":12,"qi":12,"d":0,"fvm":45,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6684,"nome":"Ekkelenkamp","r":"C","squadra":"Udinese","q":12,"qi":10,"d":2,"fvm":57,"tags":["scommessa","perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5172,"nome":"Jones C.","r":"C","squadra":"Inter","q":12,"qi":12,"d":0,"fvm":42,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":1850,"nome":"Kessiè","r":"C","squadra":"Atalanta","q":12,"qi":12,"d":0,"fvm":44,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7625,"nome":"Goncalves P.","r":"C","squadra":"Fiorentina","q":12,"qi":12,"d":0,"fvm":47,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6151,"nome":"Perrone","r":"C","squadra":"Como","q":11,"qi":10,"d":1,"fvm":33,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7129,"nome":"Rodriguez Je.","r":"C","squadra":"Como","q":11,"qi":12,"d":-1,"fvm":26,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5823,"nome":"Baldanzi","r":"C","squadra":"Genoa","q":11,"qi":11,"d":0,"fvm":24,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2848,"nome":"Frattesi","r":"C","squadra":"Lazio","q":11,"qi":7,"d":4,"fvm":120,"tags":["scommessa","perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7436,"nome":"Alajbegovic","r":"C","squadra":"Juventus","q":11,"qi":12,"d":-1,"fvm":42,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4892,"nome":"Saelemaekers","r":"C","squadra":"Milan","q":11,"qi":10,"d":1,"fvm":32,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7078,"nome":"Mastantuono","r":"C","squadra":"Fiorentina","q":11,"qi":12,"d":-1,"fvm":39,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6372,"nome":"Moreira","r":"C","squadra":"Milan","q":11,"qi":12,"d":-1,"fvm":37,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":184,"nome":"Bernardeschi","r":"C","squadra":"Bologna","q":10,"qi":9,"d":1,"fvm":26,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6844,"nome":"Rowe","r":"C","squadra":"Atalanta","q":10,"qi":11,"d":-1,"fvm":39,"tags":["perla"],"inj":null,"tit":"cambio","gkpct":null},{"id":1933,"nome":"Mandragora","r":"C","squadra":"Torino","q":10,"qi":9,"d":1,"fvm":35,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4220,"nome":"Zambo Anguissa","r":"C","squadra":"Napoli","q":10,"qi":11,"d":-1,"fvm":35,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":536,"nome":"Politano","r":"C","squadra":"Napoli","q":10,"qi":10,"d":0,"fvm":40,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5589,"nome":"Konè M.","r":"C","squadra":"Roma","q":10,"qi":10,"d":0,"fvm":38,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5844,"nome":"Thorstvedt","r":"C","squadra":"Sassuolo","q":10,"qi":10,"d":0,"fvm":33,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6274,"nome":"Diouf","r":"C","squadra":"Inter","q":9,"qi":8,"d":1,"fvm":43,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":7070,"nome":"Sucic P.","r":"C","squadra":"Inter","q":9,"qi":8,"d":1,"fvm":20,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":827,"nome":"Locatelli","r":"C","squadra":"Juventus","q":9,"qi":8,"d":1,"fvm":25,"tags":[],"inj":{"rientro":"08/02/2027","motivo":"Problema al menisco"},"tit":"titolare","gkpct":null},{"id":5562,"nome":"Thuram K.","r":"C","squadra":"Juventus","q":9,"qi":10,"d":-1,"fvm":20,"tags":[],"inj":{"rientro":"01/01/2027","motivo":"Sindrome femoro-rotulea"},"tit":"riserva","gkpct":null},{"id":5500,"nome":"Cancellieri","r":"C","squadra":"Lazio","q":9,"qi":9,"d":0,"fvm":21,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6398,"nome":"Isaksen","r":"C","squadra":"Lazio","q":9,"qi":9,"d":0,"fvm":22,"tags":[],"inj":{"rientro":"17/09/2026","motivo":"Pubalgia"},"tit":"cambio","gkpct":null},{"id":5878,"nome":"Colpani","r":"C","squadra":"Monza","q":9,"qi":8,"d":1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7223,"nome":"Vergara","r":"C","squadra":"Napoli","q":9,"qi":8,"d":1,"fvm":34,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":779,"nome":"Cristante","r":"C","squadra":"Roma","q":9,"qi":8,"d":1,"fvm":29,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5735,"nome":"Volpato","r":"C","squadra":"Sassuolo","q":9,"qi":7,"d":2,"fvm":25,"tags":["scommessa"],"inj":{"rientro":"21/10/2026","motivo":"Lesione non specificata"},"tit":"riserva","gkpct":null},{"id":5888,"nome":"Casadei","r":"C","squadra":"Torino","q":9,"qi":10,"d":-1,"fvm":23,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":530,"nome":"Pellegrini Lo.","r":"C","squadra":"Roma","q":9,"qi":10,"d":-1,"fvm":20,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":2077,"nome":"Pasalic","r":"C","squadra":"Atalanta","q":8,"qi":9,"d":-1,"fvm":21,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5858,"nome":"Ferguson","r":"C","squadra":"Bologna","q":8,"qi":7,"d":1,"fvm":23,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2765,"nome":"Odgaard","r":"C","squadra":"Bologna","q":8,"qi":8,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4436,"nome":"Cambiaghi","r":"C","squadra":"Bologna","q":8,"qi":8,"d":0,"fvm":25,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7311,"nome":"Romano","r":"C","squadra":"Cagliari","q":8,"qi":5,"d":3,"fvm":21,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":6010,"nome":"Fazzini","r":"C","squadra":"Cagliari","q":8,"qi":7,"d":1,"fvm":28,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7472,"nome":"Calò","r":"C","squadra":"Frosinone","q":8,"qi":7,"d":1,"fvm":27,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4856,"nome":"Chukwueze","r":"C","squadra":"Milan","q":8,"qi":6,"d":2,"fvm":20,"tags":["scommessa"],"inj":null,"tit":"cambio","gkpct":null},{"id":4287,"nome":"Lobotka","r":"C","squadra":"Napoli","q":8,"qi":7,"d":1,"fvm":23,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6717,"nome":"Konè I.","r":"C","squadra":"Sassuolo","q":8,"qi":9,"d":-1,"fvm":20,"tags":[],"inj":{"rientro":"17/01/2027","motivo":"Frattura gamba sinistra"},"tit":"titolare","gkpct":null},{"id":6680,"nome":"Karlstrom","r":"C","squadra":"Udinese","q":8,"qi":6,"d":2,"fvm":20,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":7551,"nome":"Schmid","r":"C","squadra":"Frosinone","q":8,"qi":8,"d":0,"fvm":23,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7618,"nome":"Hutchinson","r":"C","squadra":"Milan","q":8,"qi":8,"d":0,"fvm":21,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6833,"nome":"Mbangula","r":"C","squadra":"Bologna","q":8,"qi":8,"d":0,"fvm":22,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4364,"nome":"Gaetano","r":"C","squadra":"Atalanta","q":7,"qi":7,"d":0,"fvm":30,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":5422,"nome":"Zalewski","r":"C","squadra":"Atalanta","q":7,"qi":6,"d":1,"fvm":18,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4870,"nome":"Adopo","r":"C","squadra":"Cagliari","q":7,"qi":6,"d":1,"fvm":13,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4260,"nome":"Winks","r":"C","squadra":"Cagliari","q":7,"qi":6,"d":1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5036,"nome":"Caqueret","r":"C","squadra":"Como","q":7,"qi":6,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4465,"nome":"Fagioli","r":"C","squadra":"Fiorentina","q":7,"qi":8,"d":-1,"fvm":18,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6294,"nome":"Ndour","r":"C","squadra":"Fiorentina","q":7,"qi":8,"d":-1,"fvm":18,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":5791,"nome":"Frendrup","r":"C","squadra":"Genoa","q":7,"qi":7,"d":0,"fvm":19,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5685,"nome":"Koopmeiners","r":"C","squadra":"Juventus","q":7,"qi":5,"d":2,"fvm":20,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":4459,"nome":"Rovella","r":"C","squadra":"Lazio","q":7,"qi":6,"d":1,"fvm":16,"tags":[],"inj":{"rientro":"19/09/2026","motivo":"Problema al polpaccio"},"tit":"titolare","gkpct":null},{"id":5504,"nome":"Coulibaly L.","r":"C","squadra":"Lecce","q":7,"qi":6,"d":1,"fvm":17,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6593,"nome":"Akinsanmiro","r":"C","squadra":"Monza","q":7,"qi":6,"d":1,"fvm":11,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":6666,"nome":"Bernabè","r":"C","squadra":"Parma","q":7,"qi":7,"d":0,"fvm":31,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6190,"nome":"Pisilli","r":"C","squadra":"Roma","q":7,"qi":5,"d":2,"fvm":19,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":6677,"nome":"Adzic","r":"C","squadra":"Sassuolo","q":7,"qi":5,"d":2,"fvm":16,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":5946,"nome":"Sow","r":"C","squadra":"Genoa","q":7,"qi":7,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6618,"nome":"Cissè A.","r":"C","squadra":"Milan","q":7,"qi":3,"d":4,"fvm":40,"tags":["scommessa","perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":4479,"nome":"Elmas","r":"C","squadra":"Atalanta","q":7,"qi":7,"d":0,"fvm":22,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7619,"nome":"Monteiro J.","r":"C","squadra":"Lecce","q":7,"qi":7,"d":0,"fvm":21,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":5680,"nome":"Sarr P.","r":"C","squadra":"Juventus","q":7,"qi":7,"d":0,"fvm":25,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":795,"nome":"El Shaarawy","r":"C","squadra":"Genoa","q":7,"qi":7,"d":0,"fvm":20,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":5298,"nome":"Pobega","r":"C","squadra":"Bologna","q":6,"qi":6,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7412,"nome":"Milla","r":"C","squadra":"Como","q":6,"qi":5,"d":1,"fvm":28,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":6678,"nome":"Liberali","r":"C","squadra":"Como","q":6,"qi":6,"d":0,"fvm":17,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7464,"nome":"Oulai","r":"C","squadra":"Fiorentina","q":6,"qi":6,"d":0,"fvm":18,"tags":[],"inj":{"rientro":"15/09/2026","motivo":"Problema muscolare retto femorale"},"tit":"riserva","gkpct":null},{"id":5998,"nome":"Zerbin","r":"C","squadra":"Frosinone","q":6,"qi":5,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":6020,"nome":"Ellertsson","r":"C","squadra":"Genoa","q":6,"qi":6,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5761,"nome":"Zhegrova","r":"C","squadra":"Juventus","q":6,"qi":6,"d":0,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6549,"nome":"Pierotti","r":"C","squadra":"Lecce","q":6,"qi":6,"d":0,"fvm":19,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2741,"nome":"Pessina","r":"C","squadra":"Monza","q":6,"qi":7,"d":-1,"fvm":15,"tags":[],"inj":{"rientro":"28/10/2026","motivo":"Lussazione rotula"},"tit":"titolare","gkpct":null},{"id":2528,"nome":"Matic","r":"C","squadra":"Sassuolo","q":6,"qi":5,"d":1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7036,"nome":"Bakola","r":"C","squadra":"Sassuolo","q":6,"qi":5,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7060,"nome":"Cacciamani","r":"C","squadra":"Torino","q":6,"qi":5,"d":1,"fvm":28,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7535,"nome":"Fitz-Jim","r":"C","squadra":"Torino","q":6,"qi":4,"d":2,"fvm":18,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":6218,"nome":"Oristanio","r":"C","squadra":"Torino","q":6,"qi":7,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7198,"nome":"Piotrowski","r":"C","squadra":"Udinese","q":6,"qi":5,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6783,"nome":"Unai Gomez","r":"C","squadra":"Udinese","q":6,"qi":7,"d":-1,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5674,"nome":"Basic","r":"C","squadra":"Venezia","q":6,"qi":6,"d":0,"fvm":19,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5507,"nome":"Busio","r":"C","squadra":"Venezia","q":6,"qi":5,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7624,"nome":"Braganca","r":"C","squadra":"Torino","q":6,"qi":6,"d":0,"fvm":19,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6640,"nome":"Felici","r":"C","squadra":"Cagliari","q":5,"qi":5,"d":0,"fvm":7,"tags":[],"inj":{"rientro":"09/02/2027","motivo":"Nuovo infortunio al ginocchio"},"tit":"riserva","gkpct":null},{"id":6506,"nome":"Fini ","r":"C","squadra":"Frosinone","q":5,"qi":3,"d":2,"fvm":13,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":6917,"nome":"Masini","r":"C","squadra":"Frosinone","q":5,"qi":2,"d":3,"fvm":8,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":7409,"nome":"Meichtry","r":"C","squadra":"Genoa","q":5,"qi":5,"d":0,"fvm":11,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":4970,"nome":"Messias","r":"C","squadra":"Genoa","q":5,"qi":3,"d":2,"fvm":8,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":5301,"nome":"Luis Henrique","r":"C","squadra":"Inter","q":5,"qi":4,"d":1,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7203,"nome":"Jashari","r":"C","squadra":"Milan","q":5,"qi":4,"d":1,"fvm":13,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6898,"nome":"Keita M.","r":"C","squadra":"Parma","q":5,"qi":5,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4349,"nome":"Nicolussi Caviglia","r":"C","squadra":"Parma","q":5,"qi":6,"d":-1,"fvm":16,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6170,"nome":"Gineitis","r":"C","squadra":"Torino","q":5,"qi":5,"d":0,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6827,"nome":"Njie","r":"C","squadra":"Fiorentina","q":5,"qi":4,"d":1,"fvm":25,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":5319,"nome":"Sohm","r":"C","squadra":"Venezia","q":5,"qi":5,"d":0,"fvm":11,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6994,"nome":"Perez K.","r":"C","squadra":"Venezia","q":5,"qi":5,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7146,"nome":"Tourè I.","r":"C","squadra":"Monza","q":5,"qi":6,"d":-1,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7528,"nome":"Amondarain","r":"C","squadra":"Bologna","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6054,"nome":"Moro N.","r":"C","squadra":"Bologna","q":4,"qi":4,"d":0,"fvm":14,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":1871,"nome":"Deiola","r":"C","squadra":"Cagliari","q":4,"qi":3,"d":1,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7127,"nome":"Addai","r":"C","squadra":"Como","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":{"rientro":"11/10/2026","motivo":"Rottura tendine d'Achille"},"tit":"riserva","gkpct":null},{"id":4947,"nome":"Brescianini","r":"C","squadra":"Fiorentina","q":4,"qi":3,"d":1,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6206,"nome":"Fabbian","r":"C","squadra":"Parma","q":4,"qi":4,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7473,"nome":"Cichella","r":"C","squadra":"Frosinone","q":4,"qi":4,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7341,"nome":"Amorim","r":"C","squadra":"Genoa","q":4,"qi":4,"d":0,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2857,"nome":"Traorè Hj.","r":"C","squadra":"Genoa","q":4,"qi":5,"d":-1,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":2529,"nome":"Mkhitaryan","r":"C","squadra":"Inter","q":4,"qi":5,"d":-1,"fvm":9,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4911,"nome":"Douglas Luiz","r":"C","squadra":"Juventus","q":4,"qi":4,"d":0,"fvm":15,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6629,"nome":"Dele-Bashiru","r":"C","squadra":"Lazio","q":4,"qi":5,"d":-1,"fvm":13,"tags":["low"],"inj":{"rientro":"16/09/2026","motivo":"Infortunio muscolare coscia"},"tit":"riserva","gkpct":null},{"id":7322,"nome":"Ngom","r":"C","squadra":"Lecce","q":4,"qi":4,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6015,"nome":"Berisha M.","r":"C","squadra":"Lecce","q":4,"qi":5,"d":-1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7318,"nome":"Gandelman","r":"C","squadra":"Lecce","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":5295,"nome":"Musah","r":"C","squadra":"Milan","q":4,"qi":2,"d":2,"fvm":16,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":4199,"nome":"Loftus-Cheek","r":"C","squadra":"Milan","q":4,"qi":4,"d":0,"fvm":15,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6252,"nome":"Folorunsho","r":"C","squadra":"Monza","q":4,"qi":4,"d":0,"fvm":17,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":6207,"nome":"Almqvist","r":"C","squadra":"Parma","q":4,"qi":4,"d":0,"fvm":11,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6005,"nome":"Ilkhan","r":"C","squadra":"Torino","q":4,"qi":4,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7208,"nome":"Miller L.","r":"C","squadra":"Udinese","q":4,"qi":3,"d":1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7550,"nome":"Grillitsch","r":"C","squadra":"Frosinone","q":4,"qi":5,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7579,"nome":"Massolin","r":"C","squadra":"Cagliari","q":4,"qi":4,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7232,"nome":"Fernandez T.","r":"C","squadra":"Venezia","q":4,"qi":3,"d":1,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":22,"nome":"De Roon","r":"C","squadra":"Roma","q":3,"qi":4,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6024,"nome":"Sulemana I.","r":"C","squadra":"Sassuolo","q":3,"qi":3,"d":0,"fvm":7,"tags":["low"],"inj":{"rientro":"12/10/2026","motivo":"Lesione collaterale mediale ginocchio"},"tit":"riserva","gkpct":null},{"id":6895,"nome":"Dominguez B.","r":"C","squadra":"Sassuolo","q":3,"qi":3,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6815,"nome":"Fadera","r":"C","squadra":"Cagliari","q":3,"qi":2,"d":1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6191,"nome":"Belahyane","r":"C","squadra":"Lazio","q":3,"qi":1,"d":2,"fvm":3,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":333,"nome":"Cataldi","r":"C","squadra":"Lazio","q":3,"qi":4,"d":-1,"fvm":12,"tags":["low"],"inj":{"rientro":"15/09/2026","motivo":"Pubalgia"},"tit":"riserva","gkpct":null},{"id":7248,"nome":"Gorter","r":"C","squadra":"Lecce","q":3,"qi":1,"d":2,"fvm":12,"tags":["scommessa","low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5457,"nome":"Maleh","r":"C","squadra":"Lecce","q":3,"qi":2,"d":1,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5453,"nome":"Ricci S.","r":"C","squadra":"Como","q":3,"qi":4,"d":-1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7138,"nome":"Ordonez C.","r":"C","squadra":"Parma","q":3,"qi":2,"d":1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7536,"nome":"Diallo O.","r":"C","squadra":"Parma","q":3,"qi":3,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7183,"nome":"Aboukhlal","r":"C","squadra":"Torino","q":3,"qi":3,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":801,"nome":"Gagliardini","r":"C","squadra":"Cagliari","q":3,"qi":3,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6225,"nome":"El Azzouzi O.","r":"C","squadra":"Bologna","q":2,"qi":2,"d":0,"fvm":10,"tags":["low"],"inj":{"rientro":"24/09/2026","motivo":"Lesione bicipite femorale"},"tit":"riserva","gkpct":null},{"id":6241,"nome":"Gelli F.","r":"C","squadra":"Frosinone","q":2,"qi":3,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6903,"nome":"Hasa","r":"C","squadra":"Frosinone","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6503,"nome":"Stankovic A.","r":"C","squadra":"Inter","q":2,"qi":3,"d":-1,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7477,"nome":"Colombo L.","r":"C","squadra":"Monza","q":2,"qi":3,"d":-1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5131,"nome":"Gilmour","r":"C","squadra":"Napoli","q":2,"qi":3,"d":-1,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7276,"nome":"Cremaschi","r":"C","squadra":"Parma","q":2,"qi":1,"d":1,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6246,"nome":"Lipani","r":"C","squadra":"Sassuolo","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6212,"nome":"Zarraga","r":"C","squadra":"Udinese","q":2,"qi":1,"d":1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5872,"nome":"Helgason","r":"C","squadra":"Venezia","q":2,"qi":3,"d":-1,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6592,"nome":"Forson O.","r":"C","squadra":"Monza","q":2,"qi":1,"d":1,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7574,"nome":"Foe Ondoa","r":"C","squadra":"Monza","q":2,"qi":1,"d":1,"fvm":2,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7092,"nome":"Jovanovic","r":"C","squadra":"Udinese","q":2,"qi":2,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7165,"nome":"Liteta","r":"C","squadra":"Cagliari","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7357,"nome":"Lahdo","r":"C","squadra":"Como","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7456,"nome":"El Azzouzi A.","r":"C","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5725,"nome":"Kone B.","r":"C","squadra":"Frosinone","q":1,"qi":1,"d":0,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6980,"nome":"Venturino","r":"C","squadra":"Genoa","q":1,"qi":2,"d":-1,"fvm":4,"tags":["low"],"inj":{"rientro":"30/10/2026","motivo":"Operato al ginocchio"},"tit":"riserva","gkpct":null},{"id":7345,"nome":"Przyborek","r":"C","squadra":"Lazio","q":1,"qi":1,"d":0,"fvm":5,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6410,"nome":"Kaba","r":"C","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":2,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7319,"nome":"Fofana Sa.","r":"C","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5880,"nome":"Ciurria","r":"C","squadra":"Monza","q":1,"qi":2,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6219,"nome":"Boloca","r":"C","squadra":"Sassuolo","q":1,"qi":2,"d":-1,"fvm":5,"tags":["low"],"inj":{"rientro":"30/09/2026","motivo":"Artroscopia ginocchio"},"tit":"riserva","gkpct":null},{"id":5007,"nome":"Ilic","r":"C","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7418,"nome":"Chakvetadze","r":"C","squadra":"Udinese","q":1,"qi":2,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7481,"nome":"Dagasso","r":"C","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":526,"nome":"Duncan","r":"C","squadra":"Venezia","q":1,"qi":2,"d":-1,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7571,"nome":"Laerke","r":"C","squadra":"Lecce","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7572,"nome":"Comotto","r":"C","squadra":"Milan","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7575,"nome":"Mout","r":"C","squadra":"Monza","q":1,"qi":1,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5462,"nome":"Ciervo","r":"C","squadra":"Cagliari","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7628,"nome":"Sierro","r":"C","squadra":"Parma","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7629,"nome":"Libra","r":"C","squadra":"Bologna","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5585,"nome":"Malen","r":"A","squadra":"Roma","q":37,"qi":34,"d":3,"fvm":445,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2764,"nome":"Martinez L.","r":"A","squadra":"Inter","q":35,"qi":35,"d":0,"fvm":390,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6052,"nome":"Hojlund","r":"A","squadra":"Napoli","q":29,"qi":28,"d":1,"fvm":285,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":4871,"nome":"Thuram","r":"A","squadra":"Inter","q":28,"qi":29,"d":-1,"fvm":260,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6397,"nome":"Ramos G.","r":"A","squadra":"Milan","q":27,"qi":27,"d":0,"fvm":232,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":2097,"nome":"Kean","r":"A","squadra":"Como","q":25,"qi":25,"d":0,"fvm":185,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":5951,"nome":"Kolo Muani","r":"A","squadra":"Juventus","q":24,"qi":26,"d":-2,"fvm":143,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6752,"nome":"Woltemade","r":"A","squadra":"Juventus","q":23,"qi":23,"d":0,"fvm":140,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":7017,"nome":"Douvikas","r":"A","squadra":"Como","q":21,"qi":20,"d":1,"fvm":180,"tags":["top"],"inj":null,"tit":"titolare","gkpct":null},{"id":6434,"nome":"Yildiz","r":"A","squadra":"Juventus","q":21,"qi":23,"d":-2,"fvm":80,"tags":["top"],"inj":{"rientro":"26/11/2026","motivo":"Infortunio al piede sinistro"},"tit":"titolare","gkpct":null},{"id":2137,"nome":"Scamacca","r":"A","squadra":"Atalanta","q":19,"qi":19,"d":0,"fvm":100,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":531,"nome":"Berardi","r":"A","squadra":"Sassuolo","q":19,"qi":18,"d":1,"fvm":108,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5637,"nome":"Davis K.","r":"A","squadra":"Udinese","q":19,"qi":19,"d":0,"fvm":113,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6435,"nome":"Krstovic","r":"A","squadra":"Atalanta","q":18,"qi":18,"d":0,"fvm":96,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":5995,"nome":"De Ketelaere","r":"A","squadra":"Atalanta","q":17,"qi":17,"d":0,"fvm":92,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7071,"nome":"Esposito F.P.","r":"A","squadra":"Inter","q":17,"qi":16,"d":1,"fvm":105,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":6675,"nome":"Dovbyk","r":"A","squadra":"Bologna","q":16,"qi":16,"d":0,"fvm":50,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":309,"nome":"Dybala","r":"A","squadra":"Roma","q":16,"qi":14,"d":2,"fvm":110,"tags":["scommessa","perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5734,"nome":"Soulè","r":"A","squadra":"Roma","q":15,"qi":12,"d":3,"fvm":54,"tags":["scommessa"],"inj":null,"tit":"cambio","gkpct":null},{"id":6060,"nome":"Laurientè","r":"A","squadra":"Sassuolo","q":15,"qi":15,"d":0,"fvm":80,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6967,"nome":"Diao","r":"A","squadra":"Como","q":14,"qi":11,"d":3,"fvm":70,"tags":["scommessa","perla"],"inj":null,"tit":"cambio","gkpct":null},{"id":7351,"nome":"Santos A.","r":"A","squadra":"Napoli","q":14,"qi":14,"d":0,"fvm":58,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7023,"nome":"Pellegrino M.","r":"A","squadra":"Fiorentina","q":14,"qi":15,"d":-1,"fvm":50,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6572,"nome":"Castro S.","r":"A","squadra":"Roma","q":14,"qi":14,"d":0,"fvm":70,"tags":["perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":2061,"nome":"Simeone","r":"A","squadra":"Torino","q":14,"qi":15,"d":-1,"fvm":74,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":5694,"nome":"Beto","r":"A","squadra":"Fiorentina","q":14,"qi":14,"d":0,"fvm":47,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4371,"nome":"Raspadori","r":"A","squadra":"Atalanta","q":13,"qi":13,"d":0,"fvm":67,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4463,"nome":"Esposito Se.","r":"A","squadra":"Sassuolo","q":12,"qi":13,"d":-1,"fvm":35,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2038,"nome":"Pinamonti","r":"A","squadra":"Lazio","q":12,"qi":13,"d":-1,"fvm":52,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":6646,"nome":"Adams C.","r":"A","squadra":"Torino","q":12,"qi":9,"d":3,"fvm":31,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":7547,"nome":"Kevin Carlos","r":"A","squadra":"Cagliari","q":12,"qi":13,"d":-1,"fvm":30,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":5436,"nome":"Raimondo","r":"A","squadra":"Frosinone","q":11,"qi":7,"d":4,"fvm":55,"tags":["scommessa","perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":4923,"nome":"Colombo","r":"A","squadra":"Genoa","q":11,"qi":11,"d":0,"fvm":55,"tags":["perla"],"inj":null,"tit":"titolare","gkpct":null},{"id":7484,"nome":"Adams A.","r":"A","squadra":"Venezia","q":11,"qi":12,"d":-1,"fvm":33,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6229,"nome":"Tourè E.","r":"A","squadra":"Parma","q":11,"qi":11,"d":0,"fvm":34,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7347,"nome":"Bowie","r":"A","squadra":"Sassuolo","q":10,"qi":10,"d":0,"fvm":32,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6904,"nome":"Yeboah J.","r":"A","squadra":"Venezia","q":10,"qi":8,"d":2,"fvm":30,"tags":["scommessa"],"inj":null,"tit":"cambio","gkpct":null},{"id":7554,"nome":"Romero D.","r":"A","squadra":"Parma","q":10,"qi":10,"d":0,"fvm":32,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4359,"nome":"Piccoli","r":"A","squadra":"Bologna","q":9,"qi":8,"d":1,"fvm":50,"tags":["perla"],"inj":null,"tit":"cambio","gkpct":null},{"id":6530,"nome":"Ghedjemis","r":"A","squadra":"Frosinone","q":9,"qi":9,"d":0,"fvm":25,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":2155,"nome":"Cutrone","r":"A","squadra":"Monza","q":9,"qi":9,"d":0,"fvm":20,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7600,"nome":"Osmajic","r":"A","squadra":"Genoa","q":9,"qi":8,"d":1,"fvm":34,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6204,"nome":"Kvernadze","r":"A","squadra":"Frosinone","q":8,"qi":4,"d":4,"fvm":30,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":5029,"nome":"Geubbels","r":"A","squadra":"Lecce","q":8,"qi":9,"d":-1,"fvm":21,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7612,"nome":"Bobcek","r":"A","squadra":"Frosinone","q":8,"qi":9,"d":-1,"fvm":15,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":4896,"nome":"Maldini","r":"A","squadra":"Cagliari","q":7,"qi":5,"d":2,"fvm":25,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":6164,"nome":"Vitinha O.","r":"A","squadra":"Genoa","q":7,"qi":8,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":6669,"nome":"Bonny","r":"A","squadra":"Inter","q":7,"qi":7,"d":0,"fvm":15,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7523,"nome":"Varela G.","r":"A","squadra":"Monza","q":7,"qi":3,"d":4,"fvm":36,"tags":["scommessa","perla"],"inj":null,"tit":"riserva","gkpct":null},{"id":7449,"nome":"Rrahmani Al.","r":"A","squadra":"Venezia","q":7,"qi":8,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":7623,"nome":"Gnonto","r":"A","squadra":"Fiorentina","q":7,"qi":7,"d":0,"fvm":23,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":2832,"nome":"Boga","r":"A","squadra":"Juventus","q":6,"qi":6,"d":0,"fvm":27,"tags":["perla"],"inj":{"rientro":"13/10/2026","motivo":"Lesione bicipite femorale"},"tit":"riserva","gkpct":null},{"id":6556,"nome":"Noslin","r":"A","squadra":"Lazio","q":6,"qi":6,"d":0,"fvm":8,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7252,"nome":"Stulic","r":"A","squadra":"Lecce","q":6,"qi":7,"d":-1,"fvm":11,"tags":[],"inj":null,"tit":"titolare","gkpct":null},{"id":608,"nome":"Zapata D.","r":"A","squadra":"Torino","q":6,"qi":7,"d":-1,"fvm":12,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":7546,"nome":"Robinson J.","r":"A","squadra":"Monza","q":6,"qi":4,"d":2,"fvm":12,"tags":["scommessa"],"inj":null,"tit":"titolare","gkpct":null},{"id":7620,"nome":"Zeballos","r":"A","squadra":"Monza","q":6,"qi":6,"d":0,"fvm":17,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5918,"nome":"Sulemana K.","r":"A","squadra":"Atalanta","q":5,"qi":6,"d":-1,"fvm":5,"tags":[],"inj":{"rientro":"11/10/2026","motivo":"Lesione collaterale mediale ginocchio"},"tit":"riserva","gkpct":null},{"id":7374,"nome":"Mendy P.","r":"A","squadra":"Cagliari","q":5,"qi":4,"d":1,"fvm":14,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":5882,"nome":"Mota","r":"A","squadra":"Monza","q":5,"qi":5,"d":0,"fvm":8,"tags":[],"inj":null,"tit":"riserva","gkpct":null},{"id":6831,"nome":"Neres","r":"A","squadra":"Napoli","q":5,"qi":6,"d":-1,"fvm":20,"tags":[],"inj":null,"tit":"cambio","gkpct":null},{"id":7561,"nome":"Lontani","r":"A","squadra":"Parma","q":5,"qi":1,"d":4,"fvm":17,"tags":["scommessa"],"inj":null,"tit":"riserva","gkpct":null},{"id":7001,"nome":"N'Dri","r":"A","squadra":"Lecce","q":4,"qi":3,"d":1,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6519,"nome":"Camarda","r":"A","squadra":"Milan","q":4,"qi":5,"d":-1,"fvm":20,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7213,"nome":"Frigan","r":"A","squadra":"Parma","q":4,"qi":5,"d":-1,"fvm":6,"tags":["low"],"inj":null,"tit":"titolare","gkpct":null},{"id":7349,"nome":"Kulenovic","r":"A","squadra":"Torino","q":4,"qi":4,"d":0,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7272,"nome":"Gueye","r":"A","squadra":"Udinese","q":4,"qi":4,"d":0,"fvm":7,"tags":["low"],"inj":null,"tit":"cambio","gkpct":null},{"id":4387,"nome":"Adorante","r":"A","squadra":"Venezia","q":4,"qi":5,"d":-1,"fvm":5,"tags":["low"],"inj":{"rientro":"17/10/2026","motivo":"Operato alla schiena"},"tit":"riserva","gkpct":null},{"id":2012,"nome":"Milik","r":"A","squadra":"Juventus","q":4,"qi":5,"d":-1,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7602,"nome":"Fatah","r":"A","squadra":"Lecce","q":4,"qi":4,"d":0,"fvm":8,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7610,"nome":"Birligea","r":"A","squadra":"Frosinone","q":4,"qi":5,"d":-1,"fvm":7,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6145,"nome":"Ngonge","r":"A","squadra":"Monza","q":4,"qi":5,"d":-1,"fvm":13,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":5336,"nome":"Nzola","r":"A","squadra":"Cagliari","q":4,"qi":4,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7453,"nome":"Havel","r":"A","squadra":"Genoa","q":3,"qi":4,"d":-1,"fvm":5,"tags":["low"],"inj":{"rientro":"11/09/2026","motivo":"Contusione al polpaccio"},"tit":"riserva","gkpct":null},{"id":7162,"nome":"Giovane","r":"A","squadra":"Napoli","q":3,"qi":4,"d":-1,"fvm":3,"tags":["low"],"inj":{"rientro":"11/10/2026","motivo":"Operato ernia inguinale"},"tit":"riserva","gkpct":null},{"id":7120,"nome":"Lang","r":"A","squadra":"Napoli","q":3,"qi":3,"d":0,"fvm":14,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6215,"nome":"Lucca","r":"A","squadra":"Napoli","q":3,"qi":3,"d":0,"fvm":12,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7342,"nome":"Elphege","r":"A","squadra":"Parma","q":3,"qi":3,"d":0,"fvm":10,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":6822,"nome":"Ekhator","r":"A","squadra":"Juventus","q":2,"qi":3,"d":-1,"fvm":7,"tags":["low"],"inj":{"rientro":"02/11/2026","motivo":"Lesione bicipite femorale"},"tit":"riserva","gkpct":null},{"id":7482,"nome":"Lauberbach","r":"A","squadra":"Venezia","q":2,"qi":1,"d":1,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7627,"nome":"Enem","r":"A","squadra":"Bologna","q":2,"qi":2,"d":0,"fvm":4,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7317,"nome":"Trepy","r":"A","squadra":"Cagliari","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7161,"nome":"Bayo V.","r":"A","squadra":"Udinese","q":1,"qi":1,"d":0,"fvm":3,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7408,"nome":"Lisman","r":"A","squadra":"Venezia","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7568,"nome":"De Martis","r":"A","squadra":"Parma","q":1,"qi":1,"d":0,"fvm":1,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null},{"id":7622,"nome":"Robinho Junior","r":"A","squadra":"Genoa","q":1,"qi":1,"d":0,"fvm":2,"tags":["low"],"inj":null,"tit":"riserva","gkpct":null}];
 
 const DEFAULT_STATE = {
   budget:500,
@@ -258,6 +404,7 @@ const DEFAULT_STATE = {
 
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let selected = null;
+let activeMainTab = 'prepara';
 
 function norm(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
@@ -330,7 +477,7 @@ async function loadState(){
   renderMarket();
   renderRivals();
   renderLog();
-  renderResults(document.getElementById('search').value);
+  renderPrepList();
   setInterval(checkNewBuild, 45000);
 }
 async function saveState(){
@@ -343,8 +490,9 @@ function boughtCount(role){
 function boughtSpent(role){
   return Object.values(state.bought).filter(b=>b.r===role).reduce((a,b)=>a+b.price,0);
 }
+function isTaken(id){ return !!state.bought[id] || !!state.discarded[id]; }
 function poolFor(role){
-  return players.filter(p=>p.r===role && !state.bought[p.id] && !state.discarded[p.id]).sort((a,b)=>b.q-a.q);
+  return players.filter(p=>p.r===role && !isTaken(p.id)).sort((a,b)=>peso(b)-peso(a));
 }
 
 function roleRemainingRaw(role){
@@ -374,6 +522,13 @@ function normalizedPct(role){
   return Number(state.pct[role]) / sum * 100;
 }
 
+function fvmAtteso(p){
+  return Math.round(p.fvm * state.budget / 1000);
+}
+function peso(p){
+  return Math.round((p.q + fvmAtteso(p)) / 2);
+}
+
 function computeSuggestion(player){
   const role = player.r;
   const raw = roleRemainingRaw(role);
@@ -384,9 +539,20 @@ function computeSuggestion(player){
   }
   const pool = poolFor(role);
   const target = pool.slice(0, neededSlots);
-  const sumQ = target.reduce((a,p)=>a+p.q,0) || 1;
-  const value = Math.max(1, Math.round(remainingBudget * (player.q / sumQ)));
+  const sumPeso = target.reduce((a,p)=>a+peso(p),0) || 1;
+  let value = Math.max(1, Math.round(remainingBudget * (peso(player) / sumPeso)));
+
+  if(player.tit === 'riserva') value = Math.round(value * 0.6);
+  else if(player.tit === 'cambio') value = Math.round(value * 0.85);
+  if(player.inj) value = Math.max(1, Math.round(value * 0.4));
+  value = Math.max(1, value);
+
   return {complete:false, value, remainingBudget, raw, neededSlots, pool, over: raw<0};
+}
+/* prezzo del tocco rapido: quello che comparirebbe come "prezzo massimo consigliato" nella scheda */
+function quickBuyValue(p){
+  const s = computeSuggestion(p);
+  return s.complete ? p.q : s.value;
 }
 
 function marketTemp(){
@@ -589,12 +755,27 @@ function renderRivals(){
     box.appendChild(card);
   });
 }
-document.getElementById('toggleRivals').onclick = ()=>{
-  const p = document.getElementById('rivals');
-  const willShow = p.style.display==='none';
-  p.style.display = willShow ? 'block' : 'none';
-  if(willShow) renderRivals();
-};
+
+/* ---- overlay a fogli (priorita 2 e 4): niente piu pannelli che spingono la pagina ---- */
+let openSheetId = null;
+function openSheet(id){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
+  document.getElementById(id).classList.add('open');
+  document.getElementById('sheetBackdrop').classList.add('show');
+  openSheetId = id;
+  if(id==='rivals') renderRivals();
+  if(id==='logpanel') renderLog();
+}
+function closeSheets(){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
+  document.getElementById('sheetBackdrop').classList.remove('show');
+  openSheetId = null;
+}
+document.getElementById('sheetBackdrop').onclick = closeSheets;
+document.querySelectorAll('[data-close]').forEach(b=> b.onclick = closeSheets);
+document.getElementById('toggleSettings').onclick = ()=> openSheet('settings');
+document.getElementById('toggleLog').onclick = ()=> openSheet('logpanel');
+document.getElementById('toggleRivals').onclick = ()=> openSheet('rivals');
 
 function renderBar(){
   healPctTotal();
@@ -603,8 +784,9 @@ function renderBar(){
     const c = boughtCount(r), t = state.slots[r];
     const display = roleBudgetDisplay(r);
     el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr'+(display<0?' over':'')+'">'+display+' cr</span>';
-    el.className = 'chip' + (c>=t ? ' done' : '');
-    document.getElementById('nt'+r).textContent = c+'/'+t;
+    el.className = 'chip' + (c>=t ? ' done' : (display<0 ? ' warn' : ''));
+    const ntEl = document.getElementById('nt'+r);
+    if(ntEl) ntEl.textContent = c+'/'+t;
     const curEl = document.getElementById('cur'+r);
     if(curEl) curEl.textContent = '(attuale: '+Math.round(normalizedPct(r))+'%)';
   });
@@ -639,64 +821,245 @@ document.getElementById('undoBtn').onclick = ()=>{
   renderUndo();
   renderMarket();
   renderRivals();
-  renderResults(document.getElementById('search').value);
+  refreshCurrentLists();
 };
 
-function renderList(list, emptyMsg){
-  const box = document.getElementById('results');
-  box.innerHTML = '';
-  if(list.length===0){
-    box.innerHTML = '<div class="hint" style="display:block">'+emptyMsg+'</div>';
-    return;
-  }
-  list.forEach(p=>{
-    const div = document.createElement('div');
-    div.className = 'result';
-    div.innerHTML = '<div class="badge '+p.r+'">'+p.r+'</div><div class="rname">'+p.nome+'<div class="rteam">'+p.squadra+'</div></div><div class="rq">'+p.q+' cr</div>';
-    div.onclick = ()=>selectPlayer(p);
-    box.appendChild(div);
-  });
+function refreshCurrentLists(){
+  renderPrepList();
+  if(document.getElementById('liveRoleTabs').querySelector('.roletab.on')) renderLiveRole();
+  if(document.getElementById('globalSearch').value) renderGlobalResults(document.getElementById('globalSearch').value);
 }
 
-function renderResults(query){
-  const hint = document.getElementById('hint');
-  if(!query){ document.getElementById('results').innerHTML=''; hint.style.display = activeRoleTab ? 'none' : 'block'; if(activeRoleTab) showRoleTop(activeRoleTab); return; }
-  hint.style.display='none';
-  clearRoleTab();
+/* ---- riga compatta riusata da Live e dalla ricerca globale, con acquisto in un tocco (priorita 3) ---- */
+function compactRowHtml(p){
+  return '<div class="result" data-id="'+p.id+'">'+
+    '<div class="badge '+p.r+'">'+p.r+'</div>'+
+    '<div class="rname">'+p.nome+'<div class="rteam">'+p.squadra+'</div></div>'+
+    '<div class="rq">'+p.q+' cr</div>'+
+    '<button class="qbuy" data-qid="'+p.id+'">✓ '+quickBuyValue(p)+'</button>'+
+  '</div>';
+}
+function wireCompactRows(container){
+  container.querySelectorAll('.qbuy').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      const id = Number(btn.dataset.qid);
+      const p = players.find(x=>x.id===id);
+      if(p) quickBuy(p);
+    };
+  });
+  container.querySelectorAll('.result').forEach(row=>{
+    row.onclick = ()=>{
+      const id = Number(row.dataset.id);
+      const p = players.find(x=>x.id===id);
+      if(p) selectPlayer(p);
+    };
+  });
+}
+function quickBuy(p){
+  commitEntry('mine', quickBuyValue(p), null, p);
+}
+
+/* ---- ricerca globale (priorita 1): funziona da qualunque scheda ---- */
+function renderGlobalResults(query){
+  const gr = document.getElementById('globalResults');
+  const clearBtn = document.getElementById('searchClear');
+  if(!query){
+    gr.style.display = 'none';
+    clearBtn.classList.remove('show');
+    showActiveTabBody();
+    return;
+  }
+  clearBtn.classList.add('show');
+  hideTabBodies();
+  gr.style.display = 'block';
   const scored = players
-    .filter(p=>!state.bought[p.id] && !state.discarded[p.id])
+    .filter(p=>!isTaken(p.id))
     .map(p=>({p, s:matchScore(query, p.nome)}))
     .filter(x=>x.s>=0)
     .sort((a,b)=>a.s-b.s || b.p.q-a.p.q)
-    .slice(0,8)
+    .slice(0,10)
     .map(x=>x.p);
-  renderList(scored, 'Nessun giocatore trovato, o gia assegnato.');
+  document.getElementById('globalCount').textContent = scored.length ? scored.length+' risultati' : '';
+  const list = document.getElementById('globalList');
+  if(scored.length===0){
+    list.innerHTML = '<div class="hint" style="display:block">Nessun giocatore trovato, o già assegnato.</div>';
+    return;
+  }
+  list.innerHTML = scored.map(compactRowHtml).join('');
+  wireCompactRows(list);
+}
+document.getElementById('globalSearch').addEventListener('input', (e)=>renderGlobalResults(e.target.value));
+document.getElementById('searchClear').onclick = ()=>{
+  document.getElementById('globalSearch').value = '';
+  renderGlobalResults('');
+};
+function hideTabBodies(){
+  document.getElementById('tabPrepara').style.display='none';
+  document.getElementById('tabLive').style.display='none';
+}
+function showActiveTabBody(){
+  document.getElementById('tabPrepara').style.display = activeMainTab==='prepara' ? '' : 'none';
+  document.getElementById('tabLive').style.display = activeMainTab==='live' ? '' : 'none';
 }
 
-let activeRoleTab = null;
-function showRoleTop(role){
-  const pool = poolFor(role).slice(0,8);
-  renderList(pool, 'Ruolo completo o nessun giocatore libero.');
+/* ---- Live: sfoglia per ruolo (la ricerca e' quella globale qui sopra) ---- */
+function renderLiveRole(){
+  const btn = document.getElementById('liveRoleTabs').querySelector('.roletab.on');
+  const hint = document.getElementById('hint');
+  const box = document.getElementById('liveList');
+  if(!btn){ box.innerHTML=''; hint.style.display='block'; return; }
+  hint.style.display='none';
+  const role = btn.dataset.r;
+  const pool = poolFor(role).slice(0,10);
+  if(pool.length===0){ box.innerHTML = '<div class="hint" style="display:block">Ruolo completo o nessun giocatore libero.</div>'; return; }
+  box.innerHTML = pool.map(compactRowHtml).join('');
+  wireCompactRows(box);
 }
-function clearRoleTab(){
-  activeRoleTab = null;
-  document.querySelectorAll('.roletab').forEach(b=>b.classList.remove('active'));
-}
-document.querySelectorAll('.roletab').forEach(btn=>{
+document.querySelectorAll('#liveRoleTabs .roletab').forEach(btn=>{
   btn.onclick = ()=>{
-    const r = btn.dataset.r;
-    document.getElementById('search').value='';
-    if(activeRoleTab===r){ clearRoleTab(); document.getElementById('results').innerHTML=''; document.getElementById('hint').style.display='block'; return; }
-    activeRoleTab = r;
-    document.querySelectorAll('.roletab').forEach(b=>b.classList.toggle('active', b===btn));
-    document.getElementById('hint').style.display='none';
-    showRoleTop(r);
+    const wasOn = btn.classList.contains('on');
+    document.querySelectorAll('#liveRoleTabs .roletab').forEach(b=>b.classList.remove('on'));
+    if(!wasOn) btn.classList.add('on');
+    renderLiveRole();
   };
 });
 
+/* ---- Prepara: filtri e lista ---- */
+const DESCR = {
+  all: "Tutti i giocatori del ruolo. Il numero giallo è quanto ci si aspetta che costi davvero in un'asta con il tuo monte crediti, con sotto la fascia realistica di oscillazione.",
+  top: "I dieci per cento più cari del ruolo. Sono quelli su cui si scatenano i rilanci e che decidono l'asta.",
+  scommessa: "Il loro prezzo di listino è già salito da quando è uscito il listone. Significa che stanno guadagnando considerazione adesso.",
+  perla: "Costano poco ma valgono molto: il mercato li valuta ben più del loro prezzo di partenza. Sono i candidati a rendere più di quanto li paghi.",
+  low: "Quotazione di listino di 4 crediti o meno: servono a riempire gli slot spendendo pochissimo. Usa \"Prima le occasioni\" per trovare i meno inutili."
+};
+let prepRole='P', prepCat='all', prepSort='q', prepHideTaken=false, prepOnlyTit=false;
+
+function band(p){
+  const e = fvmAtteso(p);
+  return { lo: Math.max(1, Math.round(e*0.75)), hi: Math.max(1, Math.round(e*1.25)), mid: Math.max(1, e) };
+}
+function ratio(p){ return p.fvm / Math.max(p.q,1); }
+
+function shortDate(d){
+  const [g,m] = d.split('/');
+  const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  return parseInt(g,10) + ' ' + mesi[parseInt(m,10)-1];
+}
+function titLine(p){
+  let lab, cls;
+  if(p.tit==='titolare'){ lab='Titolare'; cls='titolare'; }
+  else if(p.tit==='cambio'){ lab='Primo cambio'; cls='cambio'; }
+  else { lab='Non titolare'; cls='riserva'; }
+  const pct = p.gkpct ? ' '+p.gkpct+'%' : '';
+  return '<span class="sep">•</span><span class="dot '+cls+'"></span>'+
+         '<span class="titlab '+cls+'">'+lab+pct+'</span>';
+}
+function statusOf(p){
+  if(state.bought[p.id]) return {mine:true, price: state.bought[p.id].price};
+  if(state.discarded[p.id]){
+    const d = state.discarded[p.id];
+    return {mine:false, price: d.price || null};
+  }
+  return null;
+}
+function renderLinkbar(){
+  const el = document.getElementById('linkbar');
+  const spent = totalSpentAll();
+  const left = state.budget - spent;
+  const slots = ROLES.map(r=> r+' '+boughtCount(r)+'/'+state.slots[r]).join(' · ');
+  const assigned = Object.keys(state.bought).length + Object.keys(state.discarded).length;
+  el.innerHTML = "Crediti che ti restano: <b>"+left+"</b> su "+state.budget+
+                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>";
+}
+function renderPrepList(){
+  renderLinkbar();
+  document.getElementById('catdesc').textContent = DESCR[prepCat];
+  let list = players.filter(p=>p.r===prepRole);
+  if(prepCat!=='all') list = list.filter(p=>p.tags.includes(prepCat));
+  if(prepHideTaken) list = list.filter(p=>!statusOf(p));
+  if(prepOnlyTit) list = list.filter(p=>p.tit==='titolare'||p.tit==='cambio');
+  const s = prepSort;
+  list = list.slice().sort((a,b)=>{
+    if(s==='q') return fvmAtteso(b)-fvmAtteso(a);
+    if(s==='qasc') return fvmAtteso(a)-fvmAtteso(b);
+    if(s==='ratio') return ratio(b)-ratio(a);
+    if(s==='trend') return b.d-a.d || b.q-a.q;
+    return 0;
+  });
+  document.getElementById('prepCount').textContent = list.length + ' giocatori';
+  const box = document.getElementById('prepList');
+  if(list.length===0){ box.innerHTML='<div class="empty">Nessun giocatore in questa categoria.</div>'; return; }
+  box.innerHTML = list.map(p=>{
+    const b = band(p);
+    const st = statusOf(p);
+    const inj = p.inj
+      ? '<div class="injbox" style="margin-top:9px;padding:7px 10px;background:#2a1a18;border-radius:8px;font-size:12px;color:#f0a79e;">Infortunato, torna il '+shortDate(p.inj.rientro)+'</div>'
+      : '';
+    const taken = st
+      ? '<div class="takenbox">'+(st.mine
+          ? '<b>Preso da te</b>' + (st.price ? ' a '+st.price+' crediti' : '')
+          : '<b>Già assegnato</b>' + (st.price ? ' a un avversario per '+st.price+' crediti' : ' a un avversario'))+'</div>'
+      : '';
+    const cfoot = !st ? '<div class="cfoot"><button class="qbuy" data-qid="'+p.id+'">✓ '+quickBuyValue(p)+'</button></div>' : '';
+    return '<div class="card'+(p.inj?' inj':'')+(st?' taken':'')+'" data-id="'+p.id+'">'+
+      '<div class="ctop"><div class="cbadge '+p.r+'">'+p.r+'</div>'+
+      '<div class="cnm">'+p.nome+'<div class="csq">'+p.squadra+titLine(p)+'</div></div>'+
+      '<div class="pricebox"><div class="cprice">'+b.mid+'</div>'+
+        '<div class="pricelab">crediti attesi</div>'+
+        '<div class="band">'+b.lo+'–'+b.hi+'</div></div>'+
+      '</div>'+ taken + inj + cfoot +
+    '</div>';
+  }).join('');
+  box.querySelectorAll('.card').forEach(card=>{
+    card.onclick = ()=>{
+      const id = Number(card.dataset.id);
+      const p = players.find(x=>x.id===id);
+      if(p) selectPlayer(p);
+    };
+  });
+  box.querySelectorAll('.qbuy').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      const id = Number(btn.dataset.qid);
+      const p = players.find(x=>x.id===id);
+      if(p) quickBuy(p);
+    };
+  });
+}
+document.querySelectorAll('#prepRoleTabs .roletab').forEach(b=>b.onclick=()=>{
+  prepRole=b.dataset.r;
+  document.querySelectorAll('#prepRoleTabs .roletab').forEach(x=>x.classList.toggle('on',x===b));
+  renderPrepList();
+});
+document.querySelectorAll('#cats .cat').forEach(b=>b.onclick=()=>{
+  prepCat=b.dataset.c;
+  document.querySelectorAll('#cats .cat').forEach(x=>x.classList.toggle('on',x===b));
+  renderPrepList();
+});
+document.getElementById('sort').onchange=(e)=>{ prepSort=e.target.value; renderPrepList(); };
+document.getElementById('hideTaken').onchange=(e)=>{ prepHideTaken=e.target.checked; renderPrepList(); };
+document.getElementById('onlyTit').onchange=(e)=>{ prepOnlyTit=e.target.checked; renderPrepList(); };
+
+/* ---- switch Prepara / Live: pulisce la ricerca globale, torna alla scheda scelta ---- */
+document.getElementById('tabBtnPrepara').onclick = ()=>{
+  activeMainTab='prepara';
+  document.getElementById('globalSearch').value='';
+  renderGlobalResults('');
+  document.getElementById('tabBtnPrepara').classList.add('on');
+  document.getElementById('tabBtnLive').classList.remove('on');
+};
+document.getElementById('tabBtnLive').onclick = ()=>{
+  activeMainTab='live';
+  document.getElementById('globalSearch').value='';
+  renderGlobalResults('');
+  document.getElementById('tabBtnLive').classList.add('on');
+  document.getElementById('tabBtnPrepara').classList.remove('on');
+};
+
+/* ---- scheda giocatore (overlay condiviso da Prepara e Live) ---- */
 function selectPlayer(p){
   selected = p;
-  document.getElementById('detail').style.display = 'block';
   document.getElementById('buyform').style.display = 'none';
   document.getElementById('buyerPicker').style.display = 'none';
   document.getElementById('dBadge').className = 'badge '+p.r;
@@ -704,6 +1067,13 @@ function selectPlayer(p){
   document.getElementById('dName').textContent = p.nome;
   document.getElementById('dTeam').textContent = p.squadra + ' — ' + ROLENAMES[p.r];
   document.getElementById('dQt').textContent = p.q + ' crediti';
+  document.getElementById('dFvm').textContent = fvmAtteso(p) + ' crediti';
+  document.getElementById('dTit').textContent = TITNAMES[p.tit] + (p.gkpct ? ' ('+p.gkpct+'% presenze attese)' : '');
+
+  const injBanner = document.getElementById('dInjBanner');
+  injBanner.innerHTML = p.inj
+    ? '<div class="injbanner"><b>Infortunato</b> — rientro previsto il '+p.inj.rientro+' ('+p.inj.motivo+'). Il prezzo consigliato è già ridotto.</div>'
+    : '';
 
   const s = computeSuggestion(p);
   const altsBox = document.getElementById('dAlts');
@@ -730,29 +1100,24 @@ function selectPlayer(p){
     quickBtn.dataset.price = s.value;
 
     const alts = s.pool.filter(x=>x.id!==p.id)
-      .sort((a,b)=>Math.abs(a.q-p.q)-Math.abs(b.q-p.q)).slice(0,3);
+      .sort((a,b)=>Math.abs(peso(a)-peso(p))-Math.abs(peso(b)-peso(p))).slice(0,3);
     if(alts.length){
       altsBox.innerHTML = '<div style="font-size:12px;color:var(--text-dim);margin-bottom:4px">Alternative simili</div>' +
-        alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+a.q+' cr</span></div>').join('');
+        alts.map(a=>'<div class="altrow"><span>'+a.nome+' ('+a.squadra+')</span><span>'+fvmAtteso(a)+' cr</span></div>').join('');
     } else {
       altsBox.innerHTML = '';
     }
   }
-  document.getElementById('search').value = '';
-  renderResults('');
-  window.scrollTo({top: document.getElementById('detail').offsetTop - 10, behavior:'smooth'});
+  openSheet('detail');
 }
 
-document.getElementById('toggleSettings').onclick = ()=>{
-  const p = document.getElementById('settings');
-  p.style.display = p.style.display==='none' ? 'block' : 'none';
-};
 ['budget','slotP','slotD','slotC','slotA'].forEach(id=>{
   document.getElementById(id).addEventListener('change', (e)=>{
     if(id==='budget') state.budget = Number(e.target.value)||0;
     else state.slots[id.slice(4)] = Number(e.target.value)||0;
     saveState();
     renderBar();
+    refreshCurrentLists();
     if(selected) selectPlayer(selected);
   });
 });
@@ -774,12 +1139,11 @@ document.getElementById('resetPct').onclick = ()=>{
 };
 document.getElementById('resetAll').onclick = ()=>{
   state.bought = {}; state.discarded = {}; state.lastAction = null; state.market = []; state.teams = {};
-  saveState(); renderBar(); renderUndo(); renderMarket(); renderRivals(); clearRoleTab();
-  document.getElementById('detail').style.display='none';
-  renderResults('');
+  saveState(); renderBar(); renderUndo(); renderMarket(); renderRivals();
+  closeSheets();
+  refreshCurrentLists();
 };
-document.getElementById('search').addEventListener('input', (e)=>renderResults(e.target.value));
-document.getElementById('dClose').onclick = ()=>{ document.getElementById('detail').style.display='none'; selected=null; };
+document.getElementById('dClose').onclick = closeSheets;
 document.getElementById('dSkipBtn').onclick = ()=>{
   buyMode = 'other';
   document.getElementById('buyerPicker').style.display='none';
@@ -803,30 +1167,31 @@ document.getElementById('dOtherPriceBtn').onclick = ()=>{
 };
 let buyMode = 'mine';
 let pendingPrice = null;
-function commitEntry(mode, price, buyer){
-  if(!price || price<1) return false;
-  const entry = {r:selected.r, price:price, nome:selected.nome, q:selected.q};
+function commitEntry(mode, price, buyer, player){
+  const target = player || selected;
+  if(!target || !price || price<1) return false;
+  const entry = {r:target.r, price:price, nome:target.nome, q:target.q};
   if(mode==='mine'){
-    state.bought[selected.id] = entry;
+    state.bought[target.id] = entry;
   } else {
-    state.discarded[selected.id] = entry;
+    state.discarded[target.id] = entry;
     if(buyer){
       state.teams = state.teams || {};
       state.teams[buyer] = state.teams[buyer] || {bought:{}};
-      state.teams[buyer].bought[selected.id] = entry;
+      state.teams[buyer].bought[target.id] = entry;
     }
   }
   state.market = state.market || [];
-  state.market.push({id:selected.id, nome:selected.nome, r:selected.r, q:selected.q, squadra:selected.squadra, price:price, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
-  state.lastAction = {type: mode==='mine' ? 'buy' : 'other', id:selected.id, nome:selected.nome, price:price, buyer: buyer||null};
+  state.market.push({id:target.id, nome:target.nome, r:target.r, q:target.q, squadra:target.squadra, price:price, mine: mode==='mine', buyer: mode==='other' ? (buyer||null) : null});
+  state.lastAction = {type: mode==='mine' ? 'buy' : 'other', id:target.id, nome:target.nome, price:price, buyer: buyer||null};
   saveState();
   renderBar();
   renderUndo();
   renderMarket();
   renderRivals();
-  document.getElementById('detail').style.display='none';
-  document.getElementById('buyerPicker').style.display='none';
-  selected=null;
+  refreshCurrentLists();
+  if(openSheetId==='detail') closeSheets();
+  if(target === selected) selected = null;
   return true;
 }
 function renderBuyerPicker(){
@@ -879,12 +1244,6 @@ function renderLog(){
   const tot = list.reduce((a,m)=>a+m.price,0);
   box.innerHTML += '<div class="logtot"><span>'+list.length+' acquisti</span><span>Totale <b>'+tot+' cr</b></span></div>';
 }
-document.getElementById('toggleLog').onclick = ()=>{
-  const p = document.getElementById('logpanel');
-  const show = p.style.display==='none';
-  p.style.display = show ? 'block' : 'none';
-  if(show) renderLog();
-};
 document.querySelectorAll('.logtab').forEach(b=>{
   b.onclick = ()=>{
     logFilter = b.dataset.l;
@@ -894,7 +1253,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-11-c';
+const BUILD = 'build-2026-09-23-b';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

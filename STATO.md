@@ -40,3 +40,56 @@ Nessuno dei punti 1, 2, 4, 5, 6 è ancora iniziato.
 - Niente sincronizzazione multi-dispositivo: chiarito il 23/09/2026 che le due app si
   usano solo dal telefono, mai insieme a un altro dispositivo — da qui la scelta di
   sganciare Supabase invece di sistemarne le policy di sicurezza.
+
+- **23/09/2026 — architettura dell'unificazione (punto 1 del piano), decisa prima del
+  mockup**: oggi le due app hanno due dataset giocatore separati — Live (`index.html`)
+  solo quotazione ufficiale, Prepara (`scout.html`) anche FVM, tag, titolarità/infortuni,
+  trend — e Prepara è di sola consultazione (legge lo stato ma non scrive). Deciso:
+  1. **Un solo dataset giocatore**, quello ricco di oggi di Prepara (FVM, tag, titolarità,
+     infortuni, trend): anche il prezzo consigliato di Live lo userà (es. sconto se
+     infortunato, premio se titolare fisso), non solo la quotazione ufficiale.
+  2. **Un solo posto per agire**: toccare un giocatore in "Prepara" apre la stessa
+     schermata di dettaglio/acquisto di "Live" (oggi Prepara è solo consultazione).
+  3. **Impostazioni/Registro/Rivali** raggiungibili da entrambe le schede, non solo da
+     Live come oggi.
+  Prossimo passo: mockup coerente con queste tre decisioni.
+
+- **23/09/2026 — punto 1 implementato (codice vero, non mockup)**: `index.html` e
+  `scout.html` uniti in un solo `index.html` (`scout.html` ora è solo un redirect, per
+  chi lo avesse salvato). Verificato in locale con un server statico:
+  - **Dataset unico**: 532 giocatori, stesso set di id nelle due liste originali (nessun
+    disallineamento), ora con tutti i campi (quotazione ufficiale, FVM, titolarità,
+    infortuni, trend) in un solo oggetto.
+  - **Prezzo consigliato aggiornato**: non più solo quotazione ufficiale. Peso di
+    riferimento = media tra quotazione ufficiale e valore atteso da FVM
+    (`fvm * budget/1000`); poi sconto se non titolare fisso (`cambio` ×0,85, `riserva`
+    ×0,6) e forte sconto se infortunato (×0,4). **I tre moltiplicatori sono un punto di
+    partenza ragionevole, non testato su un'asta vera** — da aggiustare quando si vede
+    come si comporta.
+  - **Scheda azione unica**: toccare un giocatore in Prepara o in Live apre sempre la
+    stessa scheda (prezzo consigliato, quotazione, FVM, titolarità, banner infortunio,
+    Preso a X / Prezzo diverso / Preso da altri, alternative simili). Provato: acquisto
+    da Prepara aggiorna budget/slot/lista; ricerca in Live su un infortunato mostra il
+    banner e il prezzo già scontato.
+  - **Registro/Rivali/Impostazioni** in header, raggiungibili da entrambe le schede
+    (erano già fuori dal contenuto specifico di tab, ora la barra tab sta sotto).
+  Non ancora toccato: la grafica (resta quella scura verde/oro originale, il mockup
+  liquid glass provato prima resta da valutare a parte); i punti 2, 4, 5, 6 del piano.
+
+- **23/09/2026 — livello serio, prime 4 priorità funzionali** (l'utente ha guardato
+  l'app unita e l'ha trovata scomoda, non solo esteticamente: prima di continuare col
+  piano abbiamo fermato e riscritto l'interazione). Fatto e verificato dal vivo in
+  locale:
+  1. **Ricerca globale unica**, sopra le due schede: cerchi un nome da Prepara o da Live
+     senza cambiare scheda, i risultati sostituiscono il contenuto e tornano quando
+     cancelli. Cambiare scheda pulisce la ricerca.
+  2. **Scheda giocatore come overlay** (foglio dal basso, sfondo scurito): non sposta più
+     lo scroll della pagina — si apre sopra, si chiude e resti esattamente dove eri.
+  3. **Acquisto in un tocco**: ogni riga/card ha un bottone "✓ prezzo" col prezzo
+     consigliato già calcolato — un tocco registra l'acquisto senza aprire la scheda.
+     Tutta la card resta comunque cliccabile per aprire il dettaglio completo.
+  4. **Impostazioni/Registro/Rivali come overlay** identici alla scheda giocatore
+     (stesso meccanismo `openSheet`/`closeSheet`), non spingono più la pagina.
+  Non ancora fatto: percentuali con slider, colpo d'occhio visivo (avvisi colorati oltre
+  al rosso quando sfori), la grafica vera e propria — questi restano il prossimo giro.
+  Non ancora committato su git.
