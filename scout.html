@@ -142,107 +142,11 @@ let asta = null;
 
 const ROLENAMES = {P:'portieri', D:'difensori', C:'centrocampisti', A:'attaccanti'};
 
-/* ---- Sincronizzazione condivisa (Supabase) ---- */
-const SB_URL = 'https://swoibefjqkpgijbzrdtd.supabase.co';
-const SB_KEY = 'sb_publishable_SURWUahFwichMQq-UJxYdQ_eaN_X2KY';
-const CODE_KEY = 'asta-code';
-const DEFAULT_CODE = 'manzo-afm94-eg776-qmp0l';
-
-function getAstaCode(){
-  try{
-    let c = window.localStorage.getItem(CODE_KEY);
-    if(!c){
-      c = DEFAULT_CODE;
-      window.localStorage.setItem(CODE_KEY, c);
-    }
-    return c;
-  }catch(e){ return 'asta-locale'; }
-}
-function setAstaCode(c){
-  try{ window.localStorage.setItem(CODE_KEY, c.trim()); }catch(e){}
-}
-let ASTA_CODE = getAstaCode();
-
-let sbOnline = false, sbLastError = null;
-
-async function sbFetch(path, opts){
-  const res = await fetch(SB_URL + '/rest/v1/' + path, Object.assign({
-    headers: {
-      'apikey': SB_KEY,
-      'Authorization': 'Bearer ' + SB_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    }
-  }, opts||{}));
-  if(!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0,120));
-  const txt = await res.text();
-  return txt ? JSON.parse(txt) : null;
-}
-
-async function sbPullMovimenti(){
-  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE) + '&order=created_at.asc&limit=2000');
-}
-async function sbPullConfig(){
-  const rows = await sbFetch('asta_config?asta_code=eq.' + encodeURIComponent(ASTA_CODE) + '&limit=1');
-  return rows && rows.length ? rows[0] : null;
-}
-async function sbPushMovimento(m){
-  return await sbFetch('asta_movimenti', {
-    method:'POST',
-    body: JSON.stringify(Object.assign({asta_code: ASTA_CODE}, m))
-  });
-}
-async function sbDeleteMovimento(playerId){
-  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE) +
-                       '&player_id=eq.' + playerId, {method:'DELETE'});
-}
-async function sbDeleteAll(){
-  return await sbFetch('asta_movimenti?asta_code=eq.' + encodeURIComponent(ASTA_CODE), {method:'DELETE'});
-}
-async function sbPushConfig(cfg){
-  return await sbFetch('asta_config', {
-    method:'POST',
-    headers:{
-      'apikey': SB_KEY, 'Authorization':'Bearer '+SB_KEY,
-      'Content-Type':'application/json',
-      'Prefer':'resolution=merge-duplicates,return=representation'
-    },
-    body: JSON.stringify({
-      asta_code: ASTA_CODE, budget: cfg.budget, slots: cfg.slots,
-      pct: cfg.pct, partecipanti: cfg.partecipanti, updated_at: new Date().toISOString()
-    })
-  });
-}
-
 function readAsta(){
   try{
     const raw = window.localStorage.getItem('asta-state');
     asta = raw ? JSON.parse(raw) : null;
   }catch(e){ asta = null; }
-}
-
-/* costruisce lo stato asta dai dati condivisi su Supabase */
-async function pullShared(){
-  try{
-    const rows = await sbPullMovimenti();
-    const cfg  = await sbPullConfig();
-    const bought = {}, discarded = {};
-    (rows||[]).forEach(r=>{
-      const entry = {r:r.ruolo, price:r.prezzo, nome:r.nome, q:r.quotazione};
-      if(r.mine) bought[r.player_id] = entry; else discarded[r.player_id] = entry;
-    });
-    asta = {
-      budget: cfg && cfg.budget ? cfg.budget : 500,
-      slots: (cfg && cfg.slots) ? cfg.slots : {P:3,D:8,C:8,A:6},
-      bought, discarded
-    };
-    sbOnline = true; sbLastError = null;
-    try{ window.localStorage.setItem('asta-state', JSON.stringify(asta)); }catch(e){}
-  }catch(e){
-    sbOnline = false; sbLastError = e.message;
-    readAsta();
-  }
-  render();
 }
 function budget(){ return (asta && asta.budget) ? asta.budget : 500; }
 
@@ -265,12 +169,7 @@ function renderLinkbar(){
   const el = document.getElementById('linkbar');
   if(!asta){
     el.className = 'off';
-    el.innerHTML = (sbOnline
-      ? "Collegato, ma l'asta <b>"+ASTA_CODE+"</b> non ha ancora movimenti."
-      : "Non sincronizzato — nessun dato condiviso." +
-        (sbLastError ? '<br><span style="opacity:.8">'+sbLastError+'</span>' : '')) +
-      ' <button id="joinCode">Inserisci codice asta</button>';
-    wireJoin();
+    el.innerHTML = "Nessun dato d'asta ancora — apri Live e registra un movimento.";
     return;
   }
   el.className = '';
@@ -282,18 +181,8 @@ function renderLinkbar(){
     return r+' '+c+'/'+t;
   }).join(' · ');
   const assigned = Object.keys(asta.bought||{}).length + Object.keys(asta.discarded||{}).length;
-  el.innerHTML = (sbOnline ? "Sincronizzato · asta <b>"+ASTA_CODE+"</b>" : "Dati locali (non sincronizzato)") +
-                 " · Crediti che ti restano: <b>"+left+"</b> su "+budget()+
-                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>" +
-                 ' <button id="joinCode">Cambia codice</button>';
-  wireJoin();
-}
-function wireJoin(){
-  const j = document.getElementById('joinCode');
-  if(j) j.onclick = ()=>{
-    const c = prompt('Inserisci il codice asta condiviso:', ASTA_CODE);
-    if(c && c.trim()){ setAstaCode(c); ASTA_CODE = c.trim(); pullShared(); }
-  };
+  el.innerHTML = "Crediti che ti restano: <b>"+left+"</b> su "+budget()+
+                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>";
 }
 
 function ratio(p){ return p.fvm/p.q; }
@@ -383,11 +272,10 @@ document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{
 document.getElementById('sort').onchange=(e)=>{ sortBy=e.target.value; render(); };
 document.getElementById('hideTaken').onchange=(e)=>{ hideTaken=e.target.checked; render(); };
 document.getElementById('onlyTit').onchange=(e)=>{ onlyTit=e.target.checked; render(); };
-window.addEventListener('focus', pullShared);
+window.addEventListener('focus', render);
 window.addEventListener('storage', (e)=>{ if(e.key==='asta-state') render(); });
-pullShared();
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) pullShared(); });
-setInterval(pullShared, 1500);
+render();
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) render(); });
 
 const BUILD = 'build-2026-09-11-c';
 let buildChecking = false;
