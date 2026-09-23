@@ -165,4 +165,4 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   `isElsewhere()`, `populateElsewhereOptions()`, `renderElsewhereList()`. Provato in
   locale: aggiunta Svilar dalle Impostazioni, tag visibile sulla card, filtro nascondi
   funzionante (63→62 giocatori).
-  Non ancora committato su git.
+  Commit `cbd9960`, pushato su GitHub.
