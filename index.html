@@ -197,6 +197,9 @@
   #linkbar{background:var(--surface); border:1px solid var(--border); border-radius:10px;
            padding:10px 12px; margin-bottom:12px; font-size:12px; color:var(--text-dim); line-height:1.5;}
   #linkbar b{color:var(--text);}
+  #picksBar{margin-bottom:12px;}
+  #picksBar .pickstitle{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.03em;}
+  #picksBar .result{border-color:var(--accent-dim);}
   .count{font-size:12px; color:var(--text-dim); margin-bottom:8px;}
   .empty{text-align:center; color:var(--text-dim); font-size:13px; padding:30px 0;}
 </style>
@@ -228,6 +231,9 @@
     <div class="count" id="globalCount"></div>
     <div id="globalList"></div>
   </div>
+
+  <!-- colpo d'occhio "chi comprare ora": migliori occasioni tra i titolari liberi nei ruoli ancora da coprire -->
+  <div id="picksBar" style="display:none"></div>
 
   <!-- ===== PREPARA ===== -->
   <div id="tabPrepara">
@@ -821,6 +827,7 @@ function renderBar(){
   const bl = document.getElementById('budgetLeft');
   bl.textContent = left + ' cr';
   bl.className = left<0 ? 'over' : (left < totalFloor ? 'tight' : '');
+  renderPicksBar();
 }
 
 function renderUndo(){
@@ -884,6 +891,26 @@ function wireCompactRows(container){
 }
 function quickBuy(p){
   commitEntry('mine', quickBuyValue(p), null, p);
+}
+
+/* ---- colpo d'occhio "chi comprare ora" (punto 5 del piano): migliori occasioni tra i
+   titolari/primi cambi liberi, non infortunati, nei ruoli che hanno ancora slot da coprire ---- */
+function bestPicksNow(){
+  const candidates = players.filter(p=>{
+    if(isTaken(p.id)) return false;
+    if(p.tit!=='titolare' && p.tit!=='cambio') return false;
+    if(p.inj) return false;
+    return (state.slots[p.r] - boughtCount(p.r)) > 0;
+  });
+  return candidates.sort((a,b)=>ratio(b)-ratio(a)).slice(0,3);
+}
+function renderPicksBar(){
+  const box = document.getElementById('picksBar');
+  const picks = bestPicksNow();
+  if(picks.length===0){ box.style.display='none'; box.innerHTML=''; return; }
+  box.style.display='block';
+  box.innerHTML = '<div class="pickstitle">Occasioni ora</div>' + picks.map(compactRowHtml).join('');
+  wireCompactRows(box);
 }
 
 /* ---- ricerca globale (priorita 1): funziona da qualunque scheda ---- */

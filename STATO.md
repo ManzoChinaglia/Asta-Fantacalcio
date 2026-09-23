@@ -27,11 +27,9 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
 4. Diversificazione manuale: lista "giocatori già miei altrove" compilata a mano (niente
    collegamento con le rose di Rivoluzione Fantacalcio, che sono in un repo diverso e
    cifrate). **Non iniziato.**
-5. Level-up per uso durante un'asta vera: ricerca sempre a fuoco (**fatto**), undo sempre
-   a portata (**fatto**, già in index), avviso sfondamento budget di ruolo (**fatto**,
-   colpo d'occhio a 3 livelli sopra). Manca ancora: colpo d'occhio "chi comprare ora"
-   all'apertura dell'app (oggi si apre sulla lista giocatori del ruolo, non su un
-   riepilogo/suggerimento).
+5. ~~Level-up per uso durante un'asta vera~~ — **fatto**: ricerca sempre a fuoco, undo
+   sempre a portata (già in index), avviso sfondamento budget di ruolo (colpo d'occhio a
+   3 livelli), colpo d'occhio "chi comprare ora" (striscia "Occasioni ora", sopra).
 6. ~~Default della nuova asta: 8 partecipanti (nomi provvisori), 500 crediti~~ — **fatto**,
    7 avversari placeholder ("Avversario 1"..."Avversario 7", rinominabili/rimovibili) +
    budget 500 di default (8 squadre totali = te + 7 avversari, coerente con Fantalab).
@@ -120,3 +118,15 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   i partecipanti, solo acquisti/registro. Nomi restano modificabili/rimovibili dal
   pannello Impostazioni come prima. Provato in locale con localStorage pulito.
   Commit `8ba825d`, pushato su GitHub.
+
+- **23/09/2026 — colpo d'occhio "chi comprare ora" (chiude il punto 5 del piano)**:
+  striscia "Occasioni ora" (scelta tra 3 opzioni proposte, quella più leggera) sopra le
+  due schede, sempre visibile, non sostituisce le liste esistenti. Mostra i 3 migliori
+  titolari/primi cambi liberi (non infortunati) nei ruoli con ancora slot da coprire,
+  ordinati per rapporto FVM/quotazione (stessa metrica già usata per "Perle nascoste").
+  Bottone acquisto in un tocco come nelle righe compatte di Live/ricerca (`compactRowHtml`/
+  `wireCompactRows`, riusate). Si aggiorna da sola a ogni cambio di stato (agganciata a
+  `renderBar()`: acquisto, undo, cambio percentuali/slot, reset). Provato in locale:
+  striscia visibile su Prepara e Live all'apertura, acquisto rapido da lì aggiorna budget
+  e fa sparire/ricalcolare le occasioni.
+  Non ancora committato su git.
