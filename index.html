@@ -421,6 +421,52 @@ let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let selected = null;
 let activeMainTab = 'prepara';
 
+/* ---- dati live da Jarvis (punto 2 del piano): titolarità e infortuni via URL grezzo da
+   GitHub, invece di uno snapshot statico aggiornato a mano. Solo questi due file: sono gli
+   unici con un formato semplice e documentato (id -> percentuale / motivo+data), a
+   differenza di modello.json e statistiche.json che sono formati interni di Jarvis. ---- */
+const JARVIS_RAW = 'https://raw.githubusercontent.com/ManzoChinaglia/JARVIS/main/dati/';
+let jarvisStatus = {ok:false, giornata:null};
+
+function applyLiveJarvisData(titData, injData){
+  const tit = titData.titolari || {};
+  const panch = titData.panchina || {};
+  const indisp = titData.indisponibili || {};
+  const voci = (injData && injData.voci) || {};
+  players.forEach(p=>{
+    const id = String(p.id);
+    if(id in tit){ p.tit = 'titolare'; p.gkpct = tit[id]; }
+    else if(id in panch){ p.tit = 'cambio'; p.gkpct = panch[id]; }
+    else { p.tit = 'riserva'; p.gkpct = null; }
+    if(id in voci){
+      p.inj = {rientro: voci[id].rientro, motivo: voci[id].motivo};
+    } else if(id in indisp){
+      const d = indisp[id];
+      p.inj = {rientro: d.fino || 'non specificata', motivo: d.motivo || 'Indisponibile'};
+    } else {
+      p.inj = null;
+    }
+  });
+}
+
+async function loadLiveJarvisData(){
+  try{
+    const [titRes, injRes] = await Promise.all([
+      fetch(JARVIS_RAW+'titolari.json', {cache:'no-store'}),
+      fetch(JARVIS_RAW+'infortuni.json', {cache:'no-store'})
+    ]);
+    if(!titRes.ok || !injRes.ok) throw new Error('jarvis http error');
+    const titData = await titRes.json();
+    const injData = await injRes.json();
+    applyLiveJarvisData(titData, injData);
+    jarvisStatus = {ok:true, giornata: titData.giornata};
+  }catch(e){
+    jarvisStatus = {ok:false, giornata:null};
+  }
+  renderBar();
+  refreshCurrentLists();
+}
+
 function norm(s){ return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
 function levenshtein(a,b){
@@ -493,6 +539,7 @@ async function loadState(){
   renderRivals();
   renderLog();
   renderPrepList();
+  loadLiveJarvisData();
   setInterval(checkNewBuild, 45000);
 }
 async function saveState(){
@@ -1022,8 +1069,11 @@ function renderLinkbar(){
   const left = state.budget - spent;
   const slots = ROLES.map(r=> r+' '+boughtCount(r)+'/'+state.slots[r]).join(' · ');
   const assigned = Object.keys(state.bought).length + Object.keys(state.discarded).length;
+  const jarvisLine = jarvisStatus.ok
+    ? '<br><span style="color:var(--ok)">Titolarità/infortuni live da Jarvis</span> (formazioni giornata '+jarvisStatus.giornata+')'
+    : '<br><span style="color:var(--text-dim)">Titolarità/infortuni: dati statici (Jarvis non raggiungibile)</span>';
   el.innerHTML = "Crediti che ti restano: <b>"+left+"</b> su "+state.budget+
-                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>";
+                 "<br>Rosa: "+slots+" · Giocatori già assegnati: <b>"+assigned+"</b>"+jarvisLine;
 }
 function renderPrepList(){
   renderLinkbar();

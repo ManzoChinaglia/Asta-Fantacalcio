@@ -20,9 +20,10 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
 ## Aperto — piano di unificazione (deciso per proposte il 23/09/2026)
 
 1. ~~Un'unica app, due schede~~ — **fatto** (sopra, index.html+scout.html uniti).
-2. Dati live da Jarvis: leggere via URL grezzo da GitHub `dati/statistiche.json`,
-   `dati/titolari.json`, `dati/infortuni.json`, `dati/modello.json` del repo JARVIS
-   (pubblici, fuori dal lucchetto) invece di uno scraping proprio. **Non iniziato.**
+2. ~~Dati live da Jarvis~~ — **fatto in parte** (sotto): `titolari.json` e `infortuni.json`
+   collegati live. `statistiche.json` e `modello.json` restano fuori — sono formati
+   interni di Jarvis (array numerici senza nomi di campo, pensati solo per i suoi script
+   Python), deciso il 23/09/2026 di non provare a decifrarli da fuori.
 3. ~~Supabase da decidere~~ — **fatto**, sganciato (sopra).
 4. Diversificazione manuale: lista "giocatori già miei altrove" compilata a mano (niente
    collegamento con le rose di Rivoluzione Fantacalcio, che sono in un repo diverso e
@@ -130,3 +131,22 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   striscia visibile su Prepara e Live all'apertura, acquisto rapido da lì aggiorna budget
   e fa sparire/ricalcolare le occasioni.
   Commit `afcc84b`, pushato su GitHub.
+
+- **23/09/2026 — dati live da Jarvis, titolarità e infortuni (punto 2 del piano, in
+  parte)**: valutato prima di scrivere codice. `dati/titolari.json` e `dati/infortuni.json`
+  del repo JARVIS sono pubblici (verificato `curl` → 200) e in un formato semplice —
+  id giocatore (stesso id Fantacalcio.it usato anche qui) → percentuale titolarità o
+  motivo/data rientro infortunio. `dati/modello.json` e `dati/statistiche.json` invece
+  sono array numerici senza nomi di campo, formato interno degli script Python di Jarvis
+  (`modello.py`) — **deciso di non toccarli**, troppo rischioso indovinare cosa
+  rappresenta ogni posizione per un dato usato in un'asta vera. All'apertura dell'app,
+  fetch di `titolari.json`+`infortuni.json` via URL grezzo GitHub (`raw.githubusercontent
+  .com/ManzoChinaglia/JARVIS/main/dati/`), sovrascrivono titolarità/percentuale/infortunio
+  di ogni giocatore sopra lo snapshot statico imbottito nell'HTML. Se il fetch fallisce
+  (offline, rate limit) resta lo snapshot statico, senza rompere nulla — indicatore
+  visibile sotto "Rosa" nel riquadro in alto ("live da Jarvis" in verde / "dati statici"
+  in grigio). Nuove funzioni `loadLiveJarvisData()`, `applyLiveJarvisData()`. Provato in
+  locale: dati live confermati (es. Svilar passa da 85% statico a 91% live, coerente con
+  `titolari.json`), banner infortunio con motivo/data reali su un giocatore infortunato,
+  fallback a dati statici forzando `jarvisStatus.ok=false`.
+  Non ancora committato su git.
