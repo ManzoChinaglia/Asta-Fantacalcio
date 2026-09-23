@@ -149,4 +149,4 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   locale: dati live confermati (es. Svilar passa da 85% statico a 91% live, coerente con
   `titolari.json`), banner infortunio con motivo/data reali su un giocatore infortunato,
   fallback a dati statici forzando `jarvisStatus.ok=false`.
-  Non ancora committato su git.
+  Commit `9f3224b`, pushato su GitHub.
