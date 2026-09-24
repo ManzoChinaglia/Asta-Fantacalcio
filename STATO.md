@@ -1,6 +1,6 @@
 # Stato — Asta Fantacalcio
 
-**Al 24/09/2026: nessun punto aperto** (piano di unificazione chiuso; punti d'uso in asta chiusi dall'utente il 23/09 sera).
+**Al 24/09/2026: nessun punto aperto.** Ripartizione budget + grafica v2 fatte, committate e pushate il 24/09 (sotto); da provare sul telefono. Piano di unificazione chiuso; punti d'uso in asta chiusi il 23/09 sera.
 
 Tool unico (ex due app: `index.html` + `scout.html`, ora `scout.html` è solo un redirect) per l'asta su **Fantalab** (8 squadre, 500 crediti,
 Classic + modificatore difesa, modificatore gol diverso da Rivoluzione Fantacalcio):
@@ -335,3 +335,33 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   il correttivo sui crediti sovrastima i prezzi.
 - **23/09/2026, sera — punti d'uso chiusi dall'utente**: registrazione di ogni vendita in asta e
   controllo dei prezzi degli infortunati considerati chiusi. Nessun punto aperto per questo progetto.
+
+- **24/09/2026 — ripartizione budget e grafica v2** (build `2026-09-24-a`, poi -b/-c/-d, da provare sul telefono):
+  - **Nuova ripartizione di partenza P7 / D20 / C28 / A45** (prima P9/D21/C30/A40), scelta dall'utente per
+    diversificare rispetto all'asta precedente (P10 D29 C36 A24 nella sua rosa: Baturina 101 e Woltemade 80
+    pesavano quasi il 40%). Nessun tetto per singolo acquisto (le aste sono imprevedibili). Chi ha salvate le
+    vecchie % di partenza (9/21/30/40 o 8/20/27/45) passa in automatico alle nuove; % cambiate a mano restano.
+  - **% adattive a metà asta**: nuova `effPct(role)`. Le % in Opzioni valgono solo per i ruoli ancora aperti; un
+    ruolo completo è congelato a quanto speso davvero e il resto si divide tra i ruoli aperti. Usata da
+    `planScale`, `roleBudgetDisplay` e testata. Provato: somma sempre 100, margine del piano stabile (±1 cr) dopo
+    cambi di % con un ruolo già chiuso; nessun NaN neppure con % a 0. Se una % è troppo bassa per il ruolo
+    (es. C=0) `planScale` si ferma a 0,3 e il margine diventa negativo, come deve.
+  - **Occasioni ora tolte** (funzioni `bestPicksNow`/`renderPicksBar` rimosse).
+  - **Grafica v2** (mockup in `mockup/grafica-v2.html`): testata con un anello per ruolo, selettori a segmenti
+    (ruoli in Sfoglia/Prepara, categorie in Prepara), filtri come icona con badge accanto ai ruoli, tre voci di
+    font (Barlow Condensed per nomi/prezzi/titoli, sans spaziato per etichette, Georgia corsivo per le note),
+    transizioni (schede che entrano, righe in sequenza, fogli con curva morbida, tocchi elastici).
+  - **Fasce tolte come guida** (build `2026-09-24-c`): l'utente temeva che il piano a fasce lo limitasse
+    mentalmente. Rimossi: foglio «Piano a fasce» (con pressione sulle stelle), «margine fasce» in testata, nota
+    «Nel piano: fascia…» e semaforo rosso legato al piano nella scheda giocatore, e tutto il codice collegato
+    (`HIST`, `planRole`, `planMargin`, `planScale`, `tierPrice`, `starPressure`, `oppLiquidity`). Restano solo:
+    l'etichetta descrittiva «Fascia di prezzo» (Top ≥40, Medio 7–39, Riempitivo ≤6), il semaforo rispetto al
+    MERCATO («Affare» sotto l'80% dell'atteso, «Sopra la fascia realistica» oltre il massimo) e la testata con
+    «Crediti liberi N» (+ sforo per ruolo). L'unico piano è la ripartizione % per ruolo (`effPct`).
+    Se in futuro serve un piano per fasce, ricostruirlo da git (commit precedente al 24/09) e non riproporlo di default.
+  - **`ERR_CONNECTION_RESET` in console**: non è Jarvis (i dati live funzionano: «Jarvis live · g.6»). Era la
+    pagina stessa: il controllo periodico di nuova versione (`checkNewBuild`) o una ricarica interrotta durante
+    i test in locale. Nessun intervento.
+  - **Opzioni e Registro ridisegnati** (build `2026-09-24-d`): in Opzioni una scheda per ruolo (percentuale
+    grande nel colore del ruolo, crediti ≈, slider colorato con riempimento, slot a fianco, «quota attuale»);
+    Registro con gli stessi segmenti, nomi condensati, prezzi in evidenza. Provato: slider, reset, riempimento.

@@ -71,36 +71,10 @@
   .chip.tight .bar u{background:var(--warn);}
   .chip.warn .bar u{background:var(--danger);}
   .chip em{font-style:normal; font-weight:700; color:var(--danger);}
-  .plansum{text-align:center; padding:6px 0 16px;}
-  .plansum .big{font-family:var(--num); font-size:54px; font-weight:700; line-height:1;}
-  .plansum .big.ok{color:var(--ok);} .plansum .big.bad{color:var(--danger);}
-  .plansum .sub{font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.5;}
-  .pressrow{display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:6px; background:var(--surface); border:1px solid var(--border); border-radius:14px;}
-  .pressrow .pt{flex:1; font-size:13px; line-height:1.4;}
-  .pressrow .pt small{display:block; color:var(--text-dim); font-size:11.5px;}
-  .plab{font-size:12px; font-weight:700; padding:4px 10px; border-radius:10px;}
-  .plab.low{background:rgba(91,196,138,.16); color:var(--ok);}
-  .plab.mid{background:rgba(255,255,255,.1); color:var(--text);}
-  .plab.high{background:rgba(224,96,92,.16); color:var(--danger);}
-  .plancard{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:12px 14px; margin-bottom:10px;}
-  .plancard .ph{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:700; font-size:15px;}
-  .plancard .ph .cnt{margin-left:auto; font-weight:500; font-size:12.5px; color:var(--text-dim);}
-  .tiers{display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
-  .tier{background:var(--surface2); border-radius:12px; padding:8px 4px; text-align:center;}
-  .tier .tl{font-size:11px; color:var(--text-dim);}
-  .tier .tn{font-family:var(--num); font-size:22px; font-weight:700; margin:2px 0; font-variant-numeric:tabular-nums;}
-  .tier .tp{font-size:11px; color:var(--text-dim);}
-  .tier.full .tn{color:var(--ok);} .tier.over .tn{color:var(--danger);}
-  .plancard .need{font-size:12.5px; color:var(--text-dim); margin-top:10px; line-height:1.5;}
-  .plancard .need b{color:var(--text);}
-  .plannote{margin:8px 0; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.45; background:rgba(255,255,255,.06); color:var(--text-dim);}
-  .plannote.warn{background:rgba(232,163,61,.12); border:1px solid rgba(232,163,61,.35); color:#f0c27a;}
   .priceflag{margin:6px 0; padding:8px 12px; border-radius:14px; font-size:13px; line-height:1.4; font-weight:600;}
   .priceflag.good{background:rgba(91,196,138,.14); color:var(--ok);}
   .priceflag.warn{background:rgba(232,163,61,.14); color:#f0c27a;}
   .priceflag.bad{background:rgba(224,96,92,.16); color:var(--danger);}
-  .planline .pwarn{color:var(--warn); font-weight:700; font-size:13px;}
-  .planline{cursor:pointer;}
   .planline{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; font-size:12px; color:var(--text-dim);}
   .planline .pover{color:var(--danger); font-weight:700; font-size:13px;}
   .planline .pok{color:var(--ok);}
@@ -325,6 +299,98 @@
   .dangerzone{margin-top:22px;}
   .logrow .lt{font-size:11px; font-weight:700; color:var(--text-dim); background:var(--surface2); border-radius:6px; padding:2px 6px; flex-shrink:0;}
   .logrow .est{color:var(--text-dim); font-size:12px; font-weight:400;}
+  /* ================= grafica v2 (24/09/2026): font diversificati, anelli, segmenti, transizioni ================= */
+  :root{--serif:Georgia,"Times New Roman",serif; --ease:cubic-bezier(.22,1,.36,1);
+        --cP:#e8c25a; --cD:#5aa9e8; --cC:#4fd28a; --cA:#ef6a5e;}
+  /* tre voci: condensato per nomi/prezzi/titoli, sans piccolo spaziato per le etichette, serif corsivo per le note */
+  .rn1,.dhead .rname{font-family:var(--num); font-weight:700; letter-spacing:.01em;}
+  .rn1{font-size:21px; line-height:1.05;}
+  .dhead .rname{font-size:30px; text-transform:uppercase; letter-spacing:.02em;}
+  .rteam{font-size:11.5px; letter-spacing:.02em;}
+  .cprice{font-size:30px;}
+  .sectitle,.hudlab,.sheet h2,.jstat{font-weight:700; letter-spacing:.16em; font-size:10.5px;}
+  .sheet .panelhead h2{font-family:var(--num); font-size:30px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+  .catdesc,.optnote,.hint,.empty,.priceflag,.buyformlabel,.count,.suggested .lab,.pctsum,.planline #planText,#marketBar{font-family:var(--serif); font-style:italic;}
+  .catdesc,.optnote,.hint,.empty,.priceflag,.buyformlabel,.count,.suggested .lab,.pctsum,.planline #planText,#marketBar{font-variant-numeric:lining-nums;}
+  .cta,.stepper button,.qbuy,.logrow .lp{font-family:var(--num);}
+  .cta{font-size:26px; letter-spacing:.05em; text-transform:uppercase;}
+  .suggested .num{font-size:110px;}
+  .roletab,.cat,.logtab,#tabbar button{font-family:var(--num); font-weight:600; text-transform:uppercase; letter-spacing:.07em;}
+  .roletab{font-size:19px;} .cat{font-size:16px;} #tabbar button{font-size:14px;}
+  .statgrid .st .value{font-family:var(--num);} .statgrid .st .value{font-size:22px;}
+
+  /* selettore a segmenti: ruoli (Sfoglia e Prepara) e categorie */
+  .roletabs,.cats{gap:2px; padding:4px; border-radius:16px;}
+  .roletab.on{background:var(--surface2); color:var(--text); box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .roletab[data-r=P].on{color:var(--cP);} .roletab[data-r=D].on{color:var(--cD);}
+  .roletab[data-r=C].on{color:var(--cC);} .roletab[data-r=A].on{color:var(--cA);}
+  .roletab .n{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; text-transform:none; letter-spacing:0; font-size:10.5px;}
+  .cats{margin:0 0 8px; background:var(--glass); border:1px solid var(--glass-edge); box-shadow:var(--glass-light);
+        -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);}
+  .cat{background:none; border:none; border-radius:12px; padding:9px 0; flex:1; transition:background .3s var(--ease), color .3s var(--ease);}
+  .cat.on{background:var(--surface2); color:var(--accent); border:none; box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .prow{display:flex; gap:8px; align-items:stretch; margin-bottom:8px;}
+  .prow .roletabs{flex:1; margin:0;}
+  .fbtn{position:relative; flex:0 0 54px; border-radius:16px; display:grid; place-items:center; color:var(--text);
+        background:var(--glass); border:1px solid var(--glass-edge); box-shadow:var(--glass-light);
+        -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur); transition:transform .3s var(--spring);}
+  .fbtn:active{transform:scale(.92);}
+  .fbtn svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round;}
+  .fbtn .fn{position:absolute; top:-5px; right:-5px; margin:0; min-width:19px; height:19px; line-height:19px; border-radius:10px; font-size:11px;}
+
+  /* testata: un anello per ruolo */
+  .chip{padding:8px 2px 6px; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border-color:transparent;}
+  .chip .ring{--c:var(--cC); width:52px; height:52px; border-radius:50%; display:grid; place-items:center;
+              background:conic-gradient(var(--c) calc(var(--v)*1%), rgba(255,255,255,.09) 0); transition:background .6s var(--ease);}
+  .chip .ring i{width:42px; height:42px; border-radius:50%; background:#0d1612; display:grid; place-items:center; font-style:normal;
+                font-family:var(--num); font-size:19px; font-weight:700; font-variant-numeric:tabular-nums;}
+  #chipP .ring{--c:var(--cP);} #chipD .ring{--c:var(--cD);} #chipC .ring{--c:var(--cC);} #chipA .ring{--c:var(--cA);}
+  .chip.done .ring{--c:var(--ok);} .chip.tight .ring{--c:var(--warn);} .chip.warn .ring{--c:var(--danger);}
+  .chip b{font-size:11px; font-weight:600; color:var(--text-dim); letter-spacing:.02em;}
+  .chip.done,.chip.tight,.chip.warn{background:none; border-color:transparent;}
+  .chip.done b,.chip.done .chipcr{color:var(--ok);} .chip.tight b,.chip.tight .chipcr{color:var(--warn);} .chip.warn b,.chip.warn .chipcr{color:var(--danger);}
+  .chip .chipcr{font-size:10.5px; margin:0;}
+
+  /* transizioni: schede che entrano, righe in sequenza, fogli con curva morbida, tocchi elastici */
+  @keyframes tabin{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  @keyframes rowin{from{opacity:0; transform:translateY(10px) scale(.985);} to{opacity:1; transform:none;}}
+  #tabLive,#tabPrepara,#globalResults{animation:tabin .45s var(--ease);}
+  .result,.card{animation:rowin .4s var(--ease) both;}
+  .result:nth-child(2),.card:nth-child(2){animation-delay:.03s;} .result:nth-child(3),.card:nth-child(3){animation-delay:.06s;}
+  .result:nth-child(4),.card:nth-child(4){animation-delay:.09s;} .result:nth-child(5),.card:nth-child(5){animation-delay:.12s;}
+  .result:nth-child(n+6),.card:nth-child(n+6){animation-delay:.15s;}
+  .sheet{transition:transform .5s var(--ease);} .sheet-backdrop{transition:opacity .4s ease;}
+  #tabbar button.on{background:var(--surface2); color:var(--accent);}
+  .stepper button,.actions button,.optnav,.btn-ghost{transition:transform .25s var(--spring), background .2s;}
+  .stepper button:active,.actions button:active,.optnav:active,.btn-ghost:active{transform:scale(.94);}
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important;} }
+  /* opzioni: una scheda per ruolo (percentuale in grande, slider del colore del ruolo, slot a fianco) */
+  .rolecfg{--c:var(--accent); padding:12px 4px 10px; border-bottom:1px solid var(--border);}
+  .rolecfg:last-of-type{border-bottom:none;}
+  .rc-head{display:flex; align-items:center; gap:10px;}
+  .rc-name{font-family:var(--num); font-size:21px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; flex:1;}
+  .rc-pct{font-family:var(--num); font-size:34px; font-weight:700; color:var(--c); line-height:1;}
+  .rc-pct .pctval{color:var(--c);}
+  .rc-cr{font-size:12px; color:var(--text-dim); min-width:58px; text-align:right; font-variant-numeric:tabular-nums;}
+  .rolecfg input[type=range]{width:100%; margin:6px 0 0; -webkit-appearance:none; appearance:none; height:34px; background:none; padding:0; border:none;}
+  .rolecfg input[type=range]::-webkit-slider-runnable-track{height:6px; border-radius:3px; background:linear-gradient(90deg,var(--c) var(--fill,0%),rgba(255,255,255,.14) var(--fill,0%));}
+  .rolecfg input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:var(--c); border:3px solid #0d1612; margin-top:-11px; box-shadow:0 2px 8px rgba(0,0,0,.45);}
+  .rolecfg input[type=range]::-moz-range-thumb{width:24px; height:24px; border-radius:50%; background:var(--c); border:3px solid #0d1612;}
+  .rc-foot{display:flex; align-items:center; justify-content:space-between; margin-top:2px;}
+  .rc-foot .curpct{font-size:12px; color:var(--text-dim); font-family:var(--serif); font-style:italic;}
+  .rc-slots{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-dim); letter-spacing:.06em; text-transform:uppercase;}
+  .rc-slots input{width:64px; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:12px; padding:8px 6px; text-align:center; font-family:var(--num); font-size:20px; font-weight:700;}
+  .optcard .field input#budget{font-family:var(--num); font-size:28px; font-weight:700; color:var(--accent);}
+  /* registro: stessi segmenti del resto dell'app, righe con nome condensato e prezzo in evidenza */
+  .logtabs{gap:2px; border-radius:16px; background:var(--glass); border:1px solid var(--glass-edge);}
+  .logtab{font-size:15px; padding:10px 0; border-radius:12px; transition:background .3s var(--ease), color .3s var(--ease);}
+  .logtab.on{background:var(--surface2); color:var(--accent); box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .logrow{gap:10px; padding:11px 2px; align-items:center; animation:rowin .35s var(--ease) both;}
+  .logrow .ln{font-family:var(--num); font-size:21px; font-weight:700; letter-spacing:.01em;}
+  .logrow .lp{font-size:26px; min-width:44px;}
+  .logrow .lw{font-family:var(--serif); font-style:italic; font-size:13px;}
+  .logtot{font-family:var(--serif); font-style:italic; padding-top:14px;}
+  .logtot b{font-family:var(--num); font-style:normal; font-size:22px; color:var(--accent);}
 </style>
 </head>
 <body>
@@ -337,7 +403,7 @@
     <div class="chip" id="chipC"></div>
     <div class="chip" id="chipA"></div>
   </div>
-  <div class="planline" id="planline"><span id="planText"></span><span class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></span></div>
+  <div class="planline"><span id="planText"></span><span class="jstat" id="jstat"><i class="jd"></i><span>dati statici</span></span></div>
 </div></div>
 
 <main>
@@ -353,8 +419,6 @@
 
   <!-- ===== LIVE ===== -->
   <div id="tabLive">
-    <div id="picksBar" style="display:none"></div>
-
     <div class="sectitle">Sfoglia per ruolo</div>
     <div class="roletabs" id="liveRoleTabs">
       <button class="roletab" data-r="P">P<span class="n" id="ntP"></span></button>
@@ -373,14 +437,16 @@
 
   <!-- ===== PREPARA ===== -->
   <div id="tabPrepara" style="display:none">
-    <div class="roletabs" id="prepRoleTabs">
-      <button class="roletab on" data-r="P">P</button>
-      <button class="roletab" data-r="D">D</button>
-      <button class="roletab" data-r="C">C</button>
-      <button class="roletab" data-r="A">A</button>
+    <div class="prow">
+      <div class="roletabs" id="prepRoleTabs">
+        <button class="roletab on" data-r="P">P</button>
+        <button class="roletab" data-r="D">D</button>
+        <button class="roletab" data-r="C">C</button>
+        <button class="roletab" data-r="A">A</button>
+      </div>
+      <button class="fbtn" id="filtersBtn" aria-label="Filtri e ordinamento"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span class="fn" id="filtersN" style="display:none"></span></button>
     </div>
     <div class="cats" id="cats">
-      <button class="cat fbtn" id="filtersBtn">Filtri<span class="fn" id="filtersN" style="display:none"></span></button>
       <button class="cat on" data-c="all">Tutti</button>
       <button class="cat" data-c="top">Top</button>
       <button class="cat" data-c="scommessa">Scomm.</button>
@@ -415,21 +481,25 @@
     <div class="row">
       <div class="field"><label>Crediti totali</label><input type="number" id="budget" inputmode="numeric"></div>
     </div>
-    <div class="row">
-      <div class="field"><label>Slot Portieri</label><input type="number" id="slotP" inputmode="numeric"></div>
-      <div class="field"><label>% budget <span class="pctval" id="valP"></span>% <span class="curpct" id="curP"></span></label><input type="range" min="0" max="100" id="pctP"></div>
+    <div class="rolecfg" style="--c:var(--cP)">
+      <div class="rc-head"><div class="badge P">P</div><span class="rc-name">Portieri</span><span class="rc-pct"><span class="pctval" id="valP"></span>%</span><span class="rc-cr" id="crP"></span></div>
+      <input type="range" min="0" max="100" id="pctP">
+      <div class="rc-foot"><span class="curpct" id="curP"></span><label class="rc-slots">Slot <input type="number" id="slotP" inputmode="numeric"></label></div>
     </div>
-    <div class="row">
-      <div class="field"><label>Slot Difensori</label><input type="number" id="slotD" inputmode="numeric"></div>
-      <div class="field"><label>% budget <span class="pctval" id="valD"></span>% <span class="curpct" id="curD"></span></label><input type="range" min="0" max="100" id="pctD"></div>
+    <div class="rolecfg" style="--c:var(--cD)">
+      <div class="rc-head"><div class="badge D">D</div><span class="rc-name">Difensori</span><span class="rc-pct"><span class="pctval" id="valD"></span>%</span><span class="rc-cr" id="crD"></span></div>
+      <input type="range" min="0" max="100" id="pctD">
+      <div class="rc-foot"><span class="curpct" id="curD"></span><label class="rc-slots">Slot <input type="number" id="slotD" inputmode="numeric"></label></div>
     </div>
-    <div class="row">
-      <div class="field"><label>Slot Centrocampisti</label><input type="number" id="slotC" inputmode="numeric"></div>
-      <div class="field"><label>% budget <span class="pctval" id="valC"></span>% <span class="curpct" id="curC"></span></label><input type="range" min="0" max="100" id="pctC"></div>
+    <div class="rolecfg" style="--c:var(--cC)">
+      <div class="rc-head"><div class="badge C">C</div><span class="rc-name">Centrocampisti</span><span class="rc-pct"><span class="pctval" id="valC"></span>%</span><span class="rc-cr" id="crC"></span></div>
+      <input type="range" min="0" max="100" id="pctC">
+      <div class="rc-foot"><span class="curpct" id="curC"></span><label class="rc-slots">Slot <input type="number" id="slotC" inputmode="numeric"></label></div>
     </div>
-    <div class="row">
-      <div class="field"><label>Slot Attaccanti</label><input type="number" id="slotA" inputmode="numeric"></div>
-      <div class="field"><label>% budget <span class="pctval" id="valA"></span>% <span class="curpct" id="curA"></span></label><input type="range" min="0" max="100" id="pctA"></div>
+    <div class="rolecfg" style="--c:var(--cA)">
+      <div class="rc-head"><div class="badge A">A</div><span class="rc-name">Attaccanti</span><span class="rc-pct"><span class="pctval" id="valA"></span>%</span><span class="rc-cr" id="crA"></span></div>
+      <input type="range" min="0" max="100" id="pctA">
+      <div class="rc-foot"><span class="curpct" id="curA"></span><label class="rc-slots">Slot <input type="number" id="slotA" inputmode="numeric"></label></div>
     </div>
     <div class="pctsum" id="pctsum"></div>
     <button id="resetPct" class="btn-ghost">Ripristina percentuali di partenza</button>
@@ -473,17 +543,6 @@
   <div id="logList"></div>
 </div>
 
-<div class="sheet" id="plan">
-  <div class="sheethandle"></div>
-  <div class="panelhead"><h2>Piano a fasce</h2><button class="sheetclose" data-close>&times;</button></div>
-  <div class="plansum" id="planSummary"></div>
-  <div class="sectitle" style="margin-top:0">Pressione sulle stelle</div>
-  <div id="starsBody"></div>
-  <div class="sectitle">Piano per ruolo</div>
-  <div id="planBody"></div>
-  <p style="font-size:11.5px; color:var(--text-dim); margin:10px 2px 0; line-height:1.5">Struttura ricavata dall'asta precedente (10 squadre, 500 crediti): ogni squadra ha preso in media 3-4 giocatori "top" (40 cr o più), 11-12 medi e 10 riempitivi (6 cr o meno). I prezzi delle fasce sono scalati sul tuo budget e seguono l'inflazione dell'asta in corso.</p>
-</div>
-
 <div class="sheet" id="filters">
   <div class="sheethandle"></div>
   <div class="panelhead"><h2>Filtri Prepara</h2><button class="sheetclose" data-close>&times;</button></div>
@@ -513,7 +572,6 @@
   </div>
   <div id="dInjBanner"></div>
   <div id="dElsewhereBanner"></div>
-  <div id="dPlanNote"></div>
   <div id="dPriceFlag"></div>
   <div class="suggested">
     <div class="num" id="dSuggested">-</div>
@@ -557,7 +615,7 @@ const players = [{"id":5841,"nome":"Svilar","r":"P","squadra":"Roma","q":18,"qi"
 const DEFAULT_STATE = {
   budget:500,
   slots:{P:3,D:8,C:8,A:6},
-  pct:{P:9,D:21,C:30,A:40},
+  pct:{P:7,D:20,C:28,A:45},
   bought:{},
   discarded:{},
   market:[],
@@ -695,6 +753,9 @@ async function loadState(){
       state = Object.assign({}, DEFAULT_STATE, loaded);
       state.slots = Object.assign({}, DEFAULT_STATE.slots, loaded.slots);
       state.pct = Object.assign({}, DEFAULT_STATE.pct, loaded.pct);
+      // chi ha ancora una delle vecchie ripartizioni di partenza (mai toccate) passa a quella nuova
+      const OLD_DEFAULTS = [{P:9,D:21,C:30,A:40},{P:8,D:20,C:27,A:45}];
+      if(OLD_DEFAULTS.some(o => ROLES.every(r => Number(state.pct[r]) === o[r]))) state.pct = {...DEFAULT_STATE.pct};
     }
   }catch(e){}
   normalizeBasePct();
@@ -732,10 +793,24 @@ function roleFloorCost(role, neededSlots){
   const q = players.filter(p=>p.r===role && !isTaken(p.id)).map(p=>p.q).sort((a,b)=>a-b);
   return q.slice(0, neededSlots).reduce((a,b)=>a+b, 0);
 }
+/* Percentuale "effettiva" di un ruolo: le % in Opzioni valgono solo per i ruoli ancora aperti. Un ruolo completo
+   è congelato a quanto hai speso davvero; il resto del budget si divide tra i ruoli aperti in proporzione alle loro %.
+   Così cambiare le % a metà asta (o avanzare/sforare in un ruolo chiuso) non crea né fa sparire crediti: tutti i
+   calcoli che dipendono dalle % (piano a fasce, budget per ruolo, testata) partono da qui e si riadattano da soli. */
+function effPct(role){
+  const isOpen = r => state.slots[r] - boughtCount(r) > 0;
+  const B = Math.max(1, state.budget);
+  const open = ROLES.filter(isOpen);
+  if(!open.includes(role)) return boughtSpent(role) / B * 100;
+  const frozen = ROLES.filter(r=>!isOpen(r)).reduce((a,r)=>a + boughtSpent(r) / B * 100, 0);
+  const sum = open.reduce((a,r)=>a + Math.max(0, Number(state.pct[r]) || 0), 0);
+  const share = sum > 0 ? Math.max(0, Number(state.pct[role]) || 0) / sum : 1 / open.length;
+  return share * Math.max(0, 100 - frozen);
+}
 function roleBudgetDisplay(role){
   const needed = state.slots[role] - boughtCount(role);
   if(needed <= 0){
-    const planned = state.budget * state.pct[role] / 100;
+    const planned = state.budget * effPct(role) / 100;
     return Math.round(planned - boughtSpent(role));
   }
   return Math.round(roleRemainingRaw(role));
@@ -853,94 +928,10 @@ function marketPrice(p){
   return {base, mid, lo: Math.max(1, Math.round(m*f[0])), hi: Math.max(mid, Math.round(m*f[1]))};
 }
 
-/* ---- piano a fasce (4): Top >=40 cr, Medi 7-39, Riempitivi <=6, dalla struttura media delle 10 squadre
-   dell'asta precedente. Conta solo cio' che HAI comprato (state.bought), per fascia di prezzo pagato. ---- */
-const TIERS = ['top','mid','low'];
-const TIER_LABEL = {top:'Top', mid:'Medi', low:'Riempitivi'};
+/* fascia di prezzo di un giocatore: solo un'etichetta descrittiva (Top >=40 cr, Medio 7-39, Riempitivo <=6),
+   non un piano da seguire: la strategia la decidono le % per ruolo in Opzioni */
 const TIER_ONE = {top:'top', mid:'medio', low:'riempitivo'};
-const HIST = {
-  P:{n:{top:.6, mid:.9, low:1.5}, p:{top:52, mid:12, low:2}},
-  D:{n:{top:.3, mid:4.3, low:3.4}, p:{top:55, mid:18, low:2}},
-  C:{n:{top:1.1, mid:4.1, low:2.8}, p:{top:61, mid:19, low:2}},
-  A:{n:{top:1.5, mid:2.3, low:2.2}, p:{top:103, mid:17, low:2}}
-};
 function tierOfPrice(v){ return v >= 40 ? 'top' : (v >= 7 ? 'mid' : 'low'); }
-function planTargets(r){                       // numeri interi con somma = slot del ruolo (resto maggiore)
-  const sl = state.slots[r], h = HIST[r].n, tot = h.top + h.mid + h.low;
-  const raw = TIERS.map(t => h[t] / tot * sl), fl = raw.map(Math.floor);
-  let left = sl - fl.reduce((a,b)=>a+b, 0);
-  raw.map((v,i)=>[v - fl[i], i]).sort((a,b)=>b[0]-a[0]).forEach(([,i])=>{ if(left > 0){ fl[i]++; left--; } });
-  return {top:fl[0], mid:fl[1], low:fl[2]};
-}
-function planScale(r){                          // scala i prezzi delle fasce di ruolo sul budget di quel ruolo (% in Opzioni), a inflazione 1
-  const t = planTargets(r), roleBudget = state.budget * Number(state.pct[r]) / 100;
-  const non = t.top * HIST[r].p.top + t.mid * HIST[r].p.mid;
-  return non > 0 ? Math.max(0.3, (roleBudget - t.low * HIST[r].p.low) / non) : 1;
-}
-function tierPrice(r, t){ return t === 'low' ? HIST[r].p.low : HIST[r].p[t] * planScale(r) * priceFactor(); }
-function planRole(r){
-  const tg = planTargets(r), got = {top:0, mid:0, low:0};
-  Object.values(state.bought).filter(b=>b.r===r).forEach(b=>{ got[tierOfPrice(b.price)]++; });
-  const left = state.slots[r] - boughtCount(r);
-  const rem = {top:Math.max(0,tg.top-got.top), mid:Math.max(0,tg.mid-got.mid), low:Math.max(0,tg.low-got.low)};
-  let sum = rem.top + rem.mid + rem.low;
-  for(const t of TIERS){ while(sum > left && rem[t] > 0){ rem[t]--; sum--; } }   // sforato: si rinuncia prima ai top
-  while(sum < left && left > 0){ rem.low++; sum++; }
-  const cost = Math.round(TIERS.reduce((a,t)=>a + rem[t] * tierPrice(r,t), 0));
-  return {tg, got, rem, left, cost};
-}
-/* ---- pressione sulle stelle (3): stelle libere (prezzo atteso >=40) contro acquirenti attesi.
-   Domanda = stelle che gli avversari prenderanno ancora (media storica per squadra x avversari, meno quelle gia'
-   prese da altri) x liquidita' relativa (crediti per slot mancante degli avversari rispetto alla partenza).
-   Si aggiorna solo con i prezzi che registri con "Preso da altri". ---- */
-const TOP_PER_TEAM = {P:.6, D:.3, C:1.1, A:1.5};
-function oppLiquidity(){
-  const opp = Math.max(1, (state.participants || []).length);
-  const gone = Object.values(state.discarded);
-  const spent = gone.reduce((a,d)=>a + (d.price || 0), 0);
-  const slotsAll = ROLES.reduce((a,r)=>a + Number(state.slots[r]), 0);
-  const cash = opp * state.budget - spent, slots = opp * slotsAll - gone.length;
-  if(slots <= 0 || cash <= 0) return 1;
-  return Math.min(1.8, Math.max(0.5, (cash / slots) / (state.budget / slotsAll)));
-}
-function starPressure(r){
-  const opp = Math.max(1, (state.participants || []).length);
-  const gone = Object.values(state.discarded).filter(d=>d.r===r && d.price >= 40).length;
-  const supply = players.filter(p=>p.r===r && !isTaken(p.id) && marketPrice(p).mid >= 40).length;
-  const buyers = Math.max(0, opp * TOP_PER_TEAM[r] - gone);
-  const ratio = (supply > 0 ? buyers / supply : (buyers > 0 ? 3 : 0)) * oppLiquidity();
-  const lvl = ratio < .7 ? 'low' : (ratio < 1.15 ? 'mid' : 'high');
-  return {supply, buyers, ratio, lvl};
-}
-const PRESS_LABEL = {low:'bassa', mid:'normale', high:'alta'};
-const PRESS_HINT = {low:'più stelle che acquirenti: puoi aspettare', mid:'domanda in linea con l\'offerta', high:'poche stelle per troppi acquirenti: non aspettare'};
-function planMargin(){
-  const need = ROLES.reduce((a,r)=>a + planRole(r).cost, 0);
-  const credits = state.budget - totalSpentAll();
-  return {need, credits, margin: credits - need};
-}
-function renderPlan(){
-  const pm = planMargin();
-  const sum = document.getElementById('planSummary');
-  sum.innerHTML = '<div class="big '+(pm.margin >= 0 ? 'ok' : 'bad')+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+' cr</div>'+
-    '<div class="sub">'+(pm.margin >= 0 ? 'margine sul piano' : 'scoperto rispetto al piano')+'<br>servono ~'+pm.need+' cr per completare la rosa ai prezzi attuali, ne hai '+pm.credits+'</div>';
-  document.getElementById('starsBody').innerHTML = ROLES.filter(r=>state.slots[r] - boughtCount(r) > 0).map(r=>{
-    const sp = starPressure(r);
-    return '<div class="pressrow"><div class="badge '+r+'">'+r+'</div><div class="pt">'+sp.supply+' stelle libere · ~'+sp.buyers.toFixed(1).replace('.0','')+' acquirenti attesi<small>'+PRESS_HINT[sp.lvl]+'</small></div><span class="plab '+sp.lvl+'">'+PRESS_LABEL[sp.lvl]+'</span></div>';
-  }).join('') + '<div style="font-size:11.5px; color:var(--text-dim); margin:2px 2px 4px; line-height:1.5">Liquidità avversari: '+Math.round(oppLiquidity()*100)+'% della partenza. Registra "Preso da altri" per tenerla aggiornata.</div>';
-  document.getElementById('planBody').innerHTML = ROLES.map(r=>{
-    const pr = planRole(r), done = boughtCount(r);
-    const cols = TIERS.map(t=>{
-      const cls = pr.got[t] > pr.tg[t] ? ' over' : (pr.got[t] >= pr.tg[t] && pr.tg[t] > 0 ? ' full' : '');
-      return '<div class="tier'+cls+'"><div class="tl">'+TIER_LABEL[t]+'</div><div class="tn">'+pr.got[t]+'/'+pr.tg[t]+'</div><div class="tp">~'+Math.round(tierPrice(r,t))+' cr</div></div>';
-    }).join('');
-    const parts = TIERS.filter(t=>pr.rem[t] > 0).map(t=>pr.rem[t]+' '+(pr.rem[t] === 1 ? TIER_ONE[t] : TIER_LABEL[t].toLowerCase()));
-    const need = pr.left > 0 ? 'Ti restano <b>'+pr.left+'</b> slot: '+parts.join(' + ')+' ≈ <b>'+pr.cost+' cr</b>' : 'Ruolo completo.';
-    return '<div class="plancard"><div class="ph"><div class="badge '+r+'">'+r+'</div>'+({P:'Portieri',D:'Difensori',C:'Centrocampisti',A:'Attaccanti'})[r]+'<span class="cnt">'+done+'/'+state.slots[r]+'</span></div>'+
-           '<div class="tiers">'+cols+'</div><div class="need">'+need+'</div></div>';
-  }).join('');
-}
-document.getElementById('planline').onclick = ()=> openSheet('plan');
 
 function computeSuggestion(player){
   const role = player.r;
@@ -1007,6 +998,7 @@ document.getElementById('marketSummary').onclick = ()=>{
   box.style.display = box.style.display==='none' ? 'block' : 'none';
 };
 
+function paintRanges(){ ROLES.forEach(r=>{ const el=document.getElementById('pct'+r); if(el) el.style.setProperty('--fill', el.value+'%'); }); }
 function renderSettings(){
   document.getElementById('budget').value = state.budget;
   ROLES.forEach(r=>{
@@ -1015,10 +1007,12 @@ function renderSettings(){
     document.getElementById('val'+r).textContent = state.pct[r];
   });
   updatePctSum();
+  paintRanges();
   renderParticipantList();
   renderElsewhereList();
 }
 function updatePctSum(){
+  paintRanges();
   const sum = ROLES.reduce((a,r)=>a+Number(state.pct[r]),0);
   const el = document.getElementById('pctsum');
   el.textContent = 'Totale percentuali: ' + sum + '%';
@@ -1216,6 +1210,7 @@ document.getElementById('toggleSettings').onclick = ()=> toggleSheet('settings')
 document.getElementById('openLogBtn').onclick = ()=> openSheet('logpanel');
 
 
+const ROLE_NAME = {P:'Portieri', D:'Difensori', C:'Centrocamp.', A:'Attaccanti'};
 function renderBar(){
   healPctTotal();
   let totalOver = 0;
@@ -1225,7 +1220,7 @@ function renderBar(){
     const needed = t - c;
     const display = roleBudgetDisplay(r);
     const floor = roleFloorCost(r, needed);
-    const planned = Math.round(state.budget * state.pct[r] / 100);
+    const planned = Math.round(state.budget * effPct(r) / 100);
     const spent = boughtSpent(r);
     const over = Math.max(0, spent - planned);
     totalOver += over;
@@ -1233,19 +1228,18 @@ function renderBar(){
     const cls = (over > 0 || display < 0) ? 'warn' : (c >= t ? 'done' : (tight ? 'tight' : ''));
     const fill = planned ? Math.min(100, spent / planned * 100) : 0;
     el.className = 'chip' + (cls ? ' ' + cls : '');
-    el.innerHTML = '<b>'+r+' '+c+'/'+t+'</b><span class="chipcr">'+spent+' / '+planned+(over ? ' <em>+'+over+'</em>' : '')+'</span>'+
-                   '<i class="bar"><u style="width:'+fill+'%"></u></i>';
+    const frac = t > 0 ? Math.min(100, c / t * 100) : 100;
+    el.innerHTML = '<div class="ring" style="--v:'+frac+'"><i>'+c+'/'+t+'</i></div><b>'+ROLE_NAME[r]+'</b>'+
+                   '<span class="chipcr">'+spent+' / '+planned+(over ? ' <em>+'+over+'</em>' : '')+'</span>';
     const ntEl = document.getElementById('nt'+r);
     if(ntEl) ntEl.textContent = c+'/'+t;
     const curEl = document.getElementById('cur'+r);
-    if(curEl) curEl.textContent = '(attuale: '+Math.round(normalizedPct(r))+'%)';
+    if(curEl) curEl.textContent = 'quota attuale '+Math.round(normalizedPct(r))+'%';
+    const crEl = document.getElementById('cr'+r);
+    if(crEl) crEl.textContent = '≈ '+Math.round(state.budget * state.pct[r] / 100)+' cr';
   });
   const pt = document.getElementById('planText');
-  const pm = planMargin();
-  pt.innerHTML = (totalOver > 0 ? '<span class="pover">Sforo +'+totalOver+'</span>' : '<span class="pok">In piano</span>')+
-    ' · margine fasce <b class="'+(pm.margin >= 0 ? 'pok' : (pm.margin >= -Math.max(10, Math.round(state.budget*.03)) ? 'pwarn' : 'pover'))+'">'+(pm.margin >= 0 ? '+' : '−')+Math.abs(pm.margin)+'</b> ›';
-  renderPlan();
-  renderPicksBar();
+  pt.innerHTML = 'Crediti liberi <b>'+remainingTotalBudget()+'</b>'+(totalOver > 0 ? ' · <span class="pover">sforo +'+totalOver+'</span>' : '');
 }
 
 function renderUndo(){
@@ -1314,30 +1308,6 @@ function wireCompactRows(container){
 }
 function quickBuy(p){
   commitEntry('mine', quickBuyValue(p), null, p, true);   // tocco rapido: prezzo stimato, non entra nel correttivo live
-}
-
-/* ---- colpo d'occhio "chi comprare ora" (punto 5 del piano): migliori occasioni tra i
-   titolari/primi cambi liberi, non infortunati, nei ruoli che hanno ancora slot da coprire ---- */
-function bestPicksNow(){
-  const best = [];
-  ROLES.forEach(r=>{
-    if((state.slots[r] - boughtCount(r)) <= 0) return;
-    const c = players.filter(p=>{
-      if(p.r!==r || isTaken(p.id) || p.inj || isElsewhere(p)) return false;
-      if(p.tit!=='titolare') return false;
-      return p.q>=3 && fvmAtteso(p)>=8;   // niente giocatori da 1 credito: non sono occasioni, sono riempitivi
-    }).sort((a,b)=>ratio(b)-ratio(a));
-    if(c[0]) best.push(c[0]);
-  });
-  return best.sort((a,b)=>ratio(b)-ratio(a)).slice(0,3);
-}
-function renderPicksBar(){
-  const box = document.getElementById('picksBar');
-  const picks = bestPicksNow();
-  if(picks.length===0){ box.style.display='none'; box.innerHTML=''; return; }
-  box.style.display='block';
-  box.innerHTML = '<div class="sectitle gold">Occasioni ora</div>' + picks.map(compactRowHtml).join('');
-  wireCompactRows(box);
 }
 
 /* ---- ricerca globale (priorita 1): funziona da qualunque scheda ---- */
@@ -1539,19 +1509,15 @@ document.getElementById('tabBtnLive').onclick = ()=> setMainTab('live');
 
 /* ---- scheda giocatore (overlay condiviso da Prepara e Live) ---- */
 let detailPrice = 1;
-/* semaforo sul prezzo: una riga sola, solo quando serve. Il margine dopo l'acquisto e' simulato sul piano vero. */
+/* semaforo sul prezzo: una riga sola, solo quando serve, rispetto al mercato (non a un piano) */
 function updatePriceFlag(){
   const box = document.getElementById('dPriceFlag');
   if(!box) return;
   box.innerHTML = '';
-  if(!selected || isTaken(selected.id) || planRole(selected.r).left <= 0) return;
+  if(!selected || isTaken(selected.id) || state.slots[selected.r] - boughtCount(selected.r) <= 0) return;
   const m = marketPrice(selected), v = detailPrice;
-  state.bought[selected.id] = {r:selected.r, price:v};
-  const after = planMargin().margin;
-  delete state.bought[selected.id];
   let cls = '', txt = '';
-  if(v > m.mid && after < 0){ cls = 'bad'; txt = 'Sopra il prezzo atteso (~'+m.mid+' cr): vai a −'+Math.abs(after)+' cr sul piano.'; }
-  else if(v > m.hi){ cls = 'warn'; txt = 'Sopra la fascia realistica (oltre '+m.hi+' cr): paghi più del mercato.'; }
+  if(v > m.hi){ cls = 'warn'; txt = 'Sopra la fascia realistica (oltre '+m.hi+' cr): paghi più del mercato.'; }
   else if(v < m.mid && v <= Math.round(m.mid*0.8)){ cls = 'good'; txt = 'Affare: sotto il prezzo atteso (~'+m.mid+' cr).'; }
   if(cls) box.innerHTML = '<div class="priceflag '+cls+'">'+txt+'</div>';
 }
@@ -1589,14 +1555,8 @@ function selectPlayer(p){
   const numEl = document.getElementById('dSuggested');
   numEl.classList.remove('danger');
   setDetailPrice(m.mid);
-  const pn = document.getElementById('dPlanNote');
-  const tr = tierOfPrice(m.mid), pr = planRole(p.r);
+  const tr = tierOfPrice(m.mid);
   document.getElementById('dQt').textContent = TIER_ONE[tr].charAt(0).toUpperCase() + TIER_ONE[tr].slice(1);
-  if(pr.left <= 0) pn.innerHTML = '';
-  const spn = (tr === 'top') ? (()=>{ const sp = starPressure(p.r); return ' Pressione sulle stelle '+p.r+': <b>'+PRESS_LABEL[sp.lvl]+'</b> ('+sp.supply+' libere).'; })() : '';
-  if(pr.left <= 0) pn.innerHTML = '';
-  else if(pr.rem[tr] === 0) pn.innerHTML = '<div class="plannote warn">Fascia <b>'+TIER_ONE[tr]+'</b> già coperta nel tuo piano ('+pr.got[tr]+'/'+pr.tg[tr]+'): se lo prendi, i crediti li togli alle altre fasce.'+spn+'</div>';
-  else pn.innerHTML = '<div class="plannote">Nel piano: fascia <b>'+TIER_ONE[tr]+'</b> — te ne restano ancora '+pr.rem[tr]+' in questo ruolo.'+spn+'</div>';
   document.getElementById('dSuggestedLabel').textContent =
     'fascia realistica ' + m.lo + '–' + m.hi + ' cr' + (liveFactor().n >= 3 ? ' · adattata all\'asta' : '');
   document.getElementById('dRoleBudgetLabel').textContent = s.complete ? 'Rispetto al piano su questo ruolo' : 'Budget rimasto sul ruolo';
@@ -1769,7 +1729,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-23-o';
+const BUILD = 'build-2026-09-24-d';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

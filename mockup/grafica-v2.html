@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup grafica FantaQintesi v2</title>
+<style>
+:root{
+  --bg:#07100c; --surface:rgba(255,255,255,.06); --surface2:rgba(255,255,255,.10);
+  --line:rgba(255,255,255,.10); --text:#f2f6f3; --muted:#8fa196;
+  --accent:#e8c25a; --ok:#4fd28a; --warn:#f0a04b; --bad:#ef6a5e;
+  --P:#e8c25a; --D:#5aa9e8; --C:#4fd28a; --A:#ef6a5e;
+  --spring:cubic-bezier(.32,1.25,.5,1);
+}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:#020504;color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  display:flex;gap:28px;justify-content:center;flex-wrap:wrap;padding:28px 12px}
+.label{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+.phone{width:375px;height:760px;border-radius:44px;background:var(--bg);position:relative;overflow:hidden;
+  border:1px solid var(--line);box-shadow:0 30px 80px #000}
+.blobs{position:absolute;inset:0;background:
+  radial-gradient(260px 220px at 15% 8%,rgba(79,210,138,.22),transparent 70%),
+  radial-gradient(240px 240px at 95% 40%,rgba(232,194,90,.12),transparent 70%),
+  radial-gradient(300px 260px at 20% 100%,rgba(90,169,232,.10),transparent 70%)}
+.screen{position:absolute;inset:0;padding:54px 16px 96px;overflow:auto}
+.glass{background:var(--surface);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(18px)}
+/* testata: 4 ruoli come anelli */
+.head{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 8px}
+.role{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:transform .35s var(--spring)}
+.role:active{transform:scale(.92)}
+.ring{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;
+  background:conic-gradient(var(--c) calc(var(--v)*1%),rgba(255,255,255,.08) 0)}
+.ring i{width:44px;height:44px;border-radius:50%;background:#0b1712;display:grid;place-items:center;font-style:normal}
+.role small{font-size:11px;color:var(--muted)}
+.plan{margin:10px 4px 0;font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.plan b{color:var(--ok)}
+/* ricerca */
+.search{margin-top:14px;padding:15px 18px;display:flex;gap:10px;align-items:center;color:var(--muted);font-size:16px}
+/* occasione hero */
+h3{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:22px 4px 10px;font-weight:600}
+.hero{padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .35s var(--spring)}
+.hero:active,.row:active{transform:scale(.97)}
+.badge{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:14px;
+  background:color-mix(in srgb,var(--c) 22%,transparent);color:var(--c)}
+.grow{flex:1;min-width:0}
+.name{font-size:17px;font-weight:650}
+.sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.price{font-size:26px;font-weight:750;color:var(--accent);font-variant-numeric:tabular-nums;text-align:right}
+.price small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .35s var(--spring)}
+.row .price{font-size:19px}
+.chips{display:flex;gap:8px;margin-top:2px;overflow:auto}
+.seg{display:flex;padding:4px;border-radius:16px;background:var(--surface);border:1px solid var(--line);gap:2px}
+.seg span{flex:1;text-align:center;padding:10px 0;border-radius:12px;font-size:14px;color:var(--muted);transition:.3s var(--spring)}
+.seg span.on{background:var(--surface2);color:var(--text);font-weight:650;box-shadow:0 2px 10px #0006}
+.seg span.on b{color:var(--c)}
+.srow{display:flex;gap:8px;align-items:stretch;margin-top:14px}
+.srow .search{margin:0;flex:1;padding:13px 16px}
+.fbtn{position:relative;width:50px;border-radius:18px;display:grid;place-items:center;font-size:19px;background:var(--surface);border:1px solid var(--line)}
+.fbtn em{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;border-radius:99px;background:var(--accent);color:#1a1400;font:700 11px/19px system-ui;text-align:center;font-style:normal}
+.mini{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.mini span{padding:5px 11px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.chip{padding:9px 16px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-size:14px;white-space:nowrap;transition:.25s}
+.chip.on{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:650}
+/* tab bar */
+.tabbar{position:absolute;left:18px;right:18px;bottom:20px;height:64px;border-radius:32px;display:flex;padding:6px;
+  background:rgba(20,32,26,.72);border:1px solid var(--line);backdrop-filter:blur(22px)}
+.tab{flex:1;display:grid;place-items:center;border-radius:26px;font-size:12px;color:var(--muted);transition:.3s var(--spring)}
+.tab.on{background:var(--surface2);color:var(--text);font-weight:650}
+/* foglio giocatore */
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .35s}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:78%;border-radius:32px 32px 0 0;padding:12px 20px 24px;
+  background:rgba(14,24,19,.94);border-top:1px solid var(--line);transform:translateY(102%);transition:transform .5s var(--spring)}
+.open .dim{opacity:1;pointer-events:auto}.open .sheet{transform:none}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 18px}
+.big{font-size:64px;font-weight:800;color:var(--accent);text-align:center;line-height:1;font-variant-numeric:tabular-nums}
+.range{text-align:center;color:var(--muted);font-size:13px;margin:6px 0 16px}
+.steps{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.steps span{padding:10px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.cta{display:block;width:100%;padding:18px;border-radius:20px;border:0;background:var(--accent);color:#1a1400;
+  font-size:19px;font-weight:750;transition:transform .3s var(--spring)}
+.cta:active{transform:scale(.97)}
+.ghost{display:flex;gap:8px;margin-top:10px}
+.ghost span{flex:1;text-align:center;padding:13px;border-radius:16px;background:var(--surface);border:1px solid var(--line);font-size:14px}
+.flag{margin:12px 0;padding:10px 14px;border-radius:14px;font-size:13px;background:rgba(79,210,138,.12);color:var(--ok)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.facts div{padding:10px;border-radius:14px;background:var(--surface);text-align:center;font-size:11px;color:var(--muted)}
+.facts b{display:block;font-size:17px;color:var(--text);margin-bottom:2px}
+/* piano */
+.bar{height:10px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--c);width:calc(var(--v)*1%);transition:width .8s var(--spring)}
+.prow{padding:14px 16px}
+.prow .top{display:flex;justify-content:space-between;font-size:15px}
+.prow .top span:last-child{color:var(--muted);font-variant-numeric:tabular-nums}
+.tiny{font-size:12px;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 8px 0;line-height:1.5}
+</style><style>
+@font-face{font-family:"Barlow Condensed";font-weight:600;src:url("../font/barlow-condensed-600.woff2") format("woff2")}
+@font-face{font-family:"Barlow Condensed";font-weight:700;src:url("../font/barlow-condensed-700.woff2") format("woff2")}
+:root{--display:"Barlow Condensed","Arial Narrow",sans-serif;--serif:Georgia,"Times New Roman",serif}
+/* font: display condensato per nomi, prezzi e titoli; sans di sistema per il resto; serif corsivo per le note */
+.name{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.01em;line-height:1.05}
+.price,.big,.ring i{font-family:var(--display);font-weight:700}
+.price{font-size:32px}.row .price{font-size:26px}
+.big{font-size:104px;letter-spacing:-.01em}
+.ring i{font-size:19px}
+h3,.label{font-family:system-ui,sans-serif;font-weight:700;font-size:11px;letter-spacing:.16em}
+.sub{font-size:12px;letter-spacing:.02em}
+.cta{font-family:var(--display);font-size:26px;letter-spacing:.04em;text-transform:uppercase}
+.seg span{font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase}
+.tab{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+.prow .top span:first-child{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase}
+.note,.range,.tiny,.flag{font-family:var(--serif);font-style:italic}
+.plan{font-family:var(--serif);font-style:italic;font-size:13px}
+.facts b{font-family:var(--display);font-size:24px}
+.badge{font-family:var(--display);font-size:20px}
+.screen>div[style*="font-size:26px"]{font-family:var(--display)!important;font-size:40px!important;text-transform:uppercase;letter-spacing:.02em}
+.sheet>div[style*="text-align:center"]{font-family:var(--display);font-size:30px!important;text-transform:uppercase}
+</style>
+</head><body>
+
+<!-- 1. LIVE -->
+<div><div class="label">1 · Live (tocca Malen)</div>
+<div class="phone" id="p1"><div class="blobs"></div>
+<div class="screen">
+  <div class="glass head">
+    <div class="role" style="--c:var(--P);--v:33"><div class="ring"><i>1/3</i></div><small>Portieri</small></div>
+    <div class="role" style="--c:var(--D);--v:0"><div class="ring"><i>0/8</i></div><small>Difensori</small></div>
+    <div class="role" style="--c:var(--C);--v:0"><div class="ring"><i>0/8</i></div><small>Centrocamp.</small></div>
+    <div class="role" style="--c:var(--A);--v:0"><div class="ring"><i>0/6</i></div><small>Attaccanti</small></div>
+  </div>
+  <div class="plan"><span>Piano: <b>in linea</b> · margine +0</span><span>Jarvis live ●</span></div>
+  <div class="glass search">⌕ &nbsp;Chi hanno chiamato?</div>
+  <h3>Sfoglia</h3>
+  <div class="seg"><span>P</span><span>D</span><span>C</span><span class="on" style="--c:var(--A)"><b>A</b> <small>6</small></span></div>
+  <div class="rows" style="margin-top:12px">
+    <div class="glass row" style="--c:var(--A)" onclick="document.getElementById('p1').classList.add('open')"><div class="badge">A</div><div class="grow"><div class="name">Malen</div><div class="sub">Roma · titolare fisso</div></div><div class="price">207</div></div>
+    <div class="glass row" style="--c:var(--A)"><div class="badge">A</div><div class="grow"><div class="name">Lautaro</div><div class="sub">Inter · titolare</div></div><div class="price">190</div></div>
+    <div class="glass row" style="--c:var(--A)"><div class="badge">A</div><div class="grow"><div class="name">Thuram</div><div class="sub">Inter · titolare</div></div><div class="price">88</div></div>
+    <div class="glass row" style="--c:var(--A)"><div class="badge">A</div><div class="grow"><div class="name">Vlahovic</div><div class="sub">Juve · infortunato</div></div><div class="price">61</div></div>
+  </div>
+</div>
+<div class="tabbar"><div class="tab on">⚡ Live</div><div class="tab">☰ Prepara</div><div class="tab">⚙ Opzioni</div></div>
+<div class="dim" onclick="document.getElementById('p1').classList.remove('open')"></div>
+<div class="sheet">
+  <div class="grab"></div>
+  <div style="text-align:center;font-size:20px;font-weight:700">Malen <span class="tiny">· Roma · A</span></div>
+  <div class="flag">Affare sotto i 165: sotto il prezzo atteso</div>
+  <div class="big">207</div><div class="range">tra 120 e 260 · atteso 207</div>
+  <div class="steps"><span>−5</span><span>−1</span><span>+1</span><span>+5</span></div>
+  <button class="cta" onclick="document.getElementById('p1').classList.remove('open')">Preso a 207</button>
+  <div class="ghost"><span>Preso da altri</span><span>Scarta</span></div>
+  <div class="facts"><div><b>92%</b>titolare</div><div><b>26</b>FVM</div><div><b>ok</b>salute</div></div>
+</div>
+</div></div>
+
+<!-- 2. PIANO -->
+<div><div class="label">2 · Piano (tocca la testata)</div>
+<div class="phone"><div class="blobs"></div>
+<div class="screen">
+  <div style="font-size:26px;font-weight:750;margin:6px 4px 4px">Il tuo piano</div>
+  <div class="tiny" style="margin:0 4px 16px">500 crediti · 8 squadre · 7% / 20% / 28% / 45%</div>
+  <div class="glass prow" style="margin-bottom:10px"><div class="top"><span>Attaccanti</span><span>0 / 225</span></div>
+    <div class="bar" style="--c:var(--A);--v:0"><i></i></div><div class="tiny">2 top da ~60 · 1 da ~30 · riempitivi</div></div>
+  <div class="glass prow" style="margin-bottom:10px"><div class="top"><span>Centrocampisti</span><span>0 / 140</span></div>
+    <div class="bar" style="--c:var(--C);--v:0"><i></i></div><div class="tiny">1 top da ~50 · titolari 10-20</div></div>
+  <div class="glass prow" style="margin-bottom:10px"><div class="top"><span>Difensori</span><span>0 / 100</span></div>
+    <div class="bar" style="--c:var(--D);--v:0"><i></i></div><div class="tiny">nessun 40+ · 4 titolari da 20-25</div></div>
+  <div class="glass prow"><div class="top"><span>Portieri</span><span>0 / 35</span></div>
+    <div class="bar" style="--c:var(--P);--v:0"><i></i></div><div class="tiny">1 titolare da ~25 · 2 riempitivi</div></div>
+  <div class="note">Sposta il peso tra ruoli con gli slider in Opzioni: qui vedi subito come cambia il piano.</div>
+</div>
+<div class="tabbar"><div class="tab on">⚡ Live</div><div class="tab">☰ Prepara</div><div class="tab">⚙ Opzioni</div></div>
+</div></div>
+
+<!-- 3. PREPARA -->
+<div><div class="label">3 · Prepara</div>
+<div class="phone"><div class="blobs"></div>
+<div class="screen">
+  <div style="font-size:26px;font-weight:750;margin:6px 4px 0">Prepara</div>
+  <div class="srow"><div class="glass search">⌕ &nbsp;Cerca nella lista</div><div class="fbtn">⚙<em>2</em></div></div>
+  <div class="seg" style="margin-top:12px"><span class="on">Tutti</span><span>Top</span><span>Perle</span><span>Low</span></div>
+  <div class="mini"><span>Ruolo: A ✕</span><span>Nascondi già miei ✕</span></div>
+  <div class="rows" style="margin-top:14px">
+    <div class="glass row" style="--c:var(--A)"><div class="badge">A</div><div class="grow"><div class="name">Malen</div><div class="sub">Roma · titolare</div></div><div class="price">207</div></div>
+    <div class="glass row" style="--c:var(--C)"><div class="badge">C</div><div class="grow"><div class="name">Frattesi</div><div class="sub">Lazio · titolare</div></div><div class="price">51</div></div>
+    <div class="glass row" style="--c:var(--D)"><div class="badge">D</div><div class="grow"><div class="name">Dimarco</div><div class="sub">Inter · titolare</div></div><div class="price">132</div></div>
+    <div class="glass row" style="--c:var(--A)"><div class="badge">A</div><div class="grow"><div class="name">Thuram</div><div class="sub">Inter · già tuo altrove</div></div><div class="price">88</div></div>
+  </div>
+</div>
+<div class="tabbar"><div class="tab">⚡ Live</div><div class="tab on">☰ Prepara</div><div class="tab">⚙ Opzioni</div></div>
+</div></div>
+
+</body></html>
