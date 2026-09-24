@@ -1,9 +1,10 @@
 # Stato — Asta Fantacalcio
 
-Due app da unire in un tool solo per l'asta su **Fantalab** (8 squadre, 500 crediti,
+**Al 24/09/2026: nessun punto aperto** (piano di unificazione chiuso; punti d'uso in asta chiusi dall'utente il 23/09 sera).
+
+Tool unico (ex due app: `index.html` + `scout.html`, ora `scout.html` è solo un redirect) per l'asta su **Fantalab** (8 squadre, 500 crediti,
 Classic + modificatore difesa, modificatore gol diverso da Rivoluzione Fantacalcio):
-- `index.html` — "Asta Assistant", live durante l'asta (budget, prezzo suggerito, registro)
-- `scout.html` — cheat sheet pre-asta (sfoglia/filtra/prezzi attesi)
+Schede «Prepara» (sfoglia/filtra/prezzi attesi) e «Live» (budget, prezzo suggerito, registro), tutte in `index.html`.
 
 Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usata da PC).
 
@@ -16,7 +17,7 @@ Uso: solo dal telefono, un dispositivo alla volta (Fantalab è un'altra app, usa
   tra le due pagine sullo stesso origin. Commit `ab32288`, pushato su GitHub.
   Il progetto Supabase è stato poi cancellato del tutto dall'utente a mano (23/09/2026, sera).
 
-## Aperto — piano di unificazione (deciso per proposte il 23/09/2026)
+## Piano di unificazione (deciso per proposte il 23/09/2026) — CHIUSO
 
 1. ~~Un'unica app, due schede~~ — **fatto** (sopra, index.html+scout.html uniti).
 2. ~~Dati live da Jarvis~~ — **fatto in parte** (sotto): `titolari.json` e `infortuni.json`
