@@ -619,7 +619,7 @@ const DEFAULT_STATE = {
   bought:{},
   discarded:{},
   market:[],
-  participants:['Avversario 1','Avversario 2','Avversario 3','Avversario 4','Avversario 5','Avversario 6','Avversario 7'],
+  participants:['Avversario 1','Avversario 2','Avversario 3','Avversario 4','Avversario 5','Avversario 6','Avversario 7','Avversario 8','Avversario 9'],
   elsewhere:[],
   teams:{}
 };
@@ -756,6 +756,9 @@ async function loadState(){
       // chi ha ancora una delle vecchie ripartizioni di partenza (mai toccate) passa a quella nuova
       const OLD_DEFAULTS = [{P:9,D:21,C:30,A:40},{P:8,D:20,C:27,A:45}];
       if(OLD_DEFAULTS.some(o => ROLES.every(r => Number(state.pct[r]) === o[r]))) state.pct = {...DEFAULT_STATE.pct};
+      // lega passata da 8 a 10 squadre (26/09): la vecchia lista di 7 "Avversario N" mai toccata passa a 9; i nomi veri restano
+      const OLD_PARTICIPANTS = Array.from({length:7}, (_, i) => 'Avversario ' + (i + 1));
+      if(Array.isArray(state.participants) && state.participants.join('|') === OLD_PARTICIPANTS.join('|')) state.participants = [...DEFAULT_STATE.participants];
     }
   }catch(e){}
   normalizeBasePct();
@@ -1729,7 +1732,7 @@ document.querySelectorAll('.logtab').forEach(b=>{
 });
 
 /* ---- Controllo automatico nuova versione ---- */
-const BUILD = 'build-2026-09-24-d';
+const BUILD = 'build-2026-09-26-a';
 let buildChecking = false;
 async function checkNewBuild(){
   if(buildChecking) return;

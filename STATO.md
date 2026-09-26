@@ -1,9 +1,14 @@
 # Stato — Asta Fantacalcio (FantaQintesi)
 
-**Al 24/09/2026: tutto ok, nessun punto aperto** (build `2026-09-24-d` provata sul telefono e approvata dall'utente). Il cronologico dettagliato del 23-24/09 è nella
+**Al 26/09/2026: lega passata a 10 squadre** (build `2026-09-26-a`, da provare sul telefono). Default 9 avversari; la
+vecchia lista di 7 «Avversario N» mai toccata passa da sola a 9, una lista con nomi veri resta com'è (aggiungere i 2 in
+Opzioni). Le % P7/D20/C28/A45 restano: il mercato a 10 le sposta di un punto al massimo (P8 D20 C32 A41 contro
+P8 D19 C31 A42 a 8). La curva dei prezzi era tarata su 10×500: a 10 la spesa attesa (4.993) torna coi crediti (5.000).
+Tattica: portiere buono entro metà asta (i titolari decenti sono ~10), due attaccanti solidi presto (la fascia
+54-84 cr sarà contesa), riempitivi di fine asta più poveri. Il cronologico dettagliato del 23-24/09 è nella
 storia di git (commit fino a `d18e94d`).
 
-Tool unico per l'asta su **Fantalab** (8 squadre, 500 crediti, Classic + modificatore difesa,
+Tool unico per l'asta su **Fantalab** (10 squadre, 500 crediti, Classic + modificatore difesa,
 modificatore gol diverso da Rivoluzione Fantacalcio). Tutto in `index.html`: schede **Live**
 (budget, prezzo atteso, registro) e **Prepara** (sfoglia/filtra), più **Opzioni**.
 `scout.html` è solo un redirect. Uso: solo dal telefono, un dispositivo alla volta.

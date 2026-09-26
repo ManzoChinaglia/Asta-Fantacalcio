@@ -1,6 +1,6 @@
 # FantaQintesi (Asta-Fantacalcio) — contesto per Claude Code
 
-Tool d'asta per la lega Fantalab: 8 squadre, 500 crediti, Classic + modificatore difesa.
+Tool d'asta per la lega Fantalab: 10 squadre (8 fino al 25/09), 500 crediti, Classic + modificatore difesa.
 Un solo `index.html` (`scout.html` è solo un redirect). Stato e cronologia: `STATO.md`.
 
 - Si usa solo dal telefono, un dispositivo alla volta: niente sincronizzazione (Supabase scartato).
