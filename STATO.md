@@ -1,5 +1,10 @@
 # Stato — Asta Fantacalcio (FantaQintesi)
 
+## Prossimo
+<!-- pannello «Punti aperti»: max 3 punti, una riga ciascuno; si aggiorna a fine sessione -->
+Stato: fermo
+1. Niente in programma: si riprende alla prossima asta
+
 **Al 26/09/2026: lega passata a 10 squadre** (build `2026-09-26-a`, da provare sul telefono). Default 9 avversari; la
 vecchia lista di 7 «Avversario N» mai toccata passa da sola a 9, una lista con nomi veri resta com'è (aggiungere i 2 in
 Opzioni). Le % P7/D20/C28/A45 restano: il mercato a 10 le sposta di un punto al massimo (P8 D20 C32 A41 contro
